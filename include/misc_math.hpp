@@ -24,10 +24,10 @@ namespace jpacPhoto
 
   // ---------------------------------------------------------------------------
   // Wigner d-function for half-integer spin
-  std::complex<double> wigner_d_half(int j, int lam1, int lam2, std::complex<double> z);
+  double wigner_d_half(int j, int lam1, int lam2, double theta);
 
   // Wigner d-function for integer spin
-  std::complex<double> wigner_d_int(int j, int lam1, int lam2, std::complex<double> z);
+  double wigner_d_int(int j, int lam1, int lam2, double theta);
 
   // Error message display function for the above
   double wigner_error(int j, int lam1, int lam2, bool half);
