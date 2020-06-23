@@ -27,7 +27,7 @@ namespace jpacPhoto
   private:
     int J, P, naturality; // (2xSpin) and parity of the resonance
     double mRes, gamRes; // Resonant mass and width
-    
+
     int l_min; // lowest allowed relative angular momentum
     double P_t; // Combinatorial factor due to only transverse polarized J/psi contribute
 
@@ -99,7 +99,7 @@ namespace jpacPhoto
     double threshold_factor(double s, double beta);
 
     // Combined total amplitude including Breit Wigner pole
-    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double zs);
+    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
   };
 };
 #endif

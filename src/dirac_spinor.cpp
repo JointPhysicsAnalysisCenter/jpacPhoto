@@ -22,16 +22,17 @@ std::complex<double> jpacPhoto::dirac_spinor::omega(int sign, double s)
 
 // ---------------------------------------------------------------------------
 // Angular half angle factors
-double jpacPhoto::dirac_spinor::xi(int lam, double zs)
+double jpacPhoto::dirac_spinor::xi(int lam, double theta)
 {
-  double theta = acos(zs) - M_PI;
   double result;
-  (lam == -1) ? (result = cos(theta / 2.)) : (result = sin(theta / 2.));
+  (lam == 1) ? (result = cos(theta / 2.)) : (result = sin(theta / 2.));
+
+  return result;
 };
 
 // ---------------------------------------------------------------------------
 // Components for both the regular spinor or adjoint
-std::complex<double> jpacPhoto::dirac_spinor::component(int i, int lambda, double s, double zs)
+std::complex<double> jpacPhoto::dirac_spinor::component(int i, int lambda, double s, double theta)
 {
   if (abs(lambda) != 1)
   {
@@ -39,34 +40,34 @@ std::complex<double> jpacPhoto::dirac_spinor::component(int i, int lambda, doubl
     exit(0);
   }
 
-  // theta - pi convention
+  // theta convention
   switch (i)
   {
-    case 0: return omega(+1, s) * xi(lambda, zs);
-    case 1: return double(lambda) * omega(+1, s) * xi(-lambda, zs);
-    case 2: return double(lambda) * omega(-1, s) * xi(lambda, zs);
-    case 3: return omega(-1, s) * xi(-lambda, zs);
+    case 0: return                  omega(+1, s) * xi( lambda, theta);
+    case 1: return double(lambda) * omega(+1, s) * xi(-lambda, theta);
+    case 2: return double(lambda) * omega(-1, s) * xi( lambda, theta);
+    case 3: return                  omega(-1, s) * xi(-lambda, theta);
     default : std::cout << "dirac_spinor: Invalid component index " << i << " passed as argument. Quitting... \n";
               exit(0);
   }
 
-  // theta convention
+  // // already particle 2'd convention
   // switch (i)
   // {
-  //   case 0: return -1. * double(lambda) * omega(+1, s) * xi(-lambda, zs);
-  //   case 1: return                        omega(+1, s) * xi(lambda,  zs);
-  //   case 2: return -1. *                  omega(-1, s) * xi(-lambda, zs);
-  //   case 3: return       double(lambda) * omega(-1, s) * xi(lambda,  zs);
+  //   case 0: return -1. * double(lambda) * omega(+1, s) * xi(-lambda, theta);
+  //   case 1: return                        omega(+1, s) * xi(lambda,  theta);
+  //   case 2: return -1. *                  omega(-1, s) * xi(-lambda, theta);
+  //   case 3: return       double(lambda) * omega(-1, s) * xi(lambda,  theta);
   //   default : std::cout << "dirac_spinor: Invalid component index " << i << " passed as argument. Quitting... \n";
   //             exit(0);
   // }
 
 };
 
-std::complex<double> jpacPhoto::dirac_spinor::adjoint_component(int i, int lambda, double s, double zs)
+std::complex<double> jpacPhoto::dirac_spinor::adjoint_component(int i, int lambda, double s, double theta)
 {
   double phase;
   (i == 2 || i == 3) ? (phase = -1.) : (phase = 1.);
 
-  return phase * component(i, lambda, s, zs);
+  return phase * component(i, lambda, s, theta);
 };

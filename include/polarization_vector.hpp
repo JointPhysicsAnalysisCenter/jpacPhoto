@@ -16,6 +16,7 @@
 // ---------------------------------------------------------------------------
 // Polarization vectors for vector particles
 // in the s-channel center of mass frame
+// Vector particles are always particle 1
 // ---------------------------------------------------------------------------
 
 namespace jpacPhoto
@@ -42,8 +43,8 @@ namespace jpacPhoto
     ~polarization_vector(){};
 
     // Components
-    std::complex<double> component(int i, int lambda, double s, double zs);
-    std::complex<double> conjugate_component(int i, int lambda, double s, double zs);
+    std::complex<double> component(int i, int lambda, double s, double theta);
+    std::complex<double> conjugate_component(int i, int lambda, double s, double theta);
   };
 };
 

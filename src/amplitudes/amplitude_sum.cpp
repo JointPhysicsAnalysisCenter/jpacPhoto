@@ -8,13 +8,13 @@
 
 #include "amplitudes/amplitude_sum.hpp"
 
-// Evaluate the sum for given set of helicites, energy, and cos
-std::complex<double> jpacPhoto::amplitude_sum::helicity_amplitude(std::vector<int> helicities, double s, double zs)
+// Evaluate the sum for given set of helicites, and mandelstam invariant s and t
+std::complex<double> jpacPhoto::amplitude_sum::helicity_amplitude(std::vector<int> helicities, double s, double t)
 {
   std::complex<double> result = 0.;
   for (int i = 0; i < amps.size(); i++)
   {
-    result += amps[i]->helicity_amplitude(helicities, s, zs);
+    result += amps[i]->helicity_amplitude(helicities, s, t);
   }
 
   return result;

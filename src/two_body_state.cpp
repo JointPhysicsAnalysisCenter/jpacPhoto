@@ -67,14 +67,14 @@ std::complex<double> jpacPhoto::two_body_state::momentum(std::string name, doubl
 
 // ---------------------------------------------------------------------------
 // The four momenta components in the x-z plane
-std::complex<double> jpacPhoto::two_body_state::component(int i, std::string name, double s, double zs)
+std::complex<double> jpacPhoto::two_body_state::component(int i, std::string name, double s, double theta)
 {
   switch (i)
   {
     case 0: return energy(name, s);
-    case 1: return momentum(name, s) * sqrt(1. - zs * zs);
+    case 1: return momentum(name, s) * sin(theta);
     case 2: return 0.;
-    case 3: return momentum(name, s) * zs;
+    case 3: return momentum(name, s) * cos(theta);
     default: std::cout << "two_body_state: Invalid four vector component! Quiting...\n";
              exit(0);
   }

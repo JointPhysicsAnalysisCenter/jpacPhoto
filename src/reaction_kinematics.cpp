@@ -33,24 +33,45 @@ double jpacPhoto::reaction_kinematics::z_s(double s, double t)
 
 // ---------------------------------------------------------------------------
 // Invariant variables
-double jpacPhoto::reaction_kinematics::t_man(double s, double zs)
+double jpacPhoto::reaction_kinematics::t_man(double s, double theta)
 {
   std::complex<double> kq = initial.momentum("beam", s) * final.momentum(vector_particle, s);
   std::complex<double> E1E3 = initial.energy("beam", s) * final.energy(vector_particle, s);
-  return mVec*mVec - 2. * abs(E1E3) + 2. * abs(kq) * zs;
+  return mVec*mVec - 2. * abs(E1E3) + 2. * abs(kq) * cos(theta);
 };
 
-double jpacPhoto::reaction_kinematics::u_man(double s, double zs)
+double jpacPhoto::reaction_kinematics::u_man(double s, double theta)
 {
-  double t = t_man(s, zs);
+  double t = t_man(s, theta);
 
-  return mVec2 + 2.*mPro2 - s - t;
+  return mVec2 + 2. * mPro2 - s - t;
+};
+
+// ---------------------------------------------------------------------------
+// Scattering angles
+double jpacPhoto::reaction_kinematics::theta_s(double s, double t)
+{
+  double zs = z_s(s, t);
+
+  // Watch for rounding errors near the bounds
+  if (std::abs(zs - 1.) < 0.0001)
+  {
+    return 0.;
+  }
+  else if (std::abs(zs + 1.) < 0.0001)
+  {
+    return 1.;
+  }
+  else
+  {
+    return acos(z_s(s,t));
+  }
 };
 
 // Scattering angle in the t-channel
-std::complex<double> jpacPhoto::reaction_kinematics::z_t(double s, double zs)
+std::complex<double> jpacPhoto::reaction_kinematics::z_t(double s, double theta)
 {
-  double t = t_man(s, zs);
+  double t = t_man(s, theta);
   std::complex<double> p_t = sqrt(xr * t - 4. * mPro2) / 2.;
   std::complex<double> q_t = sqrt(xr * jpacPhoto::Kallen(t, mVec2, 0.)) / sqrt(xr * 4. * t);
 
@@ -61,18 +82,19 @@ std::complex<double> jpacPhoto::reaction_kinematics::z_t(double s, double zs)
   return result;
 };
 
-std::complex<double> jpacPhoto::reaction_kinematics::z_u(double s, double zs)
+std::complex<double> jpacPhoto::reaction_kinematics::z_u(double s, double theta)
 {
   // TODO: fix this
   std::cout << "z_u not implimented yet i fucked up here :p\n";
+  std::cout << "if youre seeing this message email me and yell at me because i forgot\n";
   return xr;
 };
 
 // ---------------------------------------------------------------------------
 // Cosine of crossing an
-std::complex<double> jpacPhoto::reaction_kinematics::crossing_angle(std::string particle, double s, double zs)
+std::complex<double> jpacPhoto::reaction_kinematics::crossing_angle(std::string particle, double s, double theta)
 {
-  double t = t_man(s, zs);
+  double t = t_man(s, theta);
 
   std::complex<double> S_gp, S_vp, T_gv, T_pp;
   S_gp = sqrt(xr * jpacPhoto::Kallen(s, 0., mPro2));

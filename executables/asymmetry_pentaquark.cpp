@@ -12,7 +12,7 @@
 // ---------------------------------------------------------------------------
 // COMMAND LINE OPTIONS:
 // -e double          # Change CM fixed-energy (default: 4.45 Gev)
-// -10q               # Plot 2 Pentaquark Scenario at fixed BR (default: false)    
+// -10q               # Plot 2 Pentaquark Scenario at fixed BR (default: false)
 // ---------------------------------------------------------------------------
 
 #include "constants.hpp"

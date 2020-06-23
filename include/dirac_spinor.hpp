@@ -17,6 +17,10 @@
 
 // ---------------------------------------------------------------------------
 // The dirac_spinor object is exactly as it sounds. :)
+// Spin-1/2 particles are assumed always particle 2.
+//
+// That being said, particle 2 phase is already included in definition but
+// angle pi for the - z direction is not!
 // ---------------------------------------------------------------------------
 
 namespace jpacPhoto
@@ -35,7 +39,7 @@ namespace jpacPhoto
     std::complex<double> omega(int sign, double s);
 
     // angular component
-    double xi(int lam, double zs);
+    double xi(int lam, double theta);
 
   public:
     // Constructor
@@ -54,8 +58,8 @@ namespace jpacPhoto
     ~dirac_spinor(){};
 
     // Components
-    std::complex<double> component(int i, int lambda, double s, double zs);
-  	std::complex<double> adjoint_component(int i, int lambda, double s, double zs);
+    std::complex<double> component(int i, int lambda, double s, double theta);
+  	std::complex<double> adjoint_component(int i, int lambda, double s, double theta);
   };
 };
 

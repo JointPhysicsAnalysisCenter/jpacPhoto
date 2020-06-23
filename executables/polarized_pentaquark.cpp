@@ -15,7 +15,6 @@
 // -n int             # Number of points to plot (default: 100)
 // -m double          # Maximum CM angle to plot (default: 5 GeV)
 // -integ             # Plot integrated xsection (default: false)
-// -10q               # Plot 2 Pentaquark Scenario at fixed BR (default: false)
 // -o string          # Desired observable: options "dxs", "kll", or "all" (default: dxs)
 // ---------------------------------------------------------------------------
 
@@ -41,10 +40,9 @@ int main( int argc, char** argv )
   // ---------------------------------------------------------------------------
 
   // Default values
-  double zs = 1.;
+  double theta = 0.;
   double y[2]; bool custom_y = false;
   int N = 100; // how many points to plot
-  bool TENQ = false;
   double max = 5.;
   std::string filename = "polarized_5q.pdf";
   std::string observable = "dxs", ylabel;
@@ -52,11 +50,10 @@ int main( int argc, char** argv )
   // Parse input string
   for (int i = 0; i < argc; i++)
   {
-    if (std::strcmp(argv[i],"-c")==0) zs = cos(atof(argv[i+1]) * deg2rad);
+    if (std::strcmp(argv[i],"-c")==0) theta = atof(argv[i+1]);
     if (std::strcmp(argv[i],"-m")==0) max = atof(argv[i+1]);
     if (std::strcmp(argv[i],"-f")==0) filename = argv[i+1];
     if (std::strcmp(argv[i],"-o")==0) observable = argv[i+1];
-    if (std::strcmp(argv[i],"-10q")==0) TENQ = true;
     if (std::strcmp(argv[i],"-y")==0)
     {
       custom_y = true;
@@ -98,13 +95,11 @@ int main( int argc, char** argv )
   // ---------------------------------------------------------------------------
   // SUM
   // ---------------------------------------------------------------------------
-  // if 10q then include both pentaquarks
-  std::vector<amplitude*> amps {&background, &P_c4450};
-  if (TENQ == true) (amps.push_back(&P_c4380));
-
   // Incoherent sum of the s and t channels
-  amplitude_sum sum(ptr, amps, "Sum");
-  amps.push_back(&sum);
+  amplitude_sum sum5q(ptr, {&background, &P_c4450}, "5q Sum");
+  amplitude_sum sum10q(ptr, {&background, &P_c4450, &P_c4380}, "10q Sum");
+
+  std::vector<amplitude*> amps = {&background, &sum5q, &sum10q};
 
   // ---------------------------------------------------------------------------
   // You shouldnt need to change anything below this line
@@ -120,20 +115,21 @@ int main( int argc, char** argv )
     // find the desired observable
     auto F = [&](double W)
     {
+      double t = ptr->t_man(W*W, theta * deg2rad);
       if (observable == "dxs")
       {
         ylabel = "d#sigma/dt    (nb GeV^{-2})";
-        return amps[n]->differential_xsection(W*W, zs);
+        return amps[n]->differential_xsection(W*W, t);
       }
       else if (observable == "kll")
       {
         ylabel = "K_{LL}";
-        return amps[n]->K_LL(W*W, zs);
+        return amps[n]->K_LL(W*W, t);
       }
       else if (observable == "all")
       {
         ylabel = "A_{LL}";
-        return amps[n]->A_LL(W*W, zs);
+        return amps[n]->A_LL(W*W, t);
       }
       else
       {
@@ -145,8 +141,10 @@ int main( int argc, char** argv )
     plotter->AddEntry(x_fx[0], x_fx[1], amps[n]->identifier);
   }
 
-  plotter->SetLegend(0.2, 0.7);
-
+  // Add a header to legend to specify the fixed energy
+  std::ostringstream streamObj;
+  streamObj << std::setprecision(2) << theta;
+  plotter->SetLegend(0.2, 0.7, "#theta = " + streamObj.str());
   // X axis
   plotter->SetXaxis("W  (GeV)", sqrt(ptr->sth) + 0.01, max);
 

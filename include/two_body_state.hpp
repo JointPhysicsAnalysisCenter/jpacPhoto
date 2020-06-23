@@ -51,7 +51,7 @@ namespace jpacPhoto
     std::complex<double> momentum(std::string name, double s);
     std::complex<double> energy(std::string name, double s);
 
-    std::complex<double> component(int i, std::string name, double s, double zs);
+    std::complex<double> component(int i, std::string name, double s, double theta);
   };
 };
 

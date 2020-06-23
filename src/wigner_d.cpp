@@ -58,7 +58,7 @@ double jpacPhoto::wigner_d_half(int j, int lam1, int lam2, double theta)
     phase *= pow(-1., double(lam1 - lam2) / 2.);
   }
 
-  std::complex<double> result = 0.;
+  double result = 0.;
   switch (j)
   {
     // -------------------------------------------------------------------------
@@ -185,19 +185,19 @@ double jpacPhoto::wigner_d_half(int j, int lam1, int lam2, double theta)
             {
               result = sqrt(2.) / 4.;
               result *= sin(theta / 2.);
-              result *= (1. + cos(theta) * (1. - 5. * cos(theta));
+              result *= (1. + cos(theta)) * (1. - 5. * cos(theta));
               break;
             }
             case -1:
             {
-              result = - sqrt(2.) / 4.;
+              result =  sqrt(2.) / 4.;
               result *= cos(theta / 2.);
-              result *= (1. - cos(theta) * (1. + 5. * cos(theta));
+              result *= (1. - cos(theta)) * (1. + 5. * cos(theta));
               break;
             }
             case -3:
             {
-              result = 1. / 4.;
+              result = -1. / 4.;
               result *= sin(theta / 2.);
               result *= (1. - cos(theta)) * (3. + 5. * cos(theta));
               break;
@@ -241,7 +241,7 @@ double jpacPhoto::wigner_d_half(int j, int lam1, int lam2, double theta)
 };
 
 // ---------------------------------------------------------------------------
-std::complex<double> jpacPhoto::wigner_d_int(int j, int lam1, int lam2, std::complex<double> z)
+double jpacPhoto::wigner_d_int(int j, int lam1, int lam2, double theta)
 {
 
   double phase = 1.;
@@ -264,7 +264,7 @@ std::complex<double> jpacPhoto::wigner_d_int(int j, int lam1, int lam2, std::com
     phase *= pow(-1., double(lam1 - lam2));
   }
 
-  std::complex<double> result = 0.;
+  double result = 0.;
   switch (j)
   {
     // spin - 1

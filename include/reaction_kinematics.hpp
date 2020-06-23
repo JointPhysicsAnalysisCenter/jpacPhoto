@@ -20,6 +20,7 @@
 
 #include <vector>
 #include <string>
+#include <cmath>
 
 namespace jpacPhoto
 {
@@ -96,15 +97,16 @@ namespace jpacPhoto
     double z_s(double s, double t);
 
     // Invariant variables
-    double t_man(double s, double zs);
-    double u_man(double s, double zs);
+    double t_man(double s, double theta);
+    double u_man(double s, double theta);
 
     // Scattering angles
-    std::complex<double> z_t(double s, double zs);
-    std::complex<double> z_u(double s, double zs);
+    double theta_s(double s, double t);
+    std::complex<double> z_t(double s, double theta);
+    std::complex<double> z_u(double s, double theta);
 
     // Cosine of crossing angles
-    std::complex<double> crossing_angle(std::string particle, double s, double zs);
+    std::complex<double> crossing_angle(std::string particle, double s, double theta);
 
     // Helicity configurations
     // Photon [0], Incoming Proton [1], Vector meson [2], Outgoing Proton [3]

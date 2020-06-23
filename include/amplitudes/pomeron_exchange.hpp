@@ -51,7 +51,7 @@ namespace jpacPhoto
     };
 
     // Assemble the helicity amplitude by contracting the lorentz indices
-    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double zs);
+    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
 
   private:
 
@@ -59,13 +59,13 @@ namespace jpacPhoto
     regge_trajectory * pomeron_traj;
 
     // Photon - Vector - Pomeron vertex
-    std::complex<double> top_vertex(int mu, int lam_gam, int lam_vec, double s, double zs);
+    std::complex<double> top_vertex(int mu, int lam_gam, int lam_vec, double s, double theta);
 
     // Nucleon - Nucleon - Pomeron vertex
-    std::complex<double> bottom_vertex(int mu, int lam_targ, int lam_rec, double s, double zs);
+    std::complex<double> bottom_vertex(int mu, int lam_targ, int lam_rec, double s, double theta);
 
     // Energy dependence from Pomeron propogator
-    std::complex<double> regge_factor(double s, double zs);
+    std::complex<double> regge_factor(double s, double t);
   };
 };
 

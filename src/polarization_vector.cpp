@@ -12,16 +12,17 @@
 
 // ---------------------------------------------------------------------------
 // Components
-std::complex<double> jpacPhoto::polarization_vector::component(int i, int lambda, double s, double zs)
+// vectors are always particle 1
+std::complex<double> jpacPhoto::polarization_vector::component(int i, int lambda, double s, double theta)
 {
   if (abs(lambda) == 1)
   {
     switch (i)
     {
       case 0: return 0.;
-      case 1: return - double(lambda) * zs / sqrt(2.);
+      case 1: return - double(lambda) * cos(theta) / sqrt(2.);
       case 2: return - xi / sqrt(2.);
-      case 3: return double(lambda) * sqrt(1. - zs*zs) / sqrt(2.);
+      case 3: return double(lambda) * sin(theta) / sqrt(2.);
     }
   }
   else if (lambda == 0)
@@ -35,9 +36,9 @@ std::complex<double> jpacPhoto::polarization_vector::component(int i, int lambda
       switch (i)
       {
         case 0: return state.momentum(particle, s) / mass;
-        case 1: return state.energy(particle, s) * sqrt(1. - zs*zs) / mass;
+        case 1: return state.energy(particle, s) * sin(theta) / mass;
         case 2: return 0.;
-        case 3: return state.energy(particle, s) * zs / mass;
+        case 3: return state.energy(particle, s) * cos(theta) / mass;
       }
     }
   }
@@ -48,7 +49,7 @@ std::complex<double> jpacPhoto::polarization_vector::component(int i, int lambda
   }
 };
 
-std::complex<double> jpacPhoto::polarization_vector::conjugate_component(int i, int lambda, double s, double zs)
+std::complex<double> jpacPhoto::polarization_vector::conjugate_component(int i, int lambda, double s, double theta)
 {
-  return conj(component(i, lambda, s, zs));
+  return conj(component(i, lambda, s, theta));
 };
