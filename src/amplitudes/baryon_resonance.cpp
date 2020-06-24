@@ -18,7 +18,7 @@ std::complex<double> jpacPhoto::baryon_resonance::helicity_amplitude(std::vector
   residue *= hadronic_coupling(lam_f, s);
   residue *= threshold_factor(s, 1.5);
 
-  residue *= wigner_d_half(J, lam_f, lam_i, kinematics->theta_s(s,t));
+  residue *= wigner_d_half(J, lam_i, lam_f, kinematics->theta_s(s,t));
   residue /= (s + xi * mRes * gamRes - mRes*mRes);
 
   return residue;

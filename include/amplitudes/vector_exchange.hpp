@@ -49,7 +49,7 @@ namespace jpacPhoto
     };
 
     // Assemble the helicity amplitude by contracting the lorentz indices
-    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double zs);
+    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
 
   private:
     // if using reggeized propagator

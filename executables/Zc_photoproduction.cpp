@@ -14,6 +14,7 @@
 // -n int             # Number of points to plot (default: 25)
 // -m double          # Maximum CM angle to plot (default: 10 GeV)
 // -diff              # Plot differential xsection (default: false)
+// -y "[y1:y2]"       # Custom y bounds in output plot
 // ---------------------------------------------------------------------------
 
 #include "constants.hpp"
@@ -35,7 +36,7 @@ int main( int argc, char** argv )
   // COMMAND LINE OPTIONS
   // ---------------------------------------------------------------------------
 
-  double zs = 1.;
+  double theta = 0.;
   double max = 25;
   double y[2]; bool custom_y = false;
   int N = 50;
@@ -48,7 +49,7 @@ int main( int argc, char** argv )
   for (int i = 0; i < argc; i++)
   {
     if (std::strcmp(argv[i],"-f")==0) filename = argv[i+1];
-    if (std::strcmp(argv[i],"-c")==0) zs = cos(atof(argv[i+1]) * deg2rad);
+    if (std::strcmp(argv[i],"-c")==0) theta = atof(argv[i+1]);
     if (std::strcmp(argv[i],"-m")==0) max = atof(argv[i+1]);
     if (std::strcmp(argv[i],"-n")==0) N = atoi(argv[i+1]);
     if (std::strcmp(argv[i],"-y")==0)
@@ -123,7 +124,8 @@ int main( int argc, char** argv )
     {
       if (INTEG == false)
       {
-        return amps[n]->differential_xsection(W*W, zs);
+        double t = amps[n]->kinematics->t_man(W*W, theta * deg2rad);
+        return amps[n]->differential_xsection(W*W, t);
       }
       else
       {
@@ -132,7 +134,7 @@ int main( int argc, char** argv )
     };
 
 
-    std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, sqrt(amps[n]->kinematics->sth), max, true);
+    std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, sqrt(amps[n]->kinematics->sth) + EPS, max, true);
     plotter->AddEntry(x_fx[0], x_fx[1], amps[n]->identifier);
   }
 

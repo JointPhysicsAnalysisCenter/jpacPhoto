@@ -9,8 +9,9 @@
 // COMMAND LINE OPTIONS:
 // -c double          # Change CM angle in degree (default: 0)
 // -n int             # Number of points to plot (default: 25)
-// -m double          # Maximum CM angle to plot (default: 10 GeV)
+// -m double          # Maximum energy to plot (default: 10 GeV)
 // -integ             # Plot integrated xsection (default: false)
+// -y "[y1:y2]"       # Custom y bounds in output plot
 // ---------------------------------------------------------------------------
 
 #include "constants.hpp"
@@ -41,7 +42,7 @@ int main( int argc, char** argv )
   // Default values
   int N = 50;
   double max = 10.;
-  double zs = 1.;
+  double theta = 0.;
   double y[2]; bool custom_y = false;
   bool INTEG = false; std::string ylabel = "d#sigma/dt  (nb GeV^{-2})";
   std::string filename = "X3872_photoproduction.pdf";
@@ -50,10 +51,7 @@ int main( int argc, char** argv )
   // Parse command line arguments
   for (int i = 0; i < argc; i++)
   {
-    if (std::strcmp(argv[i],"-c")==0)
-    {
-      zs = cos(atof(argv[i+1]) * deg2rad);
-    }
+    if (std::strcmp(argv[i],"-c")==0) theta = atof(argv[i+1]);
     if (std::strcmp(argv[i],"-f")==0) filename = argv[i+1];
     if (std::strcmp(argv[i],"-y")==0) {y_range(argv[i+1], y); custom_y = true;}
     if (std::strcmp(argv[i],"-m")==0) max = atof(argv[i+1]);
@@ -109,7 +107,8 @@ int main( int argc, char** argv )
     {
       if (INTEG == false)
       {
-        return exchanges[n]->differential_xsection(W*W, zs);
+        double t = ptr->t_man(W*W, theta);
+        return exchanges[n]->differential_xsection(W*W, t);
       }
       else
       {

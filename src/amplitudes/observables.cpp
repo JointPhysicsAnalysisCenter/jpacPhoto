@@ -45,20 +45,19 @@ double jpacPhoto::amplitude::differential_xsection(double s, double t)
 // IN NANOBARN
 double jpacPhoto::amplitude::integrated_xsection(double s)
 {
-  auto F = [&](double theta)
+  auto F = [&](double t)
   {
-    double jacobian = -2.; // 2. * k * q
-    jacobian *= real(kinematics->initial.momentum("beam", s));
-    jacobian *= real(kinematics->final.momentum(kinematics->vector_particle, s));
-
-    return differential_xsection(s, kinematics->t_man(s, theta)) * jacobian;
+    return differential_xsection(s, t);
   };
 
   ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kADAPTIVE);
   ROOT::Math::Functor1D wF(F);
   ig.SetFunction(wF);
 
-  return ig.Integral(0., M_PI);
+  double t_min = kinematics->t_man(s, 0.);
+  double t_max = kinematics->t_man(s, M_PI);
+
+  return ig.Integral(t_max, t_min);
 };
 
 // ---------------------------------------------------------------------------

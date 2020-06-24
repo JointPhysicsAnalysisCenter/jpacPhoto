@@ -32,6 +32,7 @@ double jpacPhoto::dirac_spinor::xi(int lam, double theta)
 
 // ---------------------------------------------------------------------------
 // Components for both the regular spinor or adjoint
+// Assumed to be particle 2 but moving in the +z direction
 std::complex<double> jpacPhoto::dirac_spinor::component(int i, int lambda, double s, double theta)
 {
   if (abs(lambda) != 1)
@@ -50,17 +51,6 @@ std::complex<double> jpacPhoto::dirac_spinor::component(int i, int lambda, doubl
     default : std::cout << "dirac_spinor: Invalid component index " << i << " passed as argument. Quitting... \n";
               exit(0);
   }
-
-  // // already particle 2'd convention
-  // switch (i)
-  // {
-  //   case 0: return -1. * double(lambda) * omega(+1, s) * xi(-lambda, theta);
-  //   case 1: return                        omega(+1, s) * xi(lambda,  theta);
-  //   case 2: return -1. *                  omega(-1, s) * xi(-lambda, theta);
-  //   case 3: return       double(lambda) * omega(-1, s) * xi(lambda,  theta);
-  //   default : std::cout << "dirac_spinor: Invalid component index " << i << " passed as argument. Quitting... \n";
-  //             exit(0);
-  // }
 
 };
 

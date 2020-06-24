@@ -13,6 +13,7 @@
 // COMMAND LINE OPTIONS:
 // -e double          # Change CM fixed-energy (default: 4.45 Gev)
 // -10q               # Plot 2 Pentaquark Scenario at fixed BR (default: false)
+// -y "[y1:y2]"       # Custom y bounds in output plot
 // ---------------------------------------------------------------------------
 
 #include "constants.hpp"
@@ -137,7 +138,8 @@ int main( int argc, char** argv )
 
     auto F = [&](double theta)
     {
-      return amps[n]->beam_asymmetry(W*W, cos(theta * deg2rad));
+      double t = ptr->t_man(W*W, theta * deg2rad);
+      return amps[n]->beam_asymmetry(W*W, t);
     };
 
     std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, 0., 90.);

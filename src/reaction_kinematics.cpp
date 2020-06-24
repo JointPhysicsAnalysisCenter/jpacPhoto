@@ -69,9 +69,8 @@ double jpacPhoto::reaction_kinematics::theta_s(double s, double t)
 };
 
 // Scattering angle in the t-channel
-std::complex<double> jpacPhoto::reaction_kinematics::z_t(double s, double theta)
+std::complex<double> jpacPhoto::reaction_kinematics::z_t(double s, double t)
 {
-  double t = t_man(s, theta);
   std::complex<double> p_t = sqrt(xr * t - 4. * mPro2) / 2.;
   std::complex<double> q_t = sqrt(xr * jpacPhoto::Kallen(t, mVec2, 0.)) / sqrt(xr * 4. * t);
 

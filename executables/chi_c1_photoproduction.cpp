@@ -13,6 +13,7 @@
 // -n int             # Number of points to plot (default: 25)
 // -m double          # Maximum CM angle to plot (default: 10 GeV)
 // -integ             # Plot integrated xsection (default: false)
+// -y "[y1:y2]"       # Custom y bounds in output plot
 // ---------------------------------------------------------------------------
 
 #include "constants.hpp"
@@ -81,28 +82,26 @@ int main( int argc, char** argv )
   omega.set_params({5.2E-4, 16., 0.}); // hadronic and nucleon vector & tensor couplings
   exchanges.push_back(&omega); // Add to the sum vector
 
-  vector_exchange rho(ptr, .770, "#rho");
-  rho.set_params({9.2E-4, 2.4, 14.6});
-  exchanges.push_back(&rho);
-
-  vector_exchange phi(ptr, 1.10, "#phi");
-  phi.set_params({4.2E-4, -6.2, 2.1});
-  exchanges.push_back(&phi);
-
-  vector_exchange jpsi(ptr, 3.097, "J/#psi");
-  jpsi.set_params({1., 3.3E-3, 0.});
-  exchanges.push_back(&jpsi);
-
-  // The total amplitude with all the above exchanges
-  amplitude_sum total(ptr, exchanges, "Sum");
-  exchanges.push_back(&total);
+  // vector_exchange rho(ptr, .770, "#rho");
+  // rho.set_params({9.2E-4, 2.4, 14.6});
+  // exchanges.push_back(&rho);
+  //
+  // vector_exchange phi(ptr, 1.10, "#phi");
+  // phi.set_params({4.2E-4, -6.2, 2.1});
+  // exchanges.push_back(&phi);
+  //
+  // vector_exchange jpsi(ptr, 3.097, "J/#psi");
+  // jpsi.set_params({1., 3.3E-3, 0.});
+  // exchanges.push_back(&jpsi);
+  //
+  // // The total amplitude with all the above exchanges
+  // amplitude_sum total(ptr, exchanges, "Sum");
+  // exchanges.push_back(&total);
 
 
 // ---------------------------------------------------------------------------
 // You shouldnt need to change anything below this line
 // ---------------------------------------------------------------------------
-double zs = cos(theta * deg2rad);
-
 // Plotter object
 jpacGraph1D* plotter = new jpacGraph1D();
 
@@ -114,7 +113,8 @@ for (int n = 0; n < exchanges.size(); n++)
   {
     if (INTEG == false)
     {
-      return exchanges[n]->differential_xsection(W*W, zs);
+      double t = ptr->t_man(W*W, theta * deg2rad);
+      return exchanges[n]->differential_xsection(W*W, t);
     }
     else
     {
@@ -122,7 +122,7 @@ for (int n = 0; n < exchanges.size(); n++)
     }
   };
 
-  std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, sqrt(ptr->sth), max);
+  std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, sqrt(ptr->sth), max, 1);
   plotter->AddEntry(x_fx[0], x_fx[1], exchanges[n]->identifier);
 }
 

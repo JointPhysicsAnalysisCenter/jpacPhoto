@@ -9,12 +9,14 @@
 
 // ---------------------------------------------------------------------------
 // Assemble the helicity amplitude by contracting the lorentz indices
-std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<int> helicities, double s, double zs)
+std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<int> helicities, double s, double t)
 {
   int lam_gam = helicities[0];
   int lam_targ = helicities[1];
   int lam_vec = helicities[2];
   int lam_rec = helicities[3];
+
+  double theta = kinematics->theta_s(s, t);
 
   std::complex<double> result = 0.;
   if (REGGE == false)
@@ -24,11 +26,11 @@ std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<
       for(int nu = 0; nu < 4; nu++)
       {
         std::complex<double> temp;
-        temp  = top_vertex(mu, lam_gam, lam_vec, s, zs);
+        temp  = top_vertex(mu, lam_gam, lam_vec, s, theta);
         temp *= metric[mu];
-        temp *= vector_propagator(mu, nu, s, zs);
+        temp *= vector_propagator(mu, nu, s, theta);
         temp *= metric[nu];
-        temp *= bottom_vertex(nu, lam_targ, lam_rec, s, zs);
+        temp *= bottom_vertex(nu, lam_targ, lam_rec, s, theta);
 
         result += temp;
       }
@@ -36,8 +38,7 @@ std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<
   }
   else
   {
-    double t = kinematics->t_man(s, zs);
-    std::complex<double> zt = kinematics->z_t(s, zs);
+    std::complex<double> zt = kinematics->z_t(s, t);
 
     int lam  = lam_gam - lam_vec;
     int lamp = (lam_targ - lam_rec) / 2.;
@@ -185,7 +186,7 @@ std::complex<double> jpacPhoto::vector_exchange::regge_propagator(double s, doub
 // ---------------------------------------------------------------------------
 // Photon - Axial Vector - Vector vertex
 // Feynman rules
-std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam, int lam_vec, double s, double zs)
+std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam, int lam_vec, double s, double theta)
 {
   // Contract with LeviCivita
   std::complex<double> result = 0.;
@@ -198,9 +199,9 @@ std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam,
         std::complex<double> temp;
         temp = levi_civita(mu, alpha, beta, gamma);
         temp *= metric[mu];
-        temp *= kinematics->initial.component(alpha, "beam", s, 1.);
-        temp *= kinematics->eps_gamma.component(beta, lam_gam, s, 1.);
-        temp *= kinematics->eps_vec.component(gamma, lam_vec, s, zs);
+        temp *= kinematics->initial.component(alpha, "beam", s, 0.);
+        temp *= kinematics->eps_gamma.component(beta, lam_gam, s, 0.);
+        temp *= kinematics->eps_vec.component(gamma, lam_vec, s, theta);
 
         result += temp;
       }
@@ -213,7 +214,7 @@ std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam,
 
 // ---------------------------------------------------------------------------
 // Nucleon - Nucleon - Vector vertex
-std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_targ, int lam_rec, double s, double zs)
+std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_targ, int lam_rec, double s, double theta)
 {
   // Vector coupling piece
   std::complex<double> vector = 0.;
@@ -222,9 +223,9 @@ std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_t
     for (int j = 0; j < 4; j++)
     {
       std::complex<double> temp;
-      temp = kinematics->recoil.adjoint_component(i, lam_rec, s, -zs); // theta_rec = theta + pi
+      temp = kinematics->recoil.adjoint_component(i, lam_rec, s, theta + M_PI); // theta_rec = theta + pi
       temp *= gamma_matrices[mu][i][j];
-      temp *= kinematics->target.component(j, lam_targ, s, -1.); // theta_targ = pi
+      temp *= kinematics->target.component(j, lam_targ, s, M_PI); // theta_targ = pi
 
       vector += temp;
     }
@@ -239,13 +240,13 @@ std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_t
       std::complex<double> sigma_q_ij = 0.;
       for (int nu = 0; nu < 4; nu++)
       {
-        sigma_q_ij += sigma(mu, nu, i, j) * metric[nu] * exchange_momenta(nu, s, zs) / (2. * mPro);
+        sigma_q_ij += sigma(mu, nu, i, j) * metric[nu] * exchange_momenta(nu, s, theta) / (2. * mPro);
       }
 
       std::complex<double> temp;
-      temp = kinematics->recoil.adjoint_component(i, lam_rec, s, -zs); // theta_rec = theta + pi
+      temp = kinematics->recoil.adjoint_component(i, lam_rec, s, theta + M_PI); // theta_rec = theta + pi
       temp *= sigma_q_ij;
-      temp *= kinematics->target.component(j, lam_targ, s, -1.); // theta_targ = pi
+      temp *= kinematics->target.component(j, lam_targ, s, M_PI); // theta_targ = pi
 
       tensor += temp;
     }
@@ -257,21 +258,21 @@ std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_t
 // ---------------------------------------------------------------------------
 // Four-momentum of the exchanged meson.
 // Simply the difference of the photon and axial 4-momenta
-std::complex<double> jpacPhoto::vector_exchange::exchange_momenta(int mu, double s, double zs)
+std::complex<double> jpacPhoto::vector_exchange::exchange_momenta(int mu, double s, double theta)
 {
   std::complex<double> qGamma_mu, qA_mu;
-  qGamma_mu = kinematics->initial.component(mu, "beam", s, 1.);
-  qA_mu = kinematics->final.component(mu, kinematics->vector_particle, s, zs);
+  qGamma_mu = kinematics->initial.component(mu, "beam", s, 0.);
+  qA_mu = kinematics->final.component(mu, kinematics->vector_particle, s, theta);
 
   return (qGamma_mu - qA_mu);
 };
 
 // ---------------------------------------------------------------------------
 // Propagator of a massive spin-one particle
-std::complex<double> jpacPhoto::vector_exchange::vector_propagator(int mu, int nu, double s, double zs)
+std::complex<double> jpacPhoto::vector_exchange::vector_propagator(int mu, int nu, double s, double theta)
 {
   std::complex<double> result;
-  result = exchange_momenta(mu, s, zs) * exchange_momenta(nu, s, zs) / mEx2;
+  result = exchange_momenta(mu, s, theta) * exchange_momenta(nu, s, theta) / mEx2;
 
   if (mu == nu)
   {
@@ -279,7 +280,7 @@ std::complex<double> jpacPhoto::vector_exchange::vector_propagator(int mu, int n
   }
 
   // pole piece (zero width here)
-  result /= kinematics->t_man(s, zs) - mEx2;
+  result /= kinematics->t_man(s, theta) - mEx2;
 
   return result;
 };

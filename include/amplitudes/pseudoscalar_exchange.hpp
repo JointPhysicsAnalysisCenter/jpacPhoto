@@ -39,6 +39,8 @@ namespace jpacPhoto
     {};
 
     // constructors for regge exchange
+
+
     pseudoscalar_exchange(reaction_kinematics * xkinem, linear_trajectory * traj, std::string name = "")
     : amplitude(xkinem, name, 2), alpha(traj), REGGE(true)
     {};
@@ -52,9 +54,12 @@ namespace jpacPhoto
     };
 
     // Assemble the helicity amplitude by contracting the spinor indices
-    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double zs);
+    std::complex<double> helicity_amplitude(std::vector<int> helicities, double xs, double xt);
 
   private:
+    // Fixed energies
+    double s, theta;
+
     // Whether to use fixed-spin propagator or regge
     bool REGGE;
 
@@ -69,16 +74,16 @@ namespace jpacPhoto
 
     // Pion form factors
     double LamPi = 0.7; // pi NN vertex cutoff parameter
-    double form_factor(double m, double s, double zs);
+    double form_factor(double m);
 
     // VMD photon vertex
-    std::complex<double> top_vertex(double lam_gam, double lam_vec, double s, double zs);
+    std::complex<double> top_vertex(double lam_gam, double lam_vec);
 
     // Nucleon vertex
-    std::complex<double> bottom_vertex(double lam_rec, double lam_targ, double s, double zs);
+    std::complex<double> bottom_vertex(double lam_rec, double lam_targ);
 
     // Simple pole propagator
-    std::complex<double> scalar_propagator(double s, double zs);
+    std::complex<double> scalar_propagator();
   };
 };
 
