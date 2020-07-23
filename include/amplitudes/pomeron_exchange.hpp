@@ -20,10 +20,6 @@
 // 1. top_vertex() coupling the vector meson to the incoming photon
 // 2. bottom_vertex() coupling the two proton dirac spinors
 // 3. regge_factor() the function describing the energy dependence of the amplitude
-//
-// To define a pomeron_exchange object all is needed is a pointer to
-// a reaction_kinematics object containing the mass and name of the vector particle
-// being produced
 // ---------------------------------------------------------------------------
 
 namespace jpacPhoto
@@ -31,7 +27,10 @@ namespace jpacPhoto
   class pomeron_exchange : public amplitude
   {
   public:
+
     // Constructor
+    // need a pointer to kinematic object, pointer to trajectory.
+    // Optional OLDMODEL if true will default to helicity conserving amplitude
     pomeron_exchange(reaction_kinematics * xkinem, regge_trajectory * alpha, bool OLDMODEL = false, std::string name = "")
     : amplitude(xkinem, name, 2), pomeron_traj(alpha), DELTA(OLDMODEL)
     {};
@@ -48,18 +47,21 @@ namespace jpacPhoto
     std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
 
   private:
-    bool DELTA = false;
-    double norm, b0; // Regge factor parameters: normalization and t-slope
+    // Fixed energies so as to not have to pass them around
+    double s, t, theta;
+
+    bool DELTA = false; // Whether or not to use the helicity conserving model 
+    double norm = 0., b0 = 0.; // Regge factor parameters: normalization and t-slope
     regge_trajectory * pomeron_traj;
 
     // Photon - Vector - Pomeron vertex
-    std::complex<double> top_vertex(int mu, int lam_gam, int lam_vec, double s, double theta);
+    std::complex<double> top_vertex(int mu, int lam_gam, int lam_vec);
 
     // Nucleon - Nucleon - Pomeron vertex
-    std::complex<double> bottom_vertex(int mu, int lam_targ, int lam_rec, double s, double theta);
+    std::complex<double> bottom_vertex(int mu, int lam_targ, int lam_rec);
 
     // Energy dependence from Pomeron propogator
-    std::complex<double> regge_factor(double s, double t);
+    std::complex<double> regge_factor();
   };
 };
 

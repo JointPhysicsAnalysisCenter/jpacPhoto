@@ -9,31 +9,32 @@
 
 // ---------------------------------------------------------------------------
 // Given a set of helicities for each particle, assemble the helicity amplitude by contracting Lorentz indicies
-std::complex<double> jpacPhoto::pomeron_exchange::helicity_amplitude(std::vector<int> helicities, double s, double t)
+std::complex<double> jpacPhoto::pomeron_exchange::helicity_amplitude(std::vector<int> helicities, double xs, double xt)
 {
   int lam_gam = helicities[0];
   int lam_targ = helicities[1];
   int lam_vec = helicities[2];
   int lam_rec = helicities[3];
 
-  double theta = kinematics->theta_s(s,t);
+  // Save energies 
+  s = xs; t = xt; theta = kinematics->theta_s(xs, xt);
 
   std::complex<double> result = 0.;
 
   // IF using helicity conserving delta fuction model
   if (DELTA == true)
   {
-    (lam_gam == lam_vec && lam_rec == lam_targ) ? (result = regge_factor(s,t)) : (result = 0.);
+    (lam_gam == lam_vec && lam_rec == lam_targ) ? (result = regge_factor()) : (result = 0.);
     return result;
   }
 
   // else use Lesniak-Szczepaniak Model
   for (int mu = 0; mu < 4; mu++)
   {
-    std::complex<double> temp = regge_factor(s, t);
-    temp *= top_vertex(mu, lam_gam, lam_vec, s, theta);
+    std::complex<double> temp = regge_factor();
+    temp *= top_vertex(mu, lam_gam, lam_vec);
     temp *= metric[mu];
-    temp *= bottom_vertex(mu, lam_targ, lam_rec, s, theta);
+    temp *= bottom_vertex(mu, lam_targ, lam_rec);
 
     result += temp;
   }
@@ -43,7 +44,7 @@ std::complex<double> jpacPhoto::pomeron_exchange::helicity_amplitude(std::vector
 
 // ---------------------------------------------------------------------------
 // Bottom vertex coupling the target and recoil proton spinors to the vector pomeron
-std::complex<double> jpacPhoto::pomeron_exchange::bottom_vertex(int mu, int lam_targ, int lam_rec, double s, double theta)
+std::complex<double> jpacPhoto::pomeron_exchange::bottom_vertex(int mu, int lam_targ, int lam_rec)
 {
   std::complex<double> result = 0.;
   for (int i = 0; i < 4; i++)
@@ -72,7 +73,7 @@ std::complex<double> jpacPhoto::pomeron_exchange::bottom_vertex(int mu, int lam_
 
 // ---------------------------------------------------------------------------
 // Top vertex coupling the photon, pomeron, and vector meson.
-std::complex<double> jpacPhoto::pomeron_exchange::top_vertex(int mu, int lam_gam, int lam_vec, double s, double theta)
+std::complex<double> jpacPhoto::pomeron_exchange::top_vertex(int mu, int lam_gam, int lam_vec)
 {
   std::complex<double> sum1 = 0., sum2 = 0.;
   for (int nu = 0; nu < 4; nu++)
@@ -95,7 +96,7 @@ std::complex<double> jpacPhoto::pomeron_exchange::top_vertex(int mu, int lam_gam
 
 // ---------------------------------------------------------------------------
 // Usual Regge power law behavior, s^alpha(t) with an exponential fall from the forward direction
-std::complex<double> jpacPhoto::pomeron_exchange::regge_factor(double s, double t)
+std::complex<double> jpacPhoto::pomeron_exchange::regge_factor()
 {
   if (s < kinematics->sth)
   {
@@ -103,16 +104,22 @@ std::complex<double> jpacPhoto::pomeron_exchange::regge_factor(double s, double 
     exit(0);
   }
 
-  if (s - kinematics->sth < 0.0001)
-  {
-    return 0.;
-  }
-
   double t_min = kinematics->t_man(s, 0.); // t_min = t(theta = 0)
 
   std::complex<double> result = exp(b0 * (t - t_min));
-  result *= pow(s - kinematics->sth, pomeron_traj->eval(t));
-  result *= xi * norm * sqrt(4. * M_PI * M_ALPHA);
+  
+  // Use physical threshold
+  if (DELTA == false)
+  {
+    result *= pow(s - kinematics->sth, pomeron_traj->eval(t));
+  }
+  // Unless using the old, helicity conserving model, in which case use fitted value.
+  else
+  {
+    result *= pow( xr * (s - 16.8), pomeron_traj->eval(t));
+  }
+  
+  result *= xi * norm * e;
 
   return result;
 };
