@@ -27,8 +27,8 @@ std::complex<double> jpacPhoto::baryon_resonance::helicity_amplitude(std::vector
 // Ad-hoc threshold factor to kill the resonance at threshold
 double jpacPhoto::baryon_resonance::threshold_factor(double s, double beta)
 {
-  double result = pow((s - sthPsiPro) / s, beta);
-  result /= pow((mRes*mRes - sthPsiPro) / (mRes*mRes), beta);
+  double result = pow((s - kinematics->sth) / s, beta);
+  result /= pow((mRes*mRes - kinematics->sth) / (mRes*mRes), beta);
 
   return result;
 };
