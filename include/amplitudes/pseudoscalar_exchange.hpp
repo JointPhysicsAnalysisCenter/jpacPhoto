@@ -16,13 +16,15 @@
 #include "gamma_technology.hpp"
 
 // ---------------------------------------------------------------------------
-// pseudoscalar_exchange class describes the amplitude for a fixed-spin-0 exchange
-// in the t-channel. Derived in terms of simple feynman rules at tree level
+// pseudoscalar_exchange class describes the amplitude for a spin-0 exchange
+// in the t-channel. Derived in terms of simple feynman rules at tree level.
 //
-// Initialization required a reaction_kinematics object, the mass of the exchange,
+// Initialization required a reaction_kinematics object.
+// Then either: the mass (in GeV) of the exchange (for fixed-spin exchange),
+//          or: a pointer to a linear_trajectory object (for Reggeize exchange).
 // and an optional string to identify the amplitude with.
 //
-//  Evaluation requires two couplings:
+// Evaluation requires two couplings:
 // photon coupling, gGamma, and nucleon coupling, gNN respectively.
 //
 // Set couplings with amp.set_params({gGamma, gNN});
@@ -39,8 +41,6 @@ namespace jpacPhoto
     {};
 
     // constructors for regge exchange
-
-
     pseudoscalar_exchange(reaction_kinematics * xkinem, linear_trajectory * traj, std::string name = "")
     : amplitude(xkinem, name, 2), alpha(traj), REGGE(true)
     {};
@@ -49,37 +49,46 @@ namespace jpacPhoto
     void set_params(std::vector<double> params)
     {
       check_Nparams(params);
-      gPsi = params[0];
+      gGamma = params[0];
       gNN = params[1];
     };
+
+    // Whether or not to include an exponential form factor (default false)
+    void set_formfactor(bool FF, double bb = 0.)
+    {
+      IF_FF = FF;
+      b = bb;
+    }
 
     // Assemble the helicity amplitude by contracting the spinor indices
     std::complex<double> helicity_amplitude(std::vector<int> helicities, double xs, double xt);
 
   private:
-    // Fixed energies
-    double s, theta;
+    // Place to save fixed energies (and theta)
+    double s, t, theta;
 
-    // Whether to use fixed-spin propagator or regge
+    // Whether to use fixed-spin propagator (false) or regge (true)
     bool REGGE;
 
-    // Mass of the exchanged pseudo-scalar
+    // Mass of the exchanged pseudo-scalar (if REGGE = false)
+    // ignored otherwise
     double mEx2;
 
-    // Regge trajectory for the pion
+    // Regge trajectory for the pion (if REGGE = true)
+    // ignored otherwise
     linear_trajectory * alpha;
 
     // Coupling constants
-    double gPsi = 0., gNN = 0.;
+    double gGamma = 0.; // Gamma - Axial - Pseudoscalar coupling 
+    double gNN = 0.;    // Pseudoscalar - Nucleon coupling
 
-    // Pion form factors
-    double LamPi = 0.7; // pi NN vertex cutoff parameter
-    double form_factor(double m);
+    bool IF_FF = false; // Whether to include the exponential form factor
+    double b = 0.; // "t-slope" parameter in the FF
 
-    // VMD photon vertex
+    // Photon - pseudoscalar - Axial vertex
     std::complex<double> top_vertex(double lam_gam, double lam_vec);
 
-    // Nucleon vertex
+    // Pseudoscalar - Nucleon vertex
     std::complex<double> bottom_vertex(double lam_rec, double lam_targ);
 
     // Simple pole propagator

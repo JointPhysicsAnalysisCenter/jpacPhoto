@@ -19,7 +19,8 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::helicity_amplitude(std::v
   int lam_vec = helicities[2];
   int lam_rec = helicities[3];
 
-  s = xs; theta = kinematics->theta_s(xs, xt);
+  // Store the invariant energies to avoid having to pass them around 
+  s = xs; t = xt, theta = kinematics->theta_s(xs, xt);
 
   // Because its a scalar exchange we dont have any loose indices to contract
   std::complex<double> result;
@@ -27,16 +28,12 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::helicity_amplitude(std::v
   result *= scalar_propagator();
   result *= bottom_vertex(lam_rec, lam_targ);
 
-  return result;
-};
-
-//------------------------------------------------------------------------------
-// Pion form factors
-double jpacPhoto::pseudoscalar_exchange::form_factor(double m)
-{
-  double result;
-  result  = (m*m - mPi*mPi);
-  result /= (m*m - kinematics->t_man(s, theta));
+  // Multiply by the optional expontial form factor
+  if (IF_FF == true)
+  {
+    double tprime = t - kinematics->t_man(s, 0.);
+    result *= exp(b * tprime);
+  }
 
   return result;
 };
@@ -50,6 +47,7 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::bottom_vertex(double lam_
   {
     for (int j = 0; j < 4; j++)
     {
+      // ubar(recoil) * gamma_5 * u(target)
       std::complex<double> temp;
       temp  = kinematics->recoil.adjoint_component(i, lam_rec, s, theta + M_PI); // theta_recoil = theta + pi
       temp *= gamma_5[i][j];
@@ -59,8 +57,9 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::bottom_vertex(double lam_
     }
   }
 
+  // Sqrt(2) from isospin considering a charged pion field
+  // remove the Sqrt(2) if considering a neutral pion exchange
   result *= sqrt(2.) * gNN;
-  result *= form_factor(LamPi);
 
   return result;
 };
@@ -100,9 +99,9 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::top_vertex(double lam_gam
 
   std::complex<double> result;
   result = term1 - term2;
-  result *= gPsi / kinematics->mVec;
-  result *= M_ALPHA / fJpsi;
-  result *= form_factor(mJpsi);
+
+  // Coupling is normalized to the mass of the Axial vector particle
+  result *= gGamma / kinematics->mVec;
 
   return result;
 };
@@ -113,11 +112,11 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::scalar_propagator()
 {
   if (REGGE == false)
   {
-    return 1. / (kinematics->t_man(s, theta) - mEx2);
+    return 1. / (t - mEx2);
   }
 
   // Else use the regge propagator
-  std::complex<double> alpha_t = alpha->eval(kinematics->t_man(s, theta));
+  std::complex<double> alpha_t = alpha->eval(t);
 
   // the gamma function causes problesm for large t so
   if (std::abs(alpha_t) > 30.)
@@ -128,7 +127,7 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::scalar_propagator()
   {
     std::complex<double> result;
     result  = alpha->slope();
-    result *= 0.5 * (double(alpha->signature) + exp(-xi * M_PI * alpha_t));
+    result *= 0.5 * (1. + double(alpha->signature) * exp(-xi * M_PI * alpha_t));
     result *= cgamma(-alpha_t);
     result *= pow(xr * s, alpha_t);
     return result;
