@@ -61,6 +61,9 @@ namespace jpacPhoto
   const double mPi        = 0.138039;
   const double mK         = 0.496;
   const double mEta       = 0.54753;
+  const double mRho       = 0.77526;
+  const double mOmega     = 0.78265;
+  const double mPhi       = 1.01956;
   const double mPro       = 0.9383;
   const double mJpsi      = 3.097;
   const double mPsi2S     = 3.686;
