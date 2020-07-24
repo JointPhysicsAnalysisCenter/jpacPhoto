@@ -11,18 +11,29 @@
 #include "constants.hpp"
 #include <iostream>
 #include <complex>
+#include <algorithm>
 
 namespace jpacPhoto
 {
   template <typename T>
-  T Kallen(T x, T y, T z)
+  inline T Kallen(T x, T y, T z)
   {
     return x*x + y*y + z*z - 2. * (x*y + x*z + y*z);
   };
 
   std::complex<double> cgamma(std::complex<double> z, int OPT = 0);
 
+  inline unsigned int factorial(unsigned int n) 
+  {
+      if (n == 0)
+        return 1;
+      return n * factorial(n - 1);
+  };
+
   // ---------------------------------------------------------------------------
+  // Wigner d-func coefficient of leading power
+  double wigner_leading_coeff(int j, int lam1, int lam2);
+
   // Wigner d-function for half-integer spin
   double wigner_d_half(int j, int lam1, int lam2, double theta);
 

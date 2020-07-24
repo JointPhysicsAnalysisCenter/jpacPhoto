@@ -7,6 +7,25 @@
 
 #include "misc_math.hpp"
 
+// --------------------------------------------------------------------------
+double jpacPhoto::wigner_leading_coeff(int j, int lam1, int lam2)
+{
+  int M = std::max(std::abs(lam1), std::abs(lam2));
+  int N = std::min(std::abs(lam1), std::abs(lam2));
+
+  int lambda = std::abs(lam1 - lam2) + lam1 - lam2;
+
+  double result = (double) factorial(2*j);
+  result /= sqrt( (double) factorial(j-M));
+  result /= sqrt( (double) factorial(j+M));
+  result /= sqrt( (double) factorial(j-N));
+  result /= sqrt( (double) factorial(j+N));
+  result /= pow(2.,  double(j-M));
+  result *= pow(-1., double(lambda)/2.);
+
+  return result;
+};
+
 // ---------------------------------------------------------------------------
 double jpacPhoto::wigner_error(int j, int lam1, int lam2, bool half)
 {
