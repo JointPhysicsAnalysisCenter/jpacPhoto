@@ -2,9 +2,6 @@ cmake_minimum_required (VERSION 2.9)
 
 project (jpacPhoto)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED YES)
-
 #Compare the new contents with the existing file, if it exists and is the
 # same we don't want to trigger a make by changing its timestamp.
 function(update_file path content)

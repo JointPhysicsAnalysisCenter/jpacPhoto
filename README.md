@@ -1,5 +1,5 @@
 # jpacPhoto
-Framework for Object-Oriented Amplitude Analysis (OOAA) involving single meson production via quasi-elastic scattering of a real photon on a nucleon target. Focus on expandability and easy interfacing with Monte-Carlo tools and event generators.
+Framework for amplitude analysis involving single meson production via quasi-elastic scattering of a real photon on a nucleon target. Focus on expandability and easy interfacing with Monte-Carlo tools and event generators.
 
 <p align="center">
   <img width="300" src="./doc/FeynmanDiagram.png">
@@ -8,6 +8,23 @@ Framework for Object-Oriented Amplitude Analysis (OOAA) involving single meson p
 Such processes are of interest at many experiments at JLab and the future EIC.
 
 Requires [ROOT](https://root.cern.ch/) (tested with version 6.17) with [*MathMore*](https://root.cern.ch/mathmore-library) libraries installed.
+
+## Install
+To install the base library use:
+```bash
+git clone https://github.com/dwinney/jpacPhoto.git 
+mkdir build && cd build
+cmake ..
+make JpacPhoto
+```
+This will create a `libJpacPhoto.so` library that can be linked to other code. 
+
+To make and use any of the example executables described below use:
+```
+git submodule update --init --recursive
+make name_of_executable
+```
+This will additionally clone and build the ``libJpacStyle.so`` plotting library.
 
 ## AMPLITUDES
 The main object of interest is the abstract [`amplitude`](./include/amplitudes/amplitude.hpp) class. This allows you to build [observables](./src/amplitudes/observables.cpp) from helicity amplitudes:
@@ -34,7 +51,7 @@ Incoherent (interfering) sums of amplitudes may be constructed through the [`amp
 Observables are evaluated in terms of the invariant center-of-mass energy, s, and momentum transfer, t. Alternatively to easily interface with event generators, Lorentz vectors may be passed using the `event` struct to calculate s and/or t. For example:
 ```c++
 // From four-vectors:
-TLorentzVector pGamma, pTarget, pVector, pRecoil;
+LorentzVector pGamma, pTarget, pVector, pRecoil;
 event fvecs(pGamma, pTarget, pVec, pRecoil);
 double s = fvecs.s_man(), t = fvecs.t_man();
 
@@ -43,16 +60,6 @@ double dxs = amplitude.differential_xsection(s, t);
 ```
 
 ## EXECUTABLES
-To build any example script in the `executables` folder, for example `test.cpp`, use:
-
-```bash
-mkdir build
-cd build
-cmake ..
-make test
-````
-Alternatively use `make JpacPhoto` to build a library file `libJpacPhoto.a` which may then be linked to other code to access header files and classes.
-
 All executables have the following two optional flags for customizing the plotted output
 ```bash
 -f string             # Desired filename of output (default: executable_name.pdf)
@@ -67,31 +74,12 @@ Reproduces the results in [2]. See [JPAC page on γp→J/ψp](http://cgl.soic.in
 #### [asymmetry_pentaquark](./executables/asymmetry_pentaquark.cpp)
 Sensitivity study of the beam asymmetry to different LHCb pentaquark scenarios at GlueX at JLab.
 
-
-#### [psi_comparison](./executables/psi_comparison.cpp)
-Comparison of the unpolarized cross sections for the photoproduction of the Psi(1S) and Psi(2S) states near threshold in the GlueX kinematics.
-
-
-#### [chi_c1_photoproduction](./executables/chi_c1_photoproduction.cpp)
-Analytical model for the unpolarized cross section near threshold of axial vector states. Decomposed into different exchanges in the t-channel (e.g. omega, rho, phi).
-
-#### [X3872_photoproduction](./executables/X3872_photoproduction.cpp)
-Prediction for the unpolarized cross-section for exclusive X(3872) photoproduction at low momentum transfer and high energies of interest for the future EIC.
-
-#### [Y4220_photoproduction](./executables/Y4220_photoproduction.cpp)
-Prediction for exclusive J/psi and Y(4220) photoproduction at the EIC.
-
-#### [Zc_photoproduction](./executables/Zc_photoproduction.cpp)
-Unpolarized cross-section predictions for the photoproduction of the Z_c+(3900) and Z_c+(4200) by charged pion exchange. Reproduces the results in [3] with up to date decay widths.
-
 ## PLOTTING
 Plots are automatically created using the JPAC collaboration style guidelines. For more information see the [jpacStyle](https://github.com/dwinney/jpacStyle) library.
 
 <p align="center">
   <img width="275" src="./doc/JPAClogo.png">
 </p>
-
-NOTE: When cloning, Git does not automatically download submodules. If jpacStyle files are not automatically downloaded use `git submodule update --init --recursive`.
 
 ## REFERENCES
 * [1] "Theoretical model of the phi meson photoproduction amplitudes" Lesniak and Szczepaniak [[arXiv:hep-ph/0304007]](https://arxiv.org/abs/hep-ph/0304007)
