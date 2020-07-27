@@ -61,7 +61,7 @@ std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<
     double tprime = t - kinematics->t_man(s, 0.);
     result *= exp(b * tprime);
   }
-
+  
   return result;
 };
 
@@ -215,24 +215,58 @@ std::complex<double> jpacPhoto::vector_exchange::barrier_factor(int j, int M)
 // Photon - Axial Vector - Vector vertex
 std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam, int lam_vec)
 {
-  // Contract with LeviCivita
   std::complex<double> result = 0.;
-  for (int alpha = 0; alpha < 4; alpha++)
-  {
-    for (int beta = 0; beta < 4; beta++)
-    {
-      for (int gamma = 0; gamma < 4; gamma++)
-      {
-        std::complex<double> temp;
-        temp = levi_civita(mu, alpha, beta, gamma);
-        temp *= metric[mu];
-        temp *= kinematics->initial.component(alpha, "beam", s, 0.);
-        temp *= kinematics->eps_gamma.component(beta, lam_gam, s, 0.);
-        temp *= kinematics->eps_vec.component(gamma, lam_vec, s, theta);
 
-        result += temp;
+  // A-V-V coupling
+  if (IF_SCALAR_X == false)
+  {
+    // Contract with LeviCivita
+    for (int alpha = 0; alpha < 4; alpha++)
+    {
+      for (int beta = 0; beta < 4; beta++)
+      {
+        for (int gamma = 0; gamma < 4; gamma++)
+        {
+          std::complex<double> temp;
+          temp = levi_civita(mu, alpha, beta, gamma);
+          temp *= metric[mu];
+          temp *= kinematics->initial.component(alpha, "beam", s, 0.);
+          temp *= kinematics->eps_gamma.component(beta, lam_gam, s, 0.);
+          temp *= kinematics->eps_vec.component(gamma, lam_vec, s, theta);
+
+          result += temp;
+        }
       }
     }
+  }
+  // S-V-V coupling
+  else
+  {
+    if (lam_vec != 0)
+    {
+      return 0.;
+    }
+
+    for (int nu = 0; nu < 4; nu++)
+    {
+      std::complex<double> term1, term2;
+
+      // (k . q) eps_gamma^mu
+      term1  = exchange_momenta(nu);
+      term1 *= metric[nu];
+      term1 *= kinematics->initial.component(nu, "beam", s, 0.);
+      term1 *= kinematics->eps_gamma.component(mu, lam_gam, s, 0.);
+
+      // (eps_gam . k) q^mu
+      term2  = kinematics->eps_gamma.component(nu, lam_gam, s, 0.);
+      term2 *= metric[nu];
+      term2 *= exchange_momenta(nu);
+      term2 *= kinematics->initial.component(mu, "beam", s, 0.);
+
+      result += term1 - term2;
+    }
+    // Dimensionless coupling requires dividing by the mVec
+    result /= kinematics->mVec;
   }
 
   // Multiply by coupling

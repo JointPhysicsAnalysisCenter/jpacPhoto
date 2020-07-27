@@ -56,6 +56,12 @@ namespace jpacPhoto
       b = bb;
     }
 
+    // Special case of scalar photoproduction relevant for the X(6900)
+    inline void set_scalarX(bool X)
+    {
+      IF_SCALAR_X = X;
+    };
+
     // Assemble the helicity amplitude by contracting the lorentz indices
     std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
 
@@ -69,6 +75,9 @@ namespace jpacPhoto
     // Form factor parameters
     bool IF_FF = false;
     double b = 0.;
+
+    // IF to treat the produced particle as a scalar
+    bool IF_SCALAR_X = false;
 
     // Couplings to the axial-vector/photon and vector/tensor couplings to nucleon
     double gGam = 0., gpGam = 0., gV = 0., gT = 0.;
