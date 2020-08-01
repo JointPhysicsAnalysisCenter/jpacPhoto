@@ -107,18 +107,7 @@ std::complex<double> jpacPhoto::pomeron_exchange::regge_factor()
   double t_min = kinematics->t_man(s, 0.); // t_min = t(theta = 0)
 
   std::complex<double> result = exp(b0 * (t - t_min));
-  
-  // Use physical threshold
-  if (DELTA == false)
-  {
-    result *= pow(s - kinematics->sth, pomeron_traj->eval(t));
-  }
-  // Unless using the old, helicity conserving model, in which case use fitted value.
-  else
-  {
-    result *= pow( xr * (s - 16.8), pomeron_traj->eval(t));
-  }
-  
+  result *= pow(s - kinematics->sth, pomeron_traj->eval(t));
   result *= xi * norm * e;
 
   return result;
