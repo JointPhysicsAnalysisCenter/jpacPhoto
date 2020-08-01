@@ -24,9 +24,23 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::helicity_amplitude(std::v
 
   // Because its a scalar exchange we dont have any loose indices to contract
   std::complex<double> result;
-  result  = top_vertex(lam_gam, lam_vec);
-  result *= scalar_propagator();
-  result *= bottom_vertex(lam_rec, lam_targ);
+  // result  = top_vertex(lam_gam, lam_vec);
+  // result *= scalar_propagator();
+  // result *= bottom_vertex(lam_targ, lam_rec);
+    
+
+  if (lam_vec != lam_gam || lam_targ != lam_rec) 
+  {
+    return 0.; 
+  }
+  else
+  {
+    result  = sqrt(2.) * gNN;
+    result *= gGamma / kinematics->mVec;
+    result *= sqrt(xr * t) / 2.;
+    result *= (kinematics->mVec2 - t);
+    result *= scalar_propagator();
+  }
 
   // Multiply by the optional expontial form factor
   if (IF_FF == true)
@@ -40,7 +54,7 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::helicity_amplitude(std::v
 
 //------------------------------------------------------------------------------
 // Nucleon vertex
-std::complex<double> jpacPhoto::pseudoscalar_exchange::bottom_vertex(double lam_rec, double lam_targ)
+std::complex<double> jpacPhoto::pseudoscalar_exchange::bottom_vertex(double lam_targ, double lam_rec)
 {
   std::complex<double> result = 0.;
   for (int i = 0; i < 4; i++)
@@ -114,22 +128,18 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::scalar_propagator()
   {
     return 1. / (t - mEx2);
   }
-
-  // Else use the regge propagator
-  std::complex<double> alpha_t = alpha->eval(t);
-
-  // the gamma function causes problesm for large t so
-  if (std::abs(alpha_t) > 30.)
-  {
-    return 0.;
-  }
   else
   {
-    std::complex<double> result;
-    result  = alpha->slope();
-    result *= 0.5 * (1. + double(alpha->signature) * exp(-xi * M_PI * alpha_t));
-    result *= cgamma(-alpha_t);
-    result *= pow(xr * s, alpha_t);
+    std::complex<double> alpha_t = alpha->eval(t);
+
+    if (std::abs(alpha_t) > 20.) return 0.;
+
+    // Else use the regge propagator
+    std::complex<double> result = 1.;
+    result  = - alpha->slope();
+    result *= 0.5 * (double(alpha->signature) +  exp(-xi * M_PI * alpha_t));
+    result *= cgamma(0. - alpha_t);
+    result *= pow(s, alpha_t);
     return result;
   }
 };

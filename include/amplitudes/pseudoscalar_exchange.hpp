@@ -89,7 +89,7 @@ namespace jpacPhoto
     std::complex<double> top_vertex(double lam_gam, double lam_vec);
 
     // Pseudoscalar - Nucleon vertex
-    std::complex<double> bottom_vertex(double lam_rec, double lam_targ);
+    std::complex<double> bottom_vertex(double lam_targ, double lam_rec);
 
     // Simple pole propagator
     std::complex<double> scalar_propagator();
