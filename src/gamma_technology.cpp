@@ -25,70 +25,13 @@ std::complex<double> jpacPhoto::sigma(int mu, int nu, int i, int j)
 
 // ---------------------------------------------------------------------------
 // Four dimensional Levi-Civita symbol
-double jpacPhoto::levi_civita(int mu, int alpha, int beta, int gamma)
+double jpacPhoto::levi_civita(int a, int b, int c, int d)
 {
-  // Error check
-  if ((mu > 3 || alpha > 3 || beta > 3 || gamma > 3) || (mu < 0 || alpha < 0 || beta < 0 || gamma < 0))
-  {
-    std::cout << " \nLeviCivita: Error! Invalid argument recieved. Quitting... \n";
-    exit(0);
-  }
+  int result = (d - c) * (d - b) * (d - a) * (c - b) * (c - a) * (b - a);
 
-  // Return 0 if any are equal
-  if (mu == alpha || mu == beta || mu == gamma || alpha == beta || alpha == gamma || beta == gamma)
-  {
-    return 0.;
-  }
+  if (result == 0) return 0.;
 
-  // Else compare with strings
-  std::string input = std::to_string(mu) + std::to_string(alpha) + std::to_string(beta) + std::to_string(gamma);
-  std::vector<std::string>  even_permutations =
-  {
-    "0123",
-    "0231",
-    "0312",
-    "1032",
-    "1203",
-    "1320",
-    "2013",
-    "2130",
-    "2301",
-    "3021",
-    "3102",
-    "3210"
-  };
-
-  for (int i = 0; i < 12; i++)
-  {
-    if (input == even_permutations[i])
-    {
-      return 1.;
-    }
-  }
-
-  std::vector<std::string> odd_permutations =
-  {
-    "0132",
-    "0213",
-    "0321",
-    "1023",
-    "2103",
-    "3120",
-    "1230",
-    "1302",
-    "2031",
-    "2310",
-    "3012",
-    "3201"
-  };
-
-  for (int i = 0; i < 12; i++)
-  {
-    if (input == odd_permutations[i])
-    {
-      return -1.;
-    }
-  }
-
-  return 0.;
+  result /= abs(d - c) * abs(d - b) * abs(d - a) * abs(c - b) * abs(c - a) * abs(b - a);
+    
+  return result;
 };
