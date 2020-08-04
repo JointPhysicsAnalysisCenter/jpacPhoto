@@ -60,6 +60,7 @@ namespace jpacPhoto
     inline void set_scalarX(bool X)
     {
       IF_SCALAR_X = X;
+      FOUR_VEC = true; // Currently scalar top vertex is not implemented in the faster analytic expression, need to do 4-vector algebra
     };
 
     // Assemble the helicity amplitude by contracting the lorentz indices
@@ -68,9 +69,15 @@ namespace jpacPhoto
   private:
     // Saved energies
     double s, t, theta;
+    double zt;
 
     // if using reggeized propagator
     bool REGGE;
+    // or the regge trajectory of the exchange
+    linear_trajectory * alpha;
+
+    // Whether using analytic or covariant expression
+    bool FOUR_VEC = false;
 
     // Form factor parameters
     bool IF_FF = false;
@@ -83,11 +90,14 @@ namespace jpacPhoto
     double gGam = 0., gpGam = 0., gV = 0., gT = 0.;
 
     // ---------------------------------------------------------------------------
-    // FIXED SPIN
+    // Covariant evaluation
 
     // Mass of the exchange
     double mEx2;
 
+    // Full covariant amplitude
+    std::complex<double> covariant_amplitude(std::vector<int> helicities);
+    
     // Four-momentum of the exhange
     std::complex<double> exchange_momenta(int mu);
 
@@ -101,10 +111,7 @@ namespace jpacPhoto
     std::complex<double> vector_propagator(int mu, int nu);
 
     // ---------------------------------------------------------------------------
-    // REGGEIZED
-
-    // or the regge trajectory of the exchange
-    linear_trajectory * alpha;
+    // Analytic evaluation
 
     // Photon - Axial - Vector
     std::complex<double> top_residue(int lam_gam, int lam_vec);

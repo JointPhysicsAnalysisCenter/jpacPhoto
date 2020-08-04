@@ -19,40 +19,32 @@ std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<
   // Update the saved energies and angles
   s = xs; t = xt;
   theta = kinematics->theta_s(xs, xt);
-;
-  std::complex<double> result = 0.;
+  zt = real(kinematics->z_t(s,t));
+
+  if (REGGE == false && FOUR_VEC == true)
+  {
+    return covariant_amplitude(helicities);
+  }
+
+  // NOTE THIS ONLY WORKS FOR UNPOLARIZED CROSS-SECTIONS
+  // NEED TO WIGNER-ROTATE HELICITES TO S CHANNEL FOR SDMES
+
+  // TODO: ADD CROSSING-MATRICES
+  int lam  = lam_gam - lam_vec;
+  int lamp = (lam_targ - lam_rec) / 2.;
+
+  // Product of residues  
+  std::complex<double> result;
+  result  = top_residue(lam_gam, lam_vec);
+  result *= bottom_residue(lam_targ, lam_rec);
 
   if (REGGE == false) // Use the covariant expression
   {
-    // Need to contract the Lorentz indices
-    for (int mu = 0; mu < 4; mu++)
-    {
-      for(int nu = 0; nu < 4; nu++)
-      {
-        std::complex<double> temp;
-        temp  = top_vertex(mu, lam_gam, lam_vec);
-        temp *= metric[mu];
-        temp *= vector_propagator(mu, nu);
-        temp *= metric[nu];
-        temp *= bottom_vertex(nu, lam_targ, lam_rec);
-
-        result += temp;
-      }
-    }
+    result *= wigner_d_int_cos(1, lam, lamp, zt);
+    result /= t - mEx2;
   }
   else // Use the helicity amplitude form in the t-channel
   {
-    // NOTE THIS ONLY WORKS FOR UNPOLARIZED CROSS-SECTIONS
-    // NEED TO WIGNER-ROTATE HELICITES TO S CHANNEL FOR SDMES
-
-    // TODO: ADD CROSSING-MATRICES
-
-    int lam  = lam_gam - lam_vec;
-    int lamp = (lam_targ - lam_rec) / 2.;
-
-    // Product of residues
-    result  = top_residue(lam_gam, lam_vec);
-    result *= bottom_residue(lam_targ, lam_rec);
     result *= regge_propagator(1, lam, lamp);
   }
 
@@ -183,8 +175,6 @@ std::complex<double> jpacPhoto::vector_exchange::regge_propagator(int j, int lam
 // Half angle factors
 std::complex<double> jpacPhoto::vector_exchange::half_angle_factor(int lam, int lamp)
 {
-  std::complex<double> zt = kinematics->z_t(s, t);
-
   std::complex<double> sinhalf = sqrt((xr - zt) / 2.);
   std::complex<double> coshalf = sqrt((xr + zt) / 2.);
 
@@ -202,7 +192,7 @@ std::complex<double> jpacPhoto::vector_exchange::barrier_factor(int j, int M)
   std::complex<double> q = (t - kinematics->mVec2) / sqrt(4. * t * xr);
   std::complex<double> p = sqrt(xr * t - 4.*mPro2) / 2.;
 
-  std::complex<double> result = pow(xr * 2. * p * q, double(j - M));
+  std::complex<double> result = pow(2. * p * q, double(j - M));
 
   return result;
 };
@@ -210,6 +200,34 @@ std::complex<double> jpacPhoto::vector_exchange::barrier_factor(int j, int M)
 // ---------------------------------------------------------------------------
 // FEYNMAN EVALUATION
 // ---------------------------------------------------------------------------
+
+std::complex<double> jpacPhoto::vector_exchange::covariant_amplitude(std::vector<int> helicities)
+{
+  int lam_gam = helicities[0];
+  int lam_targ = helicities[1];
+  int lam_vec = helicities[2];
+  int lam_rec = helicities[3];
+
+  std::complex<double> result = 0.;
+
+  // Need to contract the Lorentz indices
+  for (int mu = 0; mu < 4; mu++)
+  {
+    for(int nu = 0; nu < 4; nu++)
+    {
+      std::complex<double> temp;
+      temp  = top_vertex(mu, lam_gam, lam_vec);
+      temp *= metric[mu];
+      temp *= vector_propagator(mu, nu);
+      temp *= metric[nu];
+      temp *= bottom_vertex(nu, lam_targ, lam_rec);
+
+      result += temp;
+    }
+  }
+
+  return result;
+};
 
 // ---------------------------------------------------------------------------
 // Photon - Axial Vector - Vector vertex
@@ -229,6 +247,9 @@ std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam,
         {
           std::complex<double> temp;
           temp = levi_civita(mu, alpha, beta, gamma);
+
+          if (std::abs(temp) < 0.0001) continue;
+        
           temp *= metric[mu];
           temp *= kinematics->initial.component(alpha, "beam", s, 0.);
           temp *= kinematics->eps_gamma.component(beta, lam_gam, s, 0.);
