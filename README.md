@@ -1,4 +1,4 @@
-# jpacPhoto
+#   jpacPhoto
 Framework for amplitude analysis involving single meson production via quasi-elastic scattering of a real photon on a nucleon target. Focus on expandability and easy interfacing with Monte-Carlo tools and event generators.
 
 <p align="center">
@@ -9,24 +9,25 @@ Such processes are of interest at many experiments at JLab and the future EIC.
 
 Requires [ROOT](https://root.cern.ch/) (tested with version 6.17) with [*MathMore*](https://root.cern.ch/mathmore-library) libraries installed.
 
-## Install
-To install the base library use:
+##  USAGE
+To generate the base library use:
 ```bash
-git clone https://github.com/dwinney/jpacPhoto.git 
+git clone --recrusive https://github.com/dwinney/jpacPhoto.git 
+cd jpacPhoto
 mkdir build && cd build
 cmake ..
-make JpacPhoto
+make jpacPhoto
 ```
-This will create a `libJpacPhoto.so` library that can be linked to other code. 
+This will create a `libjpacPhoto.so` library that can be linked to other code. 
+Note: cloning with the `--recursive` flag is required to additionally clone the `jpacStyle` submodule.
 
 To make and use any of the example executables described below use:
 ```
-git submodule update --init --recursive
 make name_of_executable
 ```
-This will additionally clone and build the ``libJpacStyle.so`` plotting library.
+This will additionally build the ``libjpacStyle.so`` plotting library.
 
-## AMPLITUDES
+##  AMPLITUDES
 The main object of interest is the abstract [`amplitude`](./include/amplitudes/amplitude.hpp) class. This allows you to build [observables](./src/amplitudes/observables.cpp) from helicity amplitudes:
 
 * Probability distribution ( Σ_λ | A |^2 )
@@ -59,12 +60,17 @@ double s = fvecs.s_man(), t = fvecs.t_man();
 double dxs = amplitude.differential_xsection(s, t);
 ```
 
-## EXECUTABLES
-The executables folder includes multiple applications of the above amplitudes to different reactions. See documentation in each respective `.cpp` file usage.
+##  EXECUTABLES
+The executables folder includes multiple applications of the above amplitudes to different reactions. See documentation in each respective `.cpp` file for usage.
 
-## PLOTTING
+##  PLOTTING
 Plots are automatically created using the JPAC collaboration style guidelines. For more information see the [jpacStyle](https://github.com/dwinney/jpacStyle) library.
 
 <p align="center">
   <img width="275" src="./doc/JPAClogo.png">
 </p>
+
+##  REFERENCES
++ [1] [Double Polarization Observables in Pentaquark Photoproduction](https://arxiv.org/abs/1907.09393)
++ [2] [XYZ spectroscopy at electron-hadron facilities: Exclusive processes](https://arxiv.org/abs/2008.01001)
++ [3] [JPAC Website](http://cgl.soic.indiana.edu/jpac/index.php)
