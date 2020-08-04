@@ -2,6 +2,9 @@
 // Predicted sensativity to LHCb pentaquarks in double polarization Observables
 // at Hall A at JLab.
 //
+// USAGE:
+// make polarized_pentaquark && ./polarized_pentaquark -optional_flags flag_inputs
+//
 // Author:       Daniel Winney (2020)
 // Affiliation:  Joint Physics Analysis Center (JPAC)
 // Email:        dwinney@iu.edu
@@ -11,6 +14,7 @@
 // [2] 10.1103/PhysRevLett.115.072001
 // ---------------------------------------------------------------------------
 // COMMAND LINE OPTIONS:
+// -f string          # Desired filename of plotted output (default: polarized_5q.pdf)
 // -c double          # Change CM angle in degree (default: 0)
 // -n int             # Number of points to plot (default: 100)
 // -m double          # Maximum CM angle to plot (default: 5 GeV)

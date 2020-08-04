@@ -1,6 +1,9 @@
 // ---------------------------------------------------------------------------
 // Predicted sensativity to LHCb pentaquarks in beam and parity asymmetries at
 // GlueX at JLab
+// 
+// USAGE:
+// make asymmetry_pentaquark && ./asymmetry_pentaquark -optional_flags flag_inputs
 //
 // Author:       Daniel Winney (2020)
 // Affiliation:  Joint Physics Analysis Center (JPAC)
@@ -11,6 +14,7 @@
 // [2] 10.1103/PhysRevLett.115.072001
 // ---------------------------------------------------------------------------
 // COMMAND LINE OPTIONS:
+// -f string          # Select the filename of output pdf (default: "5q_beam_asymmetry.pdf")
 // -e double          # Change CM fixed-energy (default: 4.45 Gev)
 // -10q               # Plot 2 Pentaquark Scenario at fixed BR (default: false)
 // -y "[y1:y2]"       # Custom y bounds in output plot

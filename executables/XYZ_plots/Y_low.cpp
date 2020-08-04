@@ -1,9 +1,21 @@
 // ---------------------------------------------------------------------------
-// Photoproduction of Y states by Pomeron exchange
+// Prediction for Y(4260) and Psi(1S and 2S) based on effective vector
+// pomeron exchange at low enegies.
+//
+// Reproduces left plot in FIG 5 of [1] 
+// 
+// USAGE:
+// make Y_low && ./Y_low
+//
+// OUTPUT:
+// Y_LE.pdf
 //
 // Author:       Daniel Winney (2020)
 // Affiliation:  Joint Physics Analysis Center (JPAC)
 // Email:        dwinney@iu.edu
+// ---------------------------------------------------------------------------
+// REFERENCES:
+// [1] arXiv:2008.01001 [hep-ph]
 // ---------------------------------------------------------------------------
 
 #include "constants.hpp"
@@ -29,11 +41,6 @@ int main( int argc, char** argv )
     linear_trajectory * alpha_LE = new linear_trajectory(1, 0.94, 0.36, "LE");
     double b_LE = 0.12;
     double A_LE = 0.38;
-
-    // Same but high-energy
-    linear_trajectory * alpha_HE = new linear_trajectory(1, 1.15, 0.11, "HE");
-    double b_HE = 1.01;
-    double A_HE = 0.16;
 
     // J/Psi
     reaction_kinematics * kJpsi = new reaction_kinematics(mJpsi, "J/#psi");
@@ -61,34 +68,15 @@ int main( int argc, char** argv )
     pomeron_exchange Y_LE(kY, alpha_LE, false, "#it{Y}(4260)");
     Y_LE.set_params({A_LE * R_Y, b_LE});
 
-
-    // ---------------------------------------------------------------------------
-    // High-enegy Amplitudes
-    // ---------------------------------------------------------------------------
-
-    pomeron_exchange Jpsi_HE(kJpsi, alpha_HE, true, "#it{J /#psi}");
-    Jpsi_HE.set_params({A_HE * R_Jpsi, b_HE});
-
-    pomeron_exchange Psi2s_HE(kPsi2s, alpha_HE, true, "#psi(2#it{S})");
-    Psi2s_HE.set_params({A_HE * R_Psi2s, b_HE});
-
-    pomeron_exchange Y_HE(kY, alpha_HE, true, "#it{Y}(4260)");
-    Y_HE.set_params({A_HE * R_Y, b_HE});
-
     // ---------------------------------------------------------------------------
     // Plotting options
     // ---------------------------------------------------------------------------
 
     // which amps to plot
     std::vector<amplitude*> amps;
-
     amps.push_back(&Jpsi_LE);
     amps.push_back(&Psi2s_LE);
     amps.push_back(&Y_LE);
-
-    // amps.push_back(&Jpsi_HE);
-    // amps.push_back(&Psi2s_HE);
-    // amps.push_back(&Y_HE);
 
     // Options
     int N = 25;
@@ -98,11 +86,8 @@ int main( int argc, char** argv )
     double  ymin = 0.;
     double  ymax = 20.;
 
-    std::string ylabel  = ROOT_italics("#sigma(#gamma p #rightarrow Y p)") + "   [nb]";
-
     std::string filename = "Y_LE.pdf";
-    // std::string filename = "Y_HE.pdf";
-
+    std::string ylabel  = ROOT_italics("#sigma(#gamma p #rightarrow Y p)") + "   [nb]";
 
     // ---------------------------------------------------------------------------
     // You shouldnt need to change anything below this line
@@ -145,7 +130,7 @@ int main( int argc, char** argv )
     plotter->Plot(filename);
 
     delete plotter;
-    delete alpha_LE, alpha_HE;
+    delete alpha_LE;
     delete kJpsi, kPsi2s, kY;
 
     return 1.;

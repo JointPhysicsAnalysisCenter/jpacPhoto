@@ -1,6 +1,9 @@
 // ---------------------------------------------------------------------------
 // Analytic model for the photoproduction of chi_c1 near threshold at GlueX
 //
+// USAGE:
+// make chi_c1_photoproduction && ./chi_c1_photoproduction -optional_flags flag_inputs
+//
 // Author:       Daniel Winney (2020)
 // Affiliation:  Joint Physics Analysis Center (JPAC)
 // Email:        dwinney@iu.edu
@@ -9,6 +12,7 @@
 // [1] 10.1103/PhysRevD.96.093008
 // ---------------------------------------------------------------------------
 // COMMAND LINE OPTIONS:
+// -f string          # Select the filename of output pdf (default: "chi_c1_photoproduction.pdf")
 // -c double          # Change CM angle in degree (default: 0)
 // -n int             # Number of points to plot (default: 25)
 // -m double          # Maximum CM angle to plot (default: 10 GeV)
