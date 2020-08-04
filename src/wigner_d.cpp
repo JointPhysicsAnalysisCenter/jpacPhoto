@@ -327,3 +327,77 @@ double jpacPhoto::wigner_d_int(int j, int lam1, int lam2, double theta)
 
 return phase * result;
 };
+
+// ---------------------------------------------------------------------------
+std::complex<double> jpacPhoto::wigner_d_int_cos(int j, int lam1, int lam2, double cosine)
+{
+  // Careful because this loses the +- phase of the sintheta. 
+  std::complex<double> sine = sqrt(xr - cosine * cosine);
+
+  std::complex<double> sinhalf =  sqrt((xr - cosine) / 2.);
+  std::complex<double> coshalf =  sqrt((xr + cosine) / 2.);
+
+  double phase = 1.;
+  // If first lam argument is smaller, switch them
+  if (abs(lam1) < abs(lam2))
+  {
+    int temp = lam1;
+    lam1 = lam2;
+    lam2 = temp;
+
+    phase *= pow(-1., double(lam1 - lam2));
+  };
+
+  // If first lam is negative, smitch them
+  if (lam1 < 0)
+  {
+    lam1 *= -1;
+    lam2 *= -1;
+
+    phase *= pow(-1., double(lam1 - lam2));
+  }
+
+  std::complex<double> result = 0.;
+  switch (j)
+  {
+    // spin - 1
+    case 1:
+    {
+      if (lam1 == 1)
+      {
+        switch (lam2)
+        {
+          case 1:
+          {
+            result = (1. + cosine) / 2.;
+            break;
+          }
+          case 0:
+          {
+            result = - sine / sqrt(2.);
+            break;
+          }
+          case -1:
+          {
+            result = (1. - cosine) / 2.;
+            break;
+          }
+          default: wigner_error(j, lam1, lam2, false);
+        }
+      }
+      else if (lam1 == 0)
+      {
+        result = cosine;
+      }
+      else
+      {
+        wigner_error(j, lam1, lam2, false);
+      }
+      break;
+    }
+  // Error
+  default: wigner_error(j, lam1, lam2, false);
+}
+
+return phase * result;
+};
