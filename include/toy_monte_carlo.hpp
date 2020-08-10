@@ -23,58 +23,68 @@ namespace jpacPhoto
     class toy_monte_carlo
     {
         public:
-        // constructor
+        // constructor with only filename 
+        toy_monte_carlo(std::string filename = "mc.root")
+        {
+            rnd = new TRandom3(0);
+            outfile = new TFile(filename.c_str(), "RECREATE");
+            set_up_kin();
+        };
+
+        // constructor if you want to specify seed
         toy_monte_carlo(int seed = 0, std::string filename = "mc.root")
         {
-            set_up(seed, filename);
+            rnd = new TRandom3(seed);
+            outfile = new TFile(filename.c_str(), "RECREATE");
+            set_up_kin();
         };
 
         // destructor
         ~toy_monte_carlo()
         {
             delete outfile;
-            // delete kin; 
-            // delete dyn;
             delete rnd;
-            // delete amp;
         }
         
         inline void set_amplitude(amplitude * _amp)
         {
             amp = _amp;
+            set_up_dyn();
         };
         
         // Produce root file with N events
         void generate(double _beam_energy, int N);
 
         private:
+
         // Set up the branch structure for the output root file
-        void set_up(int seed, std::string filename);
+        void set_up_kin();
+        void set_up_dyn();
 
         // Shorthand for generating a random number in a range 
         inline double random(double min, double max)
         {
             return min + (max - min) * rnd->Rndm();
         }
-
+        
         // Generate event
-        void generate_event();
-        // void generate_weight();
+        void generate_event();  // kinematics
+        void generate_weight(); // dynamics
 
         // ROOT structures
         TFile * outfile = NULL;
         TTree * kin = NULL;
-        // TTree * dyn = NULL;
+        TTree * dyn = NULL;
         TRandom3 * rnd = NULL;
         
         // Pointer to preset amplitude that will be the weighting function for events
         amplitude * amp = NULL;
+        bool error_already_triggered = false;
         double beam_energy, W, s, t;
         double weight;
 
         // Helicities of the photon and 2 x lambda of the target and recoil protons
-        int lam_gamma, lam_ptarg, lam_prec;
-        int delta_lambda;
+        int lam_gamma, lam_ptarg, lam_erel, lam_prec;
 
         // Lepton 4-momenta components 
         double ep_px, ep_py, ep_pz, ep_E;
