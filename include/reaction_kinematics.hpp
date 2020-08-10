@@ -26,8 +26,15 @@ namespace jpacPhoto
 {
 
   // Photon lab energy
-  double E_lab(double s);
-  double W_cm(double egam);
+  inline double E_beam(double W)
+  {
+    return (W*W / mPro - mPro) / 2.;
+  };
+  
+  inline double W_cm(double egam)
+  {
+    return sqrt(mPro * (2. * egam + mPro));
+  };
 
   // Simple struct to pass a full set of 4-vectors
   struct event

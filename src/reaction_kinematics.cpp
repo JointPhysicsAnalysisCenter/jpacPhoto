@@ -9,18 +9,6 @@
 #include "reaction_kinematics.hpp"
 
 // ---------------------------------------------------------------------------
-// Photon lab energy
-double jpacPhoto::E_lab(double W)
-{
-  return (W*W / mPro - mPro) / 2.;
-};
-
-double jpacPhoto::W_cm(double egam)
-{
-  return sqrt(mPro * (2. * egam + mPro));
-};
-
-// ---------------------------------------------------------------------------
 // s-channel variables from 4-vectors
 double jpacPhoto::reaction_kinematics::s_man(event fvecs)
 {
