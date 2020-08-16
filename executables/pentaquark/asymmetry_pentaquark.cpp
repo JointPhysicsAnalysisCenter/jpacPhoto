@@ -67,7 +67,7 @@ int main( int argc, char** argv )
   // ---------------------------------------------------------------------------
 
   // Set up Kinematics for jpsi in final state
-  reaction_kinematics * ptr = new reaction_kinematics(mJpsi, "jpsi");
+  reaction_kinematics * ptr = new reaction_kinematics(mJpsi);
 
   // ---------------------------------------------------------------------------
   // T - CHANNEL // this is the same for all cases

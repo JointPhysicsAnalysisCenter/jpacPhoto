@@ -43,7 +43,7 @@ int main( int argc, char** argv )
 
   // Zc(3900)
   double mZc = 3.8884; // GeV
-  reaction_kinematics * kZc = new reaction_kinematics(mZc, "Z_{c}(3900)");
+  reaction_kinematics * kZc = new reaction_kinematics(mZc);
 
   double gc_Psi = 1.91; // psi coupling before VMD scaling
   double gc_Gamma = e * fJpsi * gc_Psi / mJpsi;
@@ -51,7 +51,7 @@ int main( int argc, char** argv )
 
   // Zb(10610)
   double mZb = 10.6072;
-  reaction_kinematics * kZb = new reaction_kinematics(mZb, "Z_{b}(10610)");
+  reaction_kinematics * kZb = new reaction_kinematics(mZb);
 
   double gb_Ups1 = 0.49, gb_Ups2 = 3.30, gb_Ups3 = 9.22;
   double gb_Gamma = e * (fUpsilon1S * gb_Ups1 / mUpsilon1S 
@@ -62,7 +62,7 @@ int main( int argc, char** argv )
   
   // Zb(10650)
   double mZbp = 10.6522;
-  reaction_kinematics * kZbp = new reaction_kinematics(mZbp, "Z_{b}(10650)");
+  reaction_kinematics * kZbp = new reaction_kinematics(mZbp);
 
   double gbp_Ups1 = 0.21, gbp_Ups2 = 1.47, gbp_Ups3 = 4.8;
   double gbp_Gamma = e * (fUpsilon1S * gbp_Ups1 / mUpsilon1S 
@@ -130,10 +130,10 @@ int main( int argc, char** argv )
     };
 
     std::array<std::vector<double>, 2> x_fx, x_fx1;
-    if (xmin < amps[n]->kinematics->Wth)
+    if (xmin < amps[n]->kinematics->Wth())
     {
-        x_fx = vec_fill(N, F, amps[n]->kinematics->Wth + EPS, xmax, PRINT_TO_COMMANDLINE);
-        x_fx[0].insert(x_fx[0].begin(), amps[n]->kinematics->Wth);
+        x_fx = vec_fill(N, F, amps[n]->kinematics->Wth() + EPS, xmax, PRINT_TO_COMMANDLINE);
+        x_fx[0].insert(x_fx[0].begin(), amps[n]->kinematics->Wth());
         x_fx[1].insert(x_fx[1].begin(), 0.);
     }
     else

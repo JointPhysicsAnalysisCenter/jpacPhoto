@@ -70,7 +70,7 @@ int main( int argc, char** argv )
   // ---------------------------------------------------------------------------
 
   // Set up Kinematics
-  reaction_kinematics * ptr = new reaction_kinematics(mJpsi, "jpsi");
+  reaction_kinematics * ptr = new reaction_kinematics(mJpsi);
 
   // ---------------------------------------------------------------------------
   // S - CHANNEL
@@ -141,7 +141,7 @@ int main( int argc, char** argv )
       }
     };
 
-    std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, sqrt(ptr->sth) + 0.01, max);
+    std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, sqrt(ptr->sth()) + 0.01, max);
     plotter->AddEntry(x_fx[0], x_fx[1], amps[n]->identifier);
   }
 
@@ -150,7 +150,7 @@ int main( int argc, char** argv )
   streamObj << std::setprecision(2) << theta;
   plotter->SetLegend(0.2, 0.7, "#theta = " + streamObj.str());
   // X axis
-  plotter->SetXaxis("W  (GeV)", sqrt(ptr->sth) + 0.01, max);
+  plotter->SetXaxis("W  (GeV)", sqrt(ptr->sth()) + 0.01, max);
 
   // To change the range of the Y-axis or the position of the Legend change the arguments here
   (custom_y == true) ? (plotter->SetYaxis(ylabel, y[0], y[1])) : (plotter->SetYaxis(ylabel));

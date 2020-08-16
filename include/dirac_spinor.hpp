@@ -28,9 +28,8 @@ namespace jpacPhoto
   class dirac_spinor
   {
   private:
-    two_body_state twobody;
-    const std::string particle;
-    const double mass;
+    // masses, energies, and momenta
+    two_body_state * state;
 
     //Whether its an anti-particle or not
     const bool ANTI_PARTICLE = false;
@@ -39,20 +38,13 @@ namespace jpacPhoto
     std::complex<double> omega(int sign, double s);
 
     // angular component
-    double xi(int lam, double theta);
+    double half_angle(int lam, double theta);
 
   public:
     // Constructor
-    dirac_spinor(two_body_state xstate, std::string name, bool if_anti = false)
-    : twobody(xstate), particle(name), mass(xstate.get_mass(name)),
-      ANTI_PARTICLE(if_anti)
+    dirac_spinor(two_body_state * xstate, bool if_anti = false)
+    : state(xstate), ANTI_PARTICLE(if_anti)
     {};
-
-  	// Copy Constructor
-  	dirac_spinor(const dirac_spinor & old)
-  	: twobody(old.twobody), particle(old.particle), mass(old.mass),
-  		ANTI_PARTICLE(old.ANTI_PARTICLE)
-  	{};
 
     // Default destructor
     ~dirac_spinor(){};

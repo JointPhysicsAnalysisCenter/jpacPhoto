@@ -44,8 +44,8 @@ namespace jpacPhoto
     : amplitude(xkinem, name, 2), mRes(mass), gamRes(width), J(j), P(p),
       naturality(p * pow(-1, (j-1)/2))
     {
-      pi_bar = - real(kinematics->initial.momentum("target", mass * mass));
-      pf_bar = - real(kinematics->final.momentum("recoil", mass * mass));
+      pi_bar = - real(kinematics->initial->momentum(mass * mass));
+      pf_bar = - real(kinematics->final->momentum(mass * mass));
 
       switch (J)
       {
@@ -73,13 +73,6 @@ namespace jpacPhoto
         }
       }
     };
-
-    // Copy Constructor
-    baryon_resonance(const baryon_resonance & old)
-    : amplitude(old),
-      mRes(old.mRes), gamRes(old.gamRes), J(old.J), P(old.P), naturality(old.naturality),
-      xBR(old.xBR), R_photo(old.R_photo), pi_bar(old.pi_bar), pf_bar(old.pf_bar)
-    {};
 
     // Setting utility
     void set_params(std::vector<double> params)

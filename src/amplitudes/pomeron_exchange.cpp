@@ -53,13 +53,13 @@ std::complex<double> jpacPhoto::pomeron_exchange::bottom_vertex(int mu, int lam_
     {
     std::complex<double> temp;
     // Recoil oriented an angle theta + pi
-    temp = kinematics->recoil.adjoint_component(i, lam_rec, s, theta + M_PI);
+    temp = kinematics->recoil->adjoint_component(i, lam_rec, s, theta + M_PI);
 
     // vector coupling
     temp *= gamma_matrices[mu][i][j];
 
     // target oriented in negative z direction
-    temp *= kinematics->target.component(j, lam_targ, s, M_PI);
+    temp *= kinematics->target->component(j, lam_targ, s, M_PI);
 
     result += temp;
     }
@@ -80,15 +80,15 @@ std::complex<double> jpacPhoto::pomeron_exchange::top_vertex(int mu, int lam_gam
   {
     std::complex<double> temp1, temp2;
 
-    temp1 = kinematics->initial.component(nu, "beam", s, 0.);
+    temp1 = kinematics->initial->q(nu, s, 0.);
     temp1 *= metric[nu];
-    temp1 *= kinematics->eps_vec.conjugate_component(nu, lam_vec, s, theta);
-    sum1 += kinematics->eps_gamma.component(mu, lam_gam, s, 0.) * temp1;
+    temp1 *= kinematics->eps_vec->conjugate_component(nu, lam_vec, s, theta);
+    sum1 += kinematics->eps_gamma->component(mu, lam_gam, s, 0.) * temp1;
 
-    temp2 = kinematics->eps_gamma.component(nu, lam_gam, s, 0.);
+    temp2 = kinematics->eps_gamma->component(nu, lam_gam, s, 0.);
     temp2 *= metric[nu];
-    temp2 *= kinematics->eps_vec.conjugate_component(nu, lam_vec, s, theta);
-    sum2 += kinematics->initial.component(mu, "beam", s, 0.) * temp2;
+    temp2 *= kinematics->eps_vec->conjugate_component(nu, lam_vec, s, theta);
+    sum2 += kinematics->initial->q(mu, s, 0.) * temp2;
   }
 
   return -sum1 + sum2;
@@ -98,7 +98,7 @@ std::complex<double> jpacPhoto::pomeron_exchange::top_vertex(int mu, int lam_gam
 // Usual Regge power law behavior, s^alpha(t) with an exponential fall from the forward direction
 std::complex<double> jpacPhoto::pomeron_exchange::regge_factor()
 {
-  if (s < kinematics->sth)
+  if (s < kinematics->sth())
   {
     std::cout << " \n pomeron_exchange: Trying to evaluate below threshold (sqrt(s) = " << sqrt(s) << ")! Quitting... \n";
     exit(0);
@@ -107,7 +107,7 @@ std::complex<double> jpacPhoto::pomeron_exchange::regge_factor()
   double t_min = kinematics->t_man(s, 0.); // t_min = t(theta = 0)
 
   std::complex<double> result = exp(b0 * (t - t_min));
-  result *= pow(s - kinematics->sth, pomeron_traj->eval(t));
+  result *= pow(s - kinematics->sth(), pomeron_traj->eval(t));
   result *= xi * norm * e;
 
   return result;

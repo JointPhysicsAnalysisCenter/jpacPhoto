@@ -37,11 +37,11 @@ int main( int argc, char** argv )
 
     // Chi_c1(1P)
     double mChi = 3.510;
-    reaction_kinematics * kChi = new reaction_kinematics(mChi, "chi_c1");
+    reaction_kinematics * kChi = new reaction_kinematics(mChi);
 
     // X(3872)
     double mX = 3.87169;
-    reaction_kinematics * kX = new reaction_kinematics(mX, "X(3872)");
+    reaction_kinematics * kX = new reaction_kinematics(mX);
 
     // Nucleon couplings 
     double gV_omega = 16., gT_omega = 0.;
@@ -139,10 +139,10 @@ int main( int argc, char** argv )
         };
 
         std::array<std::vector<double>, 2> x_fx, x_fx1;
-        if (xmin < amps[n]->kinematics->Wth)
+        if (xmin < amps[n]->kinematics->Wth())
         {
-            x_fx = vec_fill(N, F, amps[n]->kinematics->Wth + EPS, xmax, PRINT_TO_COMMANDLINE);
-            x_fx[0].insert(x_fx[0].begin(), amps[n]->kinematics->Wth);
+            x_fx = vec_fill(N, F, amps[n]->kinematics->Wth() + EPS, xmax, PRINT_TO_COMMANDLINE);
+            x_fx[0].insert(x_fx[0].begin(), amps[n]->kinematics->Wth());
             x_fx[1].insert(x_fx[1].begin(), 0.);
         }
         else

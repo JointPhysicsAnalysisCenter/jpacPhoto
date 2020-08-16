@@ -16,7 +16,7 @@
 #include "dirac_spinor.hpp"
 #include "polarization_vector.hpp"
 
-#include "TLorentzVector.h"
+#include "TMath.h"
 
 #include <vector>
 #include <string>
@@ -24,47 +24,6 @@
 
 namespace jpacPhoto
 {
-
-  // Photon lab energy
-  inline double E_beam(double W)
-  {
-    return (W*W / mPro - mPro) / 2.;
-  };
-  
-  inline double W_cm(double egam)
-  {
-    return sqrt(mPro * (2. * egam + mPro));
-  };
-
-  // Simple struct to pass a full set of 4-vectors
-  struct event
-  {
-    event(TLorentzVector pG, TLorentzVector pT, TLorentzVector qV, TLorentzVector qR)
-    : pGam(pG), pTarg(pT), qVec(qV), qRec(qR)
-    {};
-
-    TLorentzVector pGam;
-    TLorentzVector pTarg;
-    TLorentzVector qVec;
-    TLorentzVector qRec;
-
-    // Mandelstam Variables
-    inline double s_man()
-    {
-      return (pGam + pTarg).M2();
-    }
-
-    inline double t_man()
-    {
-      return (pGam - qVec).M2();
-    }
-
-    inline double u_man()
-    {
-      return (pGam - qRec).M2();
-    }
-  };
-
   // ---------------------------------------------------------------------------
   // The reaction kinematics object is intended to have all relevant kinematic quantities
   // forthe reaction. Here you'll find the momenta and energies of all particles,
@@ -75,64 +34,115 @@ namespace jpacPhoto
 
   class reaction_kinematics
   {
-  public:
-    // Constructor
-    reaction_kinematics(double vec_mass, std::string vec_name)
-    : mVec(vec_mass), mVec2(vec_mass*vec_mass), vector_particle(vec_name),
-      initial(0., mPro, "beam", "target"),
-      final(vec_mass, mPro, vec_name, "recoil"),
-      eps_vec(final, vec_name),
-      eps_gamma(initial, "beam"),
-      target(initial, "target"), recoil(final, "recoil")
-    {};
+  public: 
+    two_body_state * initial,  * final;
+    polarization_vector * eps_vec, * eps_gamma;
+    dirac_spinor * target, * recoil;
 
-  // Copy Constructor 
-    reaction_kinematics(const reaction_kinematics & old)
-    : mVec(old.mVec), mVec2(old.mVec2), vector_particle(old.vector_particle),
-      initial(old.initial), final(old.final),
-      eps_vec(old.eps_vec), eps_gamma(old.eps_gamma),
-      target(old.target), recoil(old.recoil)
-    {};
+    // Get s-channel scattering angle from invariants
+    inline double z_s(double s, double t)
+    {
+      std::complex<double> qdotqp = initial->momentum(s) * final->momentum(s);
+      std::complex<double> E1E3   = initial->energy_V(s) * final->energy_V(s);
 
-    const std::string vector_particle;
+      double result = t - mVec2 + 2.*abs(E1E3);
+      result /= 2. * abs(qdotqp);
 
-    double mVec, mVec2; // mass and mass squared of the vector particle
-    double sth = (mVec + mPro) * (mVec + mPro); // final state threshold
-    double Wth = (mVec + mPro); // square root of the threshold
+      return result;
+    };
+
+    // Scattering angle in the s-channel
+    // Use TMath::ACos instead of std::acos because its safer at the end points
+    inline double theta_s(double s, double t)
+    {
+      return TMath::ACos( z_s(s, t) );
+    };
+
+    // Invariant variables
+    inline double t_man(double s, double theta)
+    {
+      std::complex<double> qdotqp = initial->momentum(s) * final->momentum(s);
+      std::complex<double> E1E3 = initial->energy_V(s) * final->energy_V(s);
+
+      return mVec*mVec - 2. * abs(E1E3) + 2. * abs(qdotqp) * cos(theta);
+    };
+
+    inline double u_man(double s, double theta)
+    { 
+      return mVec2 + 2. * mPro2 - s - t_man(s, theta);
+    };
+
+    // Scattering angles in t and u channel frames
+    inline std::complex<double> z_t(double s, double theta)
+    {
+      double t = t_man(s, theta);
+      std::complex<double> p_t = sqrt(xr * t - 4. * mPro2) / 2.;
+      std::complex<double> q_t = sqrt(xr * Kallen(t, mVec2, 0.)) / sqrt(xr * 4. * t);
+
+      std::complex<double> result;
+      result = 2. * s + t - 2. * mPro2 - mVec2; // s - u
+      result /= 4. * p_t * q_t;
+
+      return result;
+    };
+
+    inline std::complex<double> z_u(double s, double theta)
+    {
+      // TODO: fix this
+      std::cout << "z_u not implimented yet i fucked up here :p\n";
+      std::cout << "if youre seeing this message email me and yell at me because i forgot\n";
+      
+      return xr;
+    };
+
+    // Empty constructor,
+    // defaults to compton scattering: gamma p -> gamma p
+    reaction_kinematics()
+    : mVec(0.), mVec2(0.)
+    {
+      initial   = new two_body_state(0., mPro);
+      eps_gamma = new polarization_vector(initial);
+      target    = new dirac_spinor(initial);
+
+      final     = new two_body_state(0., mPro);
+      eps_vec   = new polarization_vector(final);
+      recoil    = new dirac_spinor(final);
+    };
+
+    // Constructor with a set mass
+    reaction_kinematics(double mass)
+    : mVec(mass), mVec2(mass * mass)
+    {
+      initial   = new two_body_state(0., mPro);
+      eps_gamma = new polarization_vector(initial);
+      target    = new dirac_spinor(initial);
+
+      final     = new two_body_state(mass, mPro);
+      eps_vec   = new polarization_vector(final);
+      recoil    = new dirac_spinor(final);
+    };
+
+    // destructor
+    ~reaction_kinematics()
+    {
+      delete initial, final;
+      delete eps_gamma, eps_vec;
+      delete target, recoil;
+    }
+
+    double mVec = 0., mVec2 = 0.; // mass and mass squared of the vector particle
+    inline double Wth(){ return (mVec + mPro); }; // square root of the threshold
+    inline double sth(){ return Wth() * Wth(); }; // final state threshold
 
     inline void set_vectormass(double m)
     {
       mVec  = m;
       mVec2 = m*m;
-      sth   = (m + mPro) * (m + mPro);
-      Wth   = (m + mPro);
 
       // also update the vector mass in two_body_state
-      final.set_m1(m);
+      final->set_mV(m);
     };
     
-    // inital and final state kinematics (momenta)
-    two_body_state initial, final;
-    polarization_vector eps_vec, eps_gamma;
-    dirac_spinor target, recoil;
-
-    // Get s, t, u from 4-vectors
-    double s_man(event fvecs);
-    double z_s(event fvecs);
-    double z_s(double s, double t);
-
-    // Invariant variables
-    double t_man(double s, double theta);
-    double u_man(double s, double theta);
-
-    // Scattering angles
-    double theta_s(double s, double t);
-    std::complex<double> z_t(double s, double theta);
-    std::complex<double> z_u(double s, double theta);
-
-    // Cosine of crossing angles
-    std::complex<double> crossing_angle(std::string particle, double s, double theta);
-
     // Helicity configurations
     // Photon [0], Incoming Proton [1], Vector meson [2], Outgoing Proton [3]
     std::vector< std::vector<int> > helicities =

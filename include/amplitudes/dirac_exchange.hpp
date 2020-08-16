@@ -28,12 +28,6 @@ namespace jpacPhoto
       mEx(mass), mEx2(mass*mass)
     {};
 
-    // Copy constructor
-    dirac_exchange(const dirac_exchange & old)
-    : amplitude(old), mEx2(old.mEx2),
-      gGam(old.gGam), gVec(old.gVec)
-    {};
-
     // Setting utility
     void set_params(std::vector<double> params)
     {
@@ -43,7 +37,7 @@ namespace jpacPhoto
     };
 
     // Assemble the helicity amplitude by contracting the spinor indices
-    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double zs);
+    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
 
     // debugging options to make either the photon or vector into scalars
     void set_debug(int i)
@@ -63,29 +57,32 @@ namespace jpacPhoto
     // Exchange nucleon mass
     double mEx, mEx2;
 
+      // Place to save fixed energies (and theta)
+    double s, t, theta;
+
     // couplings
     double gGam = 0., gVec = 0.;
 
-    // Four-momentum of the exhange (u - channel)
-    std::complex<double> exchange_momentum(int mu, double s, double zs);
-
     // Should be exactly u_man(s, zs);
-    double exchange_mass(double s, double zs);
+    double exchange_mass();
+
+    // Four-momentum of the exhange (u - channel)
+    std::complex<double> exchange_momentum(int mu);
 
     // Slashed momentumn
-    std::complex<double> slashed_exchange_momentum(int i, int j, double s, double zs);
+    std::complex<double> slashed_exchange_momentum(int i, int j);
 
     // Slashed polarization vectors
-    std::complex<double> slashed_eps(int i, int j, double lam, polarization_vector eps, bool STARRED, double s, double zs);
+    std::complex<double> slashed_eps(int i, int j, double lam, polarization_vector * eps, bool STARRED, double s, double theta);
 
     // Photon - excNucleon - recNucleon vertex
-    std::complex<double> top_vertex(int i, int lam_gam, int lam_rec, double s, double zs);
+    std::complex<double> top_vertex(int i, int lam_gam, int lam_rec);
 
     // excNucleon - recNucleon - Vector vertex
-    std::complex<double> bottom_vertex(int j, int lam_vec, int lam_targ, double s, double zs);
+    std::complex<double> bottom_vertex(int j, int lam_vec, int lam_targ);
 
     // Spin-1/2 propagator
-    std::complex<double> dirac_propagator(int i, int j, double s, double zs);
+    std::complex<double> dirac_propagator(int i, int j);
   };
 };
 #endif

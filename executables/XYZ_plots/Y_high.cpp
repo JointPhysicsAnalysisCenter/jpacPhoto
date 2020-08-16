@@ -42,16 +42,16 @@ int main( int argc, char** argv )
     double A_HE = 0.16;
 
     // J/Psi
-    reaction_kinematics * kJpsi = new reaction_kinematics(mJpsi, "J/#psi");
+    reaction_kinematics * kJpsi = new reaction_kinematics(mJpsi);
     double R_Jpsi = 1.;
 
     // Psi(2S)
-    reaction_kinematics * kPsi2s = new reaction_kinematics(mPsi2S, "#psi(2S)");
+    reaction_kinematics * kPsi2s = new reaction_kinematics(mPsi2S);
     double R_Psi2s = 0.55;
 
     // Y(4260)
     double mY = 4.220;
-    reaction_kinematics * kY = new reaction_kinematics(mY, "Y(4260)");
+    reaction_kinematics * kY = new reaction_kinematics(mY);
     double R_Y = 1.55;
 
     // ---------------------------------------------------------------------------
@@ -108,9 +108,9 @@ int main( int argc, char** argv )
         };
 
         std::array<std::vector<double>, 2> x_fx;
-        if (xmin < amps[n]->kinematics->Wth)
+        if (xmin < amps[n]->kinematics->Wth())
         {
-            x_fx = vec_fill(N, F, amps[n]->kinematics->Wth + EPS, xmax, true);
+            x_fx = vec_fill(N, F, amps[n]->kinematics->Wth() + EPS, xmax, true);
         }
         else
         {

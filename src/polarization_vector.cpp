@@ -27,7 +27,7 @@ std::complex<double> jpacPhoto::polarization_vector::component(int i, int lambda
   }
   else if (lambda == 0)
   {
-    if (abs(mass) < 0.01)
+    if (abs(state->get_mV()) < 0.01) // if massless this is zero
     {
       return 0.;
     }
@@ -35,17 +35,17 @@ std::complex<double> jpacPhoto::polarization_vector::component(int i, int lambda
     {
       switch (i)
       {
-        case 0: return state.momentum(particle, s) / mass;
-        case 1: return state.energy(particle, s) * sin(theta) / mass;
+        case 0: return state->momentum(s) / state->get_mV();
+        case 1: return state->energy_V(s) * sin(theta) / state->get_mV();
         case 2: return 0.;
-        case 3: return state.energy(particle, s) * cos(theta) / mass;
+        case 3: return state->energy_V(s) * cos(theta) / state->get_mV();
       }
     }
   }
   else
   {
     std::cout << "polarization_vector: Invalid helicity! Quitting... \n";
-    exit(0);
+    return 0.;
   }
 
   return 0.;

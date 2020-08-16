@@ -32,7 +32,7 @@ namespace jpacPhoto
   class amplitude
   {
   public:
-    // Empty Constructor
+    // Constructor with only a kinematics object
     amplitude(reaction_kinematics * xkinem)
     : kinematics(xkinem)
     {};
@@ -40,11 +40,6 @@ namespace jpacPhoto
     // Constructor with an amplitude id and number of parameters specified
     amplitude(reaction_kinematics * xkinem, std::string id, int N)
     : kinematics(xkinem), identifier(id), Nparams(N)
-    {};
-
-    // Copy constructor
-    amplitude(const amplitude & old)
-    : kinematics(old.kinematics), identifier(old.identifier), Nparams(old.Nparams)
     {};
 
     // Kinematics object for thresholds and etc.

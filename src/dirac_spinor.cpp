@@ -16,13 +16,13 @@ std::complex<double> jpacPhoto::dirac_spinor::omega(int sign, double s)
     sign *= -1;
   }
 
-  std::complex<double> E = twobody.energy(particle, s);
-  return sqrt(E + double(sign) * mass);
+  std::complex<double> E = state->energy_B(s);
+  return sqrt(xr * E + double(sign) * state->get_mB());
 }
 
 // ---------------------------------------------------------------------------
 // Angular half angle factors
-double jpacPhoto::dirac_spinor::xi(int lam, double theta)
+double jpacPhoto::dirac_spinor::half_angle(int lam, double theta)
 {
   double result;
   (lam == 1) ? (result = cos(theta / 2.)) : (result = sin(theta / 2.));
@@ -37,19 +37,19 @@ std::complex<double> jpacPhoto::dirac_spinor::component(int i, int lambda, doubl
 {
   if (abs(lambda) != 1)
   {
-    std::cout << "\ndirac_spinor: Invalid helicity projection passed as argument. Quitting... \n";
-    exit(0);
+    std::cout << "\ndirac_spinor: Invalid helicity projection passed as argument!\n";
+    return 0.;
   }
 
   // theta convention
   switch (i)
   {
-    case 0: return                  omega(+1, s) * xi( lambda, theta);
-    case 1: return double(lambda) * omega(+1, s) * xi(-lambda, theta);
-    case 2: return double(lambda) * omega(-1, s) * xi( lambda, theta);
-    case 3: return                  omega(-1, s) * xi(-lambda, theta);
-    default : std::cout << "dirac_spinor: Invalid component index " << i << " passed as argument. Quitting... \n";
-              exit(0);
+    case 0: return                  omega(+1, s) * half_angle( lambda, theta);
+    case 1: return double(lambda) * omega(+1, s) * half_angle(-lambda, theta);
+    case 2: return double(lambda) * omega(-1, s) * half_angle( lambda, theta);
+    case 3: return                  omega(-1, s) * half_angle(-lambda, theta);
+    default : std::cout << "dirac_spinor: Invalid component index " << i << " passed as argument!\n";
+              return 0.;
   }
 
 };

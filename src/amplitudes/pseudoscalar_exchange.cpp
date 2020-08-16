@@ -63,9 +63,9 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::bottom_vertex(double lam_
     {
       // ubar(recoil) * gamma_5 * u(target)
       std::complex<double> temp;
-      temp  = kinematics->recoil.adjoint_component(i, lam_rec, s, theta + M_PI); // theta_recoil = theta + pi
+      temp  = kinematics->recoil->adjoint_component(i, lam_rec, s, theta + M_PI); // theta_recoil = theta + pi
       temp *= gamma_5[i][j];
-      temp *= kinematics->target.component(j, lam_targ, s, M_PI); // theta_target = pi
+      temp *= kinematics->target->component(j, lam_targ, s, M_PI); // theta_target = pi
 
       result += temp;
     }
@@ -87,25 +87,25 @@ std::complex<double> jpacPhoto::pseudoscalar_exchange::top_vertex(double lam_gam
   {
     for (int nu = 0; nu < 4; nu++)
     {
-      // (eps*_lam . eps_gam)(p . q)
+      // (eps*_lam . eps_gam)(q_vec . q_gam)
       std::complex<double> temp1;
-      temp1  = kinematics->eps_vec.conjugate_component(mu, lam_vec, s, theta);
+      temp1  = kinematics->eps_vec->conjugate_component(mu, lam_vec, s, theta);
       temp1 *= metric[mu];
-      temp1 *= kinematics->eps_gamma.component(mu, lam_gam, s, 0.);
-      temp1 *= kinematics->initial.component(nu, "beam", s, 0.);
+      temp1 *= kinematics->eps_gamma->component(mu, lam_gam, s, 0.);
+      temp1 *= kinematics->initial->q(nu, s, 0.);
       temp1 *= metric[nu];
-      temp1 *= kinematics->final.component(nu, kinematics->vector_particle, s, theta);
+      temp1 *= kinematics->final->q(nu, s, theta);
 
       term1 += temp1;
 
-      // (eps*_lam . p)(eps_gam . q)
+      // (eps*_lam . q_gam)(eps_gam . q_vec)
       std::complex<double> temp2;
-      temp2  = kinematics->eps_vec.conjugate_component(mu, lam_vec, s, theta);
+      temp2  = kinematics->eps_vec->conjugate_component(mu, lam_vec, s, theta);
       temp2 *= metric[mu];
-      temp2 *= kinematics->initial.component(mu, "beam", s, 0.);
-      temp2 *= kinematics->eps_gamma.component(nu, lam_gam, s, 0.);
+      temp2 *= kinematics->initial->q(mu, s, 0.);
+      temp2 *= kinematics->eps_gamma->component(nu, lam_gam, s, 0.);
       temp2 *= metric[nu];
-      temp2 *= kinematics->final.component(nu, kinematics->vector_particle, s, theta);
+      temp2 *= kinematics->final->q(nu, s, theta);
 
       term2 += temp2;
     }

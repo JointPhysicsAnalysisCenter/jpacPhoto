@@ -20,26 +20,22 @@ namespace jpacPhoto
     : dirac_exchange(xkinem, mass, name)
     {};
 
-    // Copy Constructor
-    rarita_exchange(const rarita_exchange & old)
-    : dirac_exchange(old)
-    {};
-
     // Assemble the helicity amplitude by contracting the spinor indices
-    std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double zs);
+    std::complex<double> helicity_amplitude(std::vector<int> helicities, double xs, double xt);
 
   protected:
+
     // rank-2 traceless tensor
-    std::complex<double> g_bar(int mu, int nu, double s, double zs);
+    std::complex<double> g_bar(int mu, int nu);
 
     // g_bar contracted with gamma^nu
-    std::complex<double> slashed_g_bar(int mu, int i, int j, double s, double zs);
+    std::complex<double> slashed_g_bar(int mu, int i, int j);
 
     // Relative momentum entering or exiting the propagator
-    std::complex<double> relative_momentum(int mu, double s, double zs, std::string in_out);
+    std::complex<double> relative_momentum(int mu, std::string in_out);
 
     // Spin-3/2 propagator
-    std::complex<double> rarita_propagator(int i, int j, double s, double zs);
+    std::complex<double> rarita_propagator(int i, int j);
   };
 };
 

@@ -6,8 +6,8 @@
 // Email:        dwinney@iu.edu
 // ---------------------------------------------------------------------------
 
-#ifndef _4VEC_
-#define _4VEC_
+#ifndef _POLVEC_
+#define _POLVEC_
 
 #include <iostream>
 #include "constants.hpp"
@@ -24,21 +24,14 @@ namespace jpacPhoto
   class polarization_vector
   {
   private:
-      two_body_state state;
-      const std::string particle;
-      const double mass;
+      two_body_state * state;
 
   public:
     // Constructor
-    polarization_vector(two_body_state xstate, std::string name)
-      : state(xstate), particle(name), mass(state.get_mass(name))
+    polarization_vector(two_body_state * xstate)
+      : state(xstate)
     {};
-
-    // Copy Constructor
-    polarization_vector(const polarization_vector & old)
-      : state(old.state), particle(old.particle), mass(old.mass)
-    {};
-
+    
     // Destructor
     ~polarization_vector(){};
 

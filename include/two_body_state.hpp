@@ -1,6 +1,4 @@
-// Base class to work with four vectors in a scattering event
-//
-// All code can be easily modified to use TLorentzVector instead
+// Energy and momentum of a two-particle state in the center of mass scattering frame
 //
 // Author:       Daniel Winney (2019)
 // Affiliation:  Joint Physics Analysis Center (JPAC)
@@ -20,7 +18,7 @@
 // The two_body_state is the base object for defining a reaction in the
 // s-channel center of mass scatering frame.
 //
-// Two particles of mass m1 and m2 are defined with momenta opposite along the
+// Two particles of mass mV and mB are defined with momenta opposite along the
 // same axis such that the energy and momenta of both particles is entirely
 // determined by the center-of-mass energy, s, and the cosing of the angle
 // from the z-axis (define to be at theta = 0).
@@ -31,32 +29,50 @@ namespace jpacPhoto
   class two_body_state
   {
   private:
-    double m1, m2;
-    const std::string particle1, particle2;
+    double mV2; // Vector mass
+    double mB2; // Baryon mass (allowed to be float for N* or Δ)
 
   public:
     // Constructor
-    two_body_state(double xm1, double xm2, std::string name1, std::string name2)
-    : m1(xm1), m2(xm2), particle1(name1), particle2(name2)
+    two_body_state(double xm1, double xm2)
+    : mV2(xm1 * xm1), mB2(xm2 * xm2)
     {};
 
-    // Copy Constructor
-    two_body_state(const two_body_state & old)
-    : m1(old.m1), m2(old.m2),
-      particle1(old.particle1), particle2(old.particle2)
-    {};
+    inline double get_mV() { return sqrt(mV2); };
+    inline double get_mB() { return sqrt(mB2); };
 
-    double get_mass(std::string name);
-
-    inline void set_m1(double m)
+    // set masses independently
+    inline void set_mV(double _mV)
     {
-      m1 = m;
-    }
+      mV2 = _mV * _mV;
+    };
 
-    std::complex<double> momentum(std::string name, double s);
-    std::complex<double> energy(std::string name, double s);
+    inline void set_mB(double _mB)
+    {
+      mB2 = _mB * _mB;
+    };
 
-    std::complex<double> component(int i, std::string name, double s, double theta);
+    // Momenta
+    // V is always particle 1 in + z direction, 
+    inline std::complex<double> momentum(double s)
+    {
+      return sqrt( Kallen(xr * s, xr * mV2, xr * mB2)) / (2. * sqrt(xr * s));
+    };
+
+    // Energies
+    inline std::complex<double> energy_V(double s)
+    {
+      return (s + mV2 - mB2) / (2. * sqrt(xr * s));
+    };
+
+    inline std::complex<double> energy_B(double s)
+    {
+      return (s - mV2 + mB2) / (2. * sqrt(xr * s));
+    };
+
+    // Full 4-momenta 
+    std::complex<double> q(int mu, double s, double theta); // 4vector of vector, particle 1
+    std::complex<double> p(int mu, double s, double theta); // 4vector of baryon, particle 2
   };
 };
 

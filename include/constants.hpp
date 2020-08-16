@@ -82,6 +82,18 @@ namespace jpacPhoto
   const double fUpsilon2S = 0.16563;
   const double fUpsilon3S = 0.1431;
 
+  // Photon lab energy
+  inline double E_beam(double W)
+  {
+    return (W*W / mPro - mPro) / 2.;
+  };
+  
+  // Center of mass energy given beam energy
+  inline double W_cm(double egam)
+  {
+    return sqrt(mPro * (2. * egam + mPro));
+  };
+
 };
 // ---------------------------------------------------------------------------
 

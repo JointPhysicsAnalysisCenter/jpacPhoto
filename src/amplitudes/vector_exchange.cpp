@@ -251,9 +251,9 @@ std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam,
           if (std::abs(temp) < 0.0001) continue;
         
           temp *= metric[mu];
-          temp *= kinematics->initial.component(alpha, "beam", s, 0.);
-          temp *= kinematics->eps_gamma.component(beta, lam_gam, s, 0.);
-          temp *= kinematics->eps_vec.component(gamma, lam_vec, s, theta);
+          temp *= kinematics->initial->q(alpha, s, 0.);
+          temp *= kinematics->eps_gamma->component(beta, lam_gam, s, 0.);
+          temp *= kinematics->eps_vec->component(gamma, lam_vec, s, theta);
 
           result += temp;
         }
@@ -275,14 +275,14 @@ std::complex<double> jpacPhoto::vector_exchange::top_vertex(int mu, int lam_gam,
       // (k . q) eps_gamma^mu
       term1  = exchange_momenta(nu);
       term1 *= metric[nu];
-      term1 *= kinematics->initial.component(nu, "beam", s, 0.);
-      term1 *= kinematics->eps_gamma.component(mu, lam_gam, s, 0.);
+      term1 *= kinematics->initial->q(nu, s, 0.);
+      term1 *= kinematics->eps_gamma->component(mu, lam_gam, s, 0.);
 
       // (eps_gam . k) q^mu
-      term2  = kinematics->eps_gamma.component(nu, lam_gam, s, 0.);
+      term2  = kinematics->eps_gamma->component(nu, lam_gam, s, 0.);
       term2 *= metric[nu];
       term2 *= exchange_momenta(nu);
-      term2 *= kinematics->initial.component(mu, "beam", s, 0.);
+      term2 *= kinematics->initial->q(mu, s, 0.);
 
       result += term1 - term2;
     }
@@ -305,9 +305,9 @@ std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_t
     for (int j = 0; j < 4; j++)
     {
       std::complex<double> temp;
-      temp = kinematics->recoil.adjoint_component(i, lam_rec, s, theta + M_PI); // theta_rec = theta + pi
+      temp = kinematics->recoil->adjoint_component(i, lam_rec, s, theta + M_PI); // theta_rec = theta + pi
       temp *= gamma_matrices[mu][i][j];
-      temp *= kinematics->target.component(j, lam_targ, s, M_PI); // theta_targ = pi
+      temp *= kinematics->target->component(j, lam_targ, s, M_PI); // theta_targ = pi
 
       vector += temp;
     }
@@ -326,9 +326,9 @@ std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_t
       }
 
       std::complex<double> temp;
-      temp = kinematics->recoil.adjoint_component(i, lam_rec, s, theta + M_PI); // theta_rec = theta + pi
+      temp = kinematics->recoil->adjoint_component(i, lam_rec, s, theta + M_PI); // theta_rec = theta + pi
       temp *= sigma_q_ij;
-      temp *= kinematics->target.component(j, lam_targ, s, M_PI); // theta_targ = pi
+      temp *= kinematics->target->component(j, lam_targ, s, M_PI); // theta_targ = pi
 
       tensor += temp;
     }
@@ -343,8 +343,8 @@ std::complex<double> jpacPhoto::vector_exchange::bottom_vertex(int mu, int lam_t
 std::complex<double> jpacPhoto::vector_exchange::exchange_momenta(int mu)
 {
   std::complex<double> qGamma_mu, qA_mu;
-  qGamma_mu = kinematics->initial.component(mu, "beam", s, 0.);
-  qA_mu = kinematics->final.component(mu, kinematics->vector_particle, s, theta);
+  qGamma_mu = kinematics->initial->q(mu, s, 0.);
+  qA_mu = kinematics->final->q(mu, s, theta);
 
   return (qGamma_mu - qA_mu);
 };

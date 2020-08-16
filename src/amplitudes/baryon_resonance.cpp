@@ -27,8 +27,8 @@ std::complex<double> jpacPhoto::baryon_resonance::helicity_amplitude(std::vector
 // Ad-hoc threshold factor to kill the resonance at threshold
 double jpacPhoto::baryon_resonance::threshold_factor(double s, double beta)
 {
-  double result = pow((s - kinematics->sth) / s, beta);
-  result /= pow((mRes*mRes - kinematics->sth) / (mRes*mRes), beta);
+  double result = pow((s - kinematics->sth()) / s, beta);
+  result /= pow((mRes*mRes - kinematics->sth()) / (mRes*mRes), beta);
 
   return result;
 };
@@ -49,7 +49,7 @@ std::complex<double> jpacPhoto::baryon_resonance::photo_coupling(int lam_i, doub
   A_lam = sqrt(xr * A_lam);
 
   std::complex<double> result = sqrt(xr * s) * pi_bar / mRes;
-  result *= sqrt(xr * 8. * mPro * mRes / kinematics->initial.momentum("beam", s));
+  result *= sqrt(xr * 8. * mPro * mRes / kinematics->initial->momentum(s));
   result *= A_lam * a;
 
   // FACTPR PF 4 PI SOMETIMES FACTORED OUT
@@ -69,7 +69,7 @@ std::complex<double> jpacPhoto::baryon_resonance::hadronic_coupling(int lam_f, d
   g = sqrt(xr * g);
 
   std::complex<double> gpsi;
-  gpsi = g * pow(kinematics->final.momentum(kinematics->vector_particle, s), l_min);
+  gpsi = g * pow(kinematics->final->momentum(s), l_min);
 
   return gpsi;
 };

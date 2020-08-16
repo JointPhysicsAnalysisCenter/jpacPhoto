@@ -40,7 +40,7 @@ int main( int argc, char** argv )
 
     // X(6900)
     double mX = 6.900;
-    reaction_kinematics * kX = new reaction_kinematics(mX, "X(6900)");
+    reaction_kinematics * kX = new reaction_kinematics(mX);
 
     double gV_psi = 1.6E-3, gT_psi = 0.;
     double gX_psi = 5.03;
@@ -98,9 +98,9 @@ int main( int argc, char** argv )
         };
 
         std::array<std::vector<double>, 2> x_fx; 
-        if (xmin < amps[n]->kinematics->Wth)
+        if (xmin < amps[n]->kinematics->Wth())
         {
-            x_fx = vec_fill(N, F, amps[n]->kinematics->Wth + EPS, 9., true);
+            x_fx = vec_fill(N, F, amps[n]->kinematics->Wth() + EPS, 9., true);
 
             for (int j = 1; j <= 10; j++)
             {
