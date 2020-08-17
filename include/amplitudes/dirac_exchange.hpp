@@ -57,9 +57,6 @@ namespace jpacPhoto
     // Exchange nucleon mass
     double mEx, mEx2;
 
-      // Place to save fixed energies (and theta)
-    double s, t, theta;
-
     // couplings
     double gGam = 0., gVec = 0.;
 

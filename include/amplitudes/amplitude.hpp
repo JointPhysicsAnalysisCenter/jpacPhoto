@@ -26,6 +26,7 @@
 #include "Math/Functor.h"
 
 #include <string>
+#include <array>
 
 namespace jpacPhoto
 {
@@ -44,6 +45,9 @@ namespace jpacPhoto
 
     // Kinematics object for thresholds and etc.
     reaction_kinematics * kinematics;
+
+    // saved energies and angle 
+    double s, t, theta;
 
     // Some saveable string by which to identify the amplitude
     std::string identifier;
@@ -76,6 +80,15 @@ namespace jpacPhoto
     double beam_asymmetry(double s, double t);
 
     double parity_asymmetry(double s, double t);
+
+    // ---------------------------------------------------------------------------
+    // If helicity amplitudes have already been generated for a value of mV, s, t 
+    // store them
+    bool CACHED = false;
+    double cached_mVec = 0., cached_s = 0., cached_t = 0.;
+    std::array<std::complex<double>, 24> cached_helicity_amplitude;
+
+    void check_cache(double _s, double _t);
 
     // ---------------------------------------------------------------------------
     // Nparams error message

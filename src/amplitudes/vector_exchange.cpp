@@ -33,6 +33,8 @@ std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<
   int lam  = lam_gam - lam_vec;
   int lamp = (lam_targ - lam_rec) / 2.;
 
+  if (abs(lam) == 2) return 0.; // double flip forbidden!
+
   // Product of residues  
   std::complex<double> result;
   result  = top_residue(lam_gam, lam_vec);
@@ -67,7 +69,6 @@ std::complex<double> jpacPhoto::vector_exchange::helicity_amplitude(std::vector<
 // Photon - Axial - Vector
 std::complex<double> jpacPhoto::vector_exchange::top_residue(int lam_gam, int lam_vec)
 {
-  // TODO: Explicit phases in terms of lam_gam and lam_vec instead of difference
   int lam = lam_gam - lam_vec;
 
   std::complex<double> result;
@@ -83,19 +84,15 @@ std::complex<double> jpacPhoto::vector_exchange::top_residue(int lam_gam, int la
       result = sqrt(xr * t) / kinematics->mVec;
       break;
     }
-    case 2:
-    {
-      return gpGam * (t / kinematics->mVec2 - 1.);
-    }
     default:
     {
-      std::cout << "\nvector_exchange: invalid helicity flip lambda = " << lam << ". Quitting... \n";
-      exit(0);
+      std::cout << "\nvector_exchange: invalid helicity flip lambda = " << lam << "!\n";
+      return 0.;
     }
   }
 
   std::complex<double> q = (t - kinematics->mVec2) / sqrt(4. * t * xr);
-  return  result * q * gGam;
+  return  xi * double(lam_gam) * result * q * gGam;
 };
 
 // Nucleon - Nucleon - Vector
@@ -125,8 +122,8 @@ std::complex<double> jpacPhoto::vector_exchange::bottom_residue(int lam_targ, in
     }
     default:
     {
-      std::cout << "\nreggeon_exchange: invalid helicity flip lambda^prime = " << lamp << ". Quitting... \n";
-      exit(0);
+      std::cout << "\nreggeon_exchange: invalid helicity flip lambda^prime = " << lamp << "!\n";
+      return 0.;
     }
   }
 

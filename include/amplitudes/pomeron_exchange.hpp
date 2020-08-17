@@ -47,8 +47,6 @@ namespace jpacPhoto
     std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
 
   private:
-    // Fixed energies so as to not have to pass them around
-    double s, t, theta;
 
     bool DELTA = false; // Whether or not to use the helicity conserving model 
     double norm = 0., b0 = 0.; // Regge factor parameters: normalization and t-slope

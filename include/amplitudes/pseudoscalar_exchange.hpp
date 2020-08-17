@@ -64,8 +64,6 @@ namespace jpacPhoto
     std::complex<double> helicity_amplitude(std::vector<int> helicities, double xs, double xt);
 
   private:
-    // Place to save fixed energies (and theta)
-    double s, t, theta;
 
     // Whether to use fixed-spin propagator (false) or regge (true)
     bool REGGE;

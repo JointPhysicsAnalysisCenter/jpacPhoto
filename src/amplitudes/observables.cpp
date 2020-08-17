@@ -9,17 +9,45 @@
 #include "amplitudes/amplitude.hpp"
 
 // ---------------------------------------------------------------------------
+
+void jpacPhoto::amplitude::check_cache(double _s, double _t)
+{
+  // check if saved version its the one we want
+  if (  (abs(cached_s - _s) < 0.00001) && 
+        (abs(cached_t - _t) < 0.00001) &&
+         (abs(cached_mVec - kinematics->mVec) < 0.00001) // important to make sure the value of mVec hasnt chanced since last time
+     )
+  {
+    return; // do nothing
+  }
+  else // save a new set
+  {
+    for (int i = 0; i < 24; i++)
+    {
+      cached_helicity_amplitude[i] = helicity_amplitude(kinematics->helicities[i], _s, _t);
+    }
+
+    // update cache info
+    cached_mVec = kinematics->mVec; cached_s = _s; cached_t = _t;
+  }
+
+  return;
+};
+
+// ---------------------------------------------------------------------------
 // Square of the spin averaged amplitude squared
 double jpacPhoto::amplitude::probability_distribution(double s, double t)
 {
+  // Check we have the right amplitudes cached
+  check_cache(s, t);
+
   double sum = 0.;
   for (int i = 0; i < 24; i++)
   {
-    std::complex<double> amp_i = helicity_amplitude(kinematics->helicities[i], s, t);
+    std::complex<double> amp_i = cached_helicity_amplitude[i];
     sum += std::real(amp_i * conj(amp_i));
   }
 
-  sum /= 4.; // Average over initial state helicites
   return sum;
 };
 
@@ -34,6 +62,7 @@ double jpacPhoto::amplitude::differential_xsection(double s, double t)
   norm /= 64. * M_PI * s;
   norm /= real(pow(kinematics->initial->momentum(s), 2.));
   norm /= (2.56819E-6); // Convert from GeV^-2 -> nb
+  norm /= 4.; // Average over initial state helicites
 
   return norm * sum;
 };
@@ -62,18 +91,21 @@ double jpacPhoto::amplitude::integrated_xsection(double s)
 // Polarizatiopn asymmetry between beam and recoil proton
 double jpacPhoto::amplitude::K_LL(double s, double t)
 {
+  // Check we have the right amplitudes cached
+  check_cache(s, t);
+  
   double sigmapp = 0., sigmapm = 0.;
   for (int i = 0; i < 6; i++)
   {
     std::complex<double> squarepp, squarepm;
 
     // Amplitudes with lam_gam = + and lam_recoil = +
-    squarepp = helicity_amplitude(kinematics->helicities[2*i+1], s, t);
+    squarepp = cached_helicity_amplitude[2*i+1];
     squarepp *= conj(squarepp);
     sigmapp += real(squarepp);
 
     // Amplitudes with lam_gam = + and lam_recoil = -
-    squarepm = helicity_amplitude(kinematics->helicities[2*i], s, t);
+    squarepm = cached_helicity_amplitude[2*i];
     squarepm *= conj(squarepm);
     sigmapm += real(squarepm);
   }
@@ -85,18 +117,21 @@ double jpacPhoto::amplitude::K_LL(double s, double t)
 // Polarization asymmetry between beam and target proton
 double jpacPhoto::amplitude::A_LL(double s, double t)
 {
+  // Check we have the right amplitudes cached
+  check_cache(s, t);
+  
   double sigmapp = 0., sigmapm = 0.;
   for (int i = 0; i < 6; i++)
   {
     std::complex<double> squarepp, squarepm;
 
     // Amplitudes with lam_gam = + and lam_targ = +
-    squarepp = helicity_amplitude(kinematics->helicities[i+6], s, t);
+    squarepp = cached_helicity_amplitude[i+6];
     squarepp *= conj(squarepp);
     sigmapp += real(squarepp);
 
     // Amplitudes with lam_gam = + and lam_targ = -
-    squarepm = helicity_amplitude(kinematics->helicities[i], s, t);
+    squarepm = cached_helicity_amplitude[i];
     squarepm *= conj(squarepm);
     sigmapm += real(squarepm);
   }
@@ -110,8 +145,8 @@ std::complex<double> jpacPhoto::amplitude::SDME(int alpha, int lam, int lamp, do
 {
   if (alpha < 0 || alpha > 2 || std::abs(lam) > 1 || std::abs(lamp) > 1)
   {
-    std::cout << "\nError! Invalid parameter passed to SDME. Quitting...\n";
-    exit(1);
+    std::cout << "\nError! Invalid parameter passed to SDME. Returning 0!\n";
+    return 0.;
   };
 
   // Phase and whether to conjugate at the end
@@ -139,7 +174,6 @@ std::complex<double> jpacPhoto::amplitude::SDME(int alpha, int lam, int lamp, do
 
   // Normalization (sum over all amplitudes squared)
   double norm = probability_distribution(s, t);
-  norm *= norm;
 
   // These are the indexes of the amplitudes in reaction_kinematics that have
   // lambda_V = +1
@@ -157,9 +191,8 @@ std::complex<double> jpacPhoto::amplitude::SDME(int alpha, int lam, int lamp, do
     case 1:  { j = 0; break; }
     default:
     {
-     std::cout << "\nSDME: Invalid parameter. J/Psi helicity projection lamp = 0 or 1.";
-     std::cout << " Quitting... \n";
-     exit(1);
+     std::cout << "\nSDME: Invalid parameter. J/Psi helicity projection lamp = 0 or 1! Returning zero.";
+     return 0.;;
     }
   }
 
@@ -171,8 +204,8 @@ std::complex<double> jpacPhoto::amplitude::SDME(int alpha, int lam, int lamp, do
     (alpha == 0) ? (index = pos_iters[i]) : (index = neg_iters[i]);
 
     std::complex<double> amp_i, amp_j;
-    amp_i = helicity_amplitude(kinematics->helicities[index + k], s, t);
-    amp_j = helicity_amplitude(kinematics->helicities[pos_iters[i] + j], s, t);
+    amp_i = cached_helicity_amplitude[index + k];
+    amp_j = cached_helicity_amplitude[pos_iters[i] + j];
 
     (alpha == 2) ? (amp_j *= xi * double(kinematics->helicities[pos_iters[i] + j][0])) : (amp_j *= xr);
 

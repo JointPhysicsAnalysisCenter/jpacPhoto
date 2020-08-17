@@ -122,6 +122,19 @@ namespace jpacPhoto
       recoil    = new dirac_spinor(final);
     };
 
+   // deprecated constructor with a string identifier, no longer needed
+    reaction_kinematics(double mass, std::string id)
+    : mVec(mass), mVec2(mass * mass)
+    {
+      initial   = new two_body_state(0., mPro);
+      eps_gamma = new polarization_vector(initial);
+      target    = new dirac_spinor(initial);
+
+      final     = new two_body_state(mass, mPro);
+      eps_vec   = new polarization_vector(final);
+      recoil    = new dirac_spinor(final);
+    };
+
     // destructor
     ~reaction_kinematics()
     {
@@ -144,35 +157,39 @@ namespace jpacPhoto
     };
     
     // Helicity configurations
-    // Photon [0], Incoming Proton [1], Vector meson [2], Outgoing Proton [3]
+    // Photon [0], Incoming Proton [1], Vector meson [2], Outgoing Proton [3], hel_id [4]
     std::vector< std::vector<int> > helicities =
     {
     //  {  γ,  p,  V,  p'}
-        {  1, -1,  1, -1 }, // 0
-        {  1, -1,  1,  1 }, // 1
-        {  1, -1,  0, -1 }, // 2
-        {  1, -1,  0,  1 }, // 3
-        {  1, -1, -1, -1 }, // 4
-        {  1, -1, -1,  1 }, // 5
-        {  1,  1,  1, -1 }, // 6
-        {  1,  1,  1,  1 }, // 7
-        {  1,  1,  0, -1 }, // 8
-        {  1,  1,  0,  1 }, // 9
-        {  1,  1, -1, -1 }, // 10
-        {  1,  1, -1,  1 }, // 11
-        { -1, -1,  1, -1 }, // 12
-        { -1, -1,  1,  1 }, // 13
-        { -1, -1,  0, -1 }, // 14
-        { -1, -1,  0,  1 }, // 15
-        { -1, -1, -1, -1 }, // 16
-        { -1, -1, -1,  1 }, // 17
-        { -1,  1,  1, -1 }, // 18
-        { -1,  1,  1,  1 }, // 19
-        { -1,  1,  0, -1 }, // 20
-        { -1,  1,  0,  1 }, // 21
-        { -1,  1, -1, -1 }, // 22
-        { -1,  1, -1,  1 }, // 23
+        {  1, -1,  1, -1 ,  0},
+        {  1, -1,  1,  1 ,  1},
+        {  1, -1,  0, -1 ,  2},
+        {  1, -1,  0,  1 ,  3},
+        {  1, -1, -1, -1 ,  4},
+        {  1, -1, -1,  1 ,  5},
+        {  1,  1,  1, -1 ,  6},
+        {  1,  1,  1,  1 ,  7},
+        {  1,  1,  0, -1 ,  8},
+        {  1,  1,  0,  1 ,  9},
+        {  1,  1, -1, -1 , 10},
+        {  1,  1, -1,  1 , 11},
+        { -1, -1,  1, -1 , 12},
+        { -1, -1,  1,  1 , 13},
+        { -1, -1,  0, -1 , 14},
+        { -1, -1,  0,  1 , 15},
+        { -1, -1, -1, -1 , 16},
+        { -1, -1, -1,  1 , 17},
+        { -1,  1,  1, -1 , 18},
+        { -1,  1,  1,  1 , 19},
+        { -1,  1,  0, -1 , 20},
+        { -1,  1,  0,  1 , 21}, 
+        { -1,  1, -1, -1 , 22},
+        { -1,  1, -1,  1 , 23},
     };
+
+    //--------------------------------------------------------------------------
+    // Cached data members
+
   };
 };
 

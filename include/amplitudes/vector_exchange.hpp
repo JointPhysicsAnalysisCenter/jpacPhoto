@@ -67,8 +67,7 @@ namespace jpacPhoto
     std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t);
 
   private:
-    // Saved energies
-    double s, t, theta;
+
     double zt;
 
     // if using reggeized propagator
