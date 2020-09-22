@@ -8,40 +8,38 @@
 #include "amplitudes/primakoff_effect.hpp"
 
 // ---------------------------------------------------------------------------
-// Contract Lorentz indices
+// Differential cross-sections with all the flux factors
 double jpacPhoto::primakoff_effect::differential_xsection(double xs, double xt)
 {
     // update saved energies
     s = xs; t = xt; theta = kinematics->theta_s(xs, xt);
+    update_kinematics(); // calculate the other kinematics
 
     // Form factor
     F_0 = form_factor(t);
     
-    // Contract the Lorentz indices
-    double sum = 0.;
-    for (int mu = 0; mu < 4; mu++)
-    {
-        for (int nu = 0; nu < 4; nu++)
-        {
-            std::complex<double> temp;
-            temp  = top_tensor(mu, nu);
-            temp *= metric[mu] * metric[nu];
-            temp *= bottom_tensor(mu, nu);
+    // Amplitude depends on LT
+    // double result = 1.;
+    double result = amplitude_squared();
 
-            sum += real(temp);
-        }
-    }
+    // additional factors from nuclear tensor
+    result *= 16. * M_PI;
+    result *= Z * Z * 16. * mPro2 * mPro2 / (4. * M_PI);
+    result *= F_0 * F_0;
+    result /= (t - 4. * mPro2) * (t - 4. * mPro2);
+
+    // from photonic tensor
+    result *= (g / mX2) * (g / mX2);
 
     // photon propagator (squared)
-    sum *= e * e / (t * t);
+    result *= e * e / (t * t);
 
     // Normalization for dxs
-    double norm = 1.;
-    norm /= 64. * M_PI * s;
-    norm /= real(pow(kinematics->initial->momentum(s), 2.));
-    norm /= (2.56819E-6); // Convert from GeV^-2 -> nb
+    // result /= 64. * M_PI * s;
+    // result /= real(pow(kinematics->initial->momentum(s), 2.));
+    // result /= (2.56819E-6); // Convert from GeV^-2 -> nb
 
-    return norm * sum;
+    return result;
 };
 
 // ---------------------------------------------------------------------------
@@ -106,35 +104,30 @@ double jpacPhoto::primakoff_effect::form_factor(double x)
 };
 
 // ---------------------------------------------------------------------------
-// Top vertex
-std::complex<double> jpacPhoto::primakoff_effect::top_tensor(int mu, int nu)
+// Amplitude
+double jpacPhoto::primakoff_effect::amplitude_squared()
 {
-    std::complex<double> qq_term;
-    qq_term  = t * Q2 / pow(kinematics->mVec, 4.);
-    qq_term *= (1. - Q2 / kinematics->mVec2);
-    qq_term *= kinematics->initial->q(mu, s, 0.);
-    qq_term *= kinematics->initial->q(nu, s, 0.);
+    double result;
 
-    std::complex<double> g_term;
-    g_term  = (kinematics->mVec2 - Q2) * (kinematics->mVec2 + Q2) * (kinematics->mVec2 + Q2);
-    g_term -= 2. * t * (kinematics->mVec2 + Q2) * (kinematics->mVec2 + Q2);
-    g_term += t * t * (kinematics->mVec2 - Q2);
-    g_term *= Q2 / (4. * pow(kinematics->mVec, 6.));
-    g_term *= metric[mu];
-
-    return g * g * (g_term);
-};
-
-// Bottom vertex
-std::complex<double> jpacPhoto::primakoff_effect::bottom_tensor(int mu, int nu)
-{
-    std::complex<double> result;
-    result  = 16. * M_PI;
-    result *= kinematics->initial->p(mu, s, M_PI); + 0.5 * kinematics->initial->q(nu, s, 0.);
-    result *= kinematics->initial->p(nu, s, M_PI); + 0.5 * kinematics->initial->q(mu, s, 0.);
-    result *= Z * Z * 16. * mPro2 * mPro2 / (4. * M_PI);
-    result *= F_0 * F_0;
-    result /= (t - 4. * mPro2) * (t - 4. * mPro2);
+    switch (LT)
+    {
+        // Longitudinal photon
+        case 0: 
+        {
+            result = p*p * Q2 *nu*nu * sqrt(1. - cX*cX);
+            break;
+        };
+        // Transverse photon
+        case 1:
+        {
+            result  = mX2 * (3.*p*p + 4.*(Q2 + nu*nu) + p*p*(cX*cX - sX*sX));
+            result += 2. * p*p * (Q2 + nu*nu) * sX*sX;
+            result -= 8. * mX2 *p * sqrt(Q2 + nu*nu) * cX;
+            result *= Q2*Q2 / (4. *mX2);
+            break;
+        };
+        default: result = 0.;
+    }
 
     return result;
 };
