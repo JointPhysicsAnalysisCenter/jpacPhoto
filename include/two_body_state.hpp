@@ -34,22 +34,38 @@ namespace jpacPhoto
 
   public:
     // Constructor
-    two_body_state(double xm1, double xm2)
-    : mV2(xm1 * xm1), mB2(xm2 * xm2)
+    two_body_state(double _mV2, double _mB2)
+    : mV2(_mV2), mB2(_mB2)
     {};
 
-    inline double get_mV() { return sqrt(mV2); };
-    inline double get_mB() { return sqrt(mB2); };
-
-    // set masses independently
-    inline void set_mV(double _mV)
-    {
-      mV2 = _mV * _mV;
+    // return mass
+    inline double get_mV() 
+    { 
+      if (mV2 >= 0.) 
+      {
+        return sqrt(mV2);
+      }
+      else
+      {
+        return sqrt(-mV2);
+      }
     };
 
-    inline void set_mB(double _mB)
+    inline double get_mB() { return sqrt(mB2); };
+
+    // Return mass squared
+    inline double get_mV2() { return mV2; };
+    inline double get_mB2() { return mB2; };
+
+    // set masses independently
+    inline void set_mV2(double _mV2)
     {
-      mB2 = _mB * _mB;
+      mV2 = _mV2;
+    };
+
+    inline void set_mB2(double _mB2)
+    {
+      mB2 = _mB2;
     };
 
     // Momenta
