@@ -40,15 +40,15 @@ int main( int argc, char** argv )
 
     primakoff_effect U(kX, "^{238}U");
     U.set_params({92, 6.8054, 0.556, 3.2E-3});
-    U.set_Q2(Q2);
+    // U.set_Q2(Q2);
 
     primakoff_effect Yb(kX, "^{176}Yb");
     Yb.set_params({70, 6.3306, 0.486, 3.2E-3});
-    Yb.set_Q2(Q2);
+    // Yb.set_Q2(Q2);
 
     primakoff_effect Zn(kX, "^{70}Zn");
     Zn.set_params({30, 4.044, 0.583, 3.2E-3});
-    Zn.set_Q2(Q2);
+    // Zn.set_Q2(Q2);
    
 
     // ---------------------------------------------------------------------------

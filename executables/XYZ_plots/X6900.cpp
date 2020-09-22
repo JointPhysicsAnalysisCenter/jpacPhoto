@@ -40,7 +40,7 @@ int main( int argc, char** argv )
 
     // X(6900)
     double mX = 6.900;
-    reaction_kinematics * kX = new reaction_kinematics(mX);
+    reaction_kinematics * kX = new reaction_kinematics(mX*mX);
 
     double gV_psi = 1.6E-3, gT_psi = 0.;
     double gX_psi = 5.03;

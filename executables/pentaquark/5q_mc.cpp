@@ -25,7 +25,7 @@ int main()
     // ---------------------------------------------------------------------------
 
     // Set up Kinematics
-    reaction_kinematics * ptr = new reaction_kinematics(mJpsi);
+    reaction_kinematics * ptr = new reaction_kinematics(mJpsi*mJpsi);
 
     // ---------------------------------------------------------------------------
     // S - CHANNEL
