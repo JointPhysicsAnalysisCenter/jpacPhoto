@@ -38,21 +38,21 @@ int main( int argc, char** argv )
 
     // Uranium
     double mU = 221.6977;
-    reaction_kinematics * kU = new reaction_kinematics(mX*mX, mU*mU, Q2);
+    reaction_kinematics * kU = new reaction_kinematics(mX, mU, Q2);
 
     primakoff_effect U(kU, "^{238}U");
     U.set_params({92, 34.48, 3.07, 3.2E-3});
 
     // Tin
     double mSn = 115.3924;
-    reaction_kinematics * kSn = new reaction_kinematics(mX*mX, mSn*mSn, Q2);
+    reaction_kinematics * kSn = new reaction_kinematics(mX, mSn, Q2);
 
     primakoff_effect Sn(kSn, "^{124}Sn");
     Sn.set_params({50, 27.56, 2.73, 3.2E-3});
 
     // Zinc
     double mZn = 65.1202;
-    reaction_kinematics * kZn = new reaction_kinematics(mX*mX, mZn*mZn, Q2);
+    reaction_kinematics * kZn = new reaction_kinematics(mX, mZn, Q2);
 
     primakoff_effect Zn(kZn, "^{70}Zn");
     Zn.set_params({30, 22.34, 2.954, 3.2E-3});

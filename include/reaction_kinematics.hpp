@@ -51,11 +51,11 @@ namespace jpacPhoto
       recoil    = new dirac_spinor(final);
     };
 
-    // Constructor with a set vector mass mV2, 
+    // Constructor with a set vector mass mV, 
     // defaults to proton as baryon and real photon
     // string ID is deprecated but kept for backward compatibility
-    reaction_kinematics(double mV2, std::string id = "")
-    : mVec(sqrt(mV2)), mVec2(mV2),
+    reaction_kinematics(double mV, std::string id = "")
+    : mVec(mV), mVec2(mV*mV),
       mBar(mPro), mBar2(mPro2),
       Q2(0.)
     {
@@ -63,40 +63,40 @@ namespace jpacPhoto
       eps_gamma = new polarization_vector(initial);
       target    = new dirac_spinor(initial);
 
-      final     = new two_body_state(mV2, mPro2);
+      final     = new two_body_state(mV*mV, mPro2);
       eps_vec   = new polarization_vector(final);
       recoil    = new dirac_spinor(final);
     };
 
 
-    // Constructor with a set mV2 and baryon mass mB2
+    // Constructor with a set mV and baryon mass mB
     // defaults to real photon
-    reaction_kinematics(double mV2, double mB2)
-    : mVec(sqrt(mV2)), mVec2(mV2),
-      mBar(sqrt(mB2)), mBar2(mB2),
+    reaction_kinematics(double mV, double mB)
+    : mVec(mV), mVec2(mV*mV),
+      mBar(mB), mBar2(mB*mB),
       Q2(0.)
     {
-      initial   = new two_body_state(0., mB2);
+      initial   = new two_body_state(0., mB*mB);
       eps_gamma = new polarization_vector(initial);
       target    = new dirac_spinor(initial);
 
-      final     = new two_body_state(mV2, mB2);
+      final     = new two_body_state(mV*mV, mB*mB);
       eps_vec   = new polarization_vector(final);
       recoil    = new dirac_spinor(final);
     };
 
-    // Constructor with a set mV2 and baryon mass mB2
+    // Constructor with a set mV and baryon mass mB
     // and q2 > 0 for a virtual photon
-    reaction_kinematics(double mV2, double mB2, double q2)
-    : mVec(sqrt(mV2)), mVec2(mV2),
-      mBar(sqrt(mB2)), mBar2(mB2),
+    reaction_kinematics(double mV, double mB, double q2)
+    : mVec(mV), mVec2(mV*mV),
+      mBar(mB), mBar2(mB*mB),
       Q2(q2)
     {
-      initial   = new two_body_state(-q2, mB2);
+      initial   = new two_body_state(-q2, mB*mB);
       eps_gamma = new polarization_vector(initial);
       target    = new dirac_spinor(initial);
 
-      final     = new two_body_state(mV2, mB2);
+      final     = new two_body_state(mV*mV, mB*mB);
       eps_vec   = new polarization_vector(final);
       recoil    = new dirac_spinor(final);
     };
@@ -116,14 +116,14 @@ namespace jpacPhoto
     inline double sth(){ return Wth() * Wth(); }; // final state threshold
 
 
-    // Change the vector mass squared
-    inline void set_vectormass(double m2)
+    // Change the vector mass
+    inline void set_vectormass(double m)
     {
-      mVec  = sqrt(m2);
-      mVec2 = m2;
+      mVec  = m;
+      mVec2 = m*m;
 
       // also update the vector mass in two_body_state
-      final->set_mV2(m2);
+      final->set_mV2(m*m);
     };
     
     inline void set_mV2(double m2)

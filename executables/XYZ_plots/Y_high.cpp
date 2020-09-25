@@ -42,16 +42,16 @@ int main( int argc, char** argv )
     double A_HE = 0.16;
 
     // J/Psi
-    reaction_kinematics * kJpsi = new reaction_kinematics(mJpsi*mJpsi);
+    reaction_kinematics * kJpsi = new reaction_kinematics(mJpsi);
     double R_Jpsi = 1.;
 
     // Psi(2S)
-    reaction_kinematics * kPsi2s = new reaction_kinematics(mPsi2S*mPsi2S);
+    reaction_kinematics * kPsi2s = new reaction_kinematics(mPsi2S);
     double R_Psi2s = 0.55;
 
     // Y(4260)
     double mY = 4.220;
-    reaction_kinematics * kY = new reaction_kinematics(mY*mY);
+    reaction_kinematics * kY = new reaction_kinematics(mY);
     double R_Y = 1.55;
 
     // ---------------------------------------------------------------------------

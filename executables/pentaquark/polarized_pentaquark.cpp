@@ -70,7 +70,7 @@ int main( int argc, char** argv )
   // ---------------------------------------------------------------------------
 
   // Set up Kinematics
-  reaction_kinematics * ptr = new reaction_kinematics(mJpsi*mJpsi);
+  reaction_kinematics * ptr = new reaction_kinematics(mJpsi);
 
   // ---------------------------------------------------------------------------
   // S - CHANNEL
