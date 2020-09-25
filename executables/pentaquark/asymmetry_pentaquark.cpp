@@ -143,7 +143,7 @@ int main( int argc, char** argv )
     auto F = [&](double theta)
     {
       double t = ptr->t_man(W*W, theta * deg2rad);
-      return amps[n]->beam_asymmetry(W*W, t);
+      return amps[n]->beam_asymmetry_y(W*W, t);
     };
 
     std::array<std::vector<double>, 2> x_fx = vec_fill(N, F, 0., 90.);
