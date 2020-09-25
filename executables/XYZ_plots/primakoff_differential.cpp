@@ -1,9 +1,8 @@
-// ---------------------------------------------------------------------------
-// 
-// 
-// 
+// --------------------------------------------------------------------------- 
+// Prediction for X(3872) Primakoff production off a nuclear target
+//
 // USAGE:
-// make primakoff && ./primakoff
+// make primakoff_differential && ../bin/primakoff_differential
 //
 // OUTPUT:
 // x_primakoff.pdf
@@ -33,23 +32,30 @@ int main( int argc, char** argv )
     // ---------------------------------------------------------------------------
     // Amplitude
     // ---------------------------------------------------------------------------
-    double Q2 = 0.5;
+    double Q2 = 0.1;   // fixed Q2
+    double W  = 2.;    // Fixed energy per nucleon
+    double mX = 3.872; // Mass of produced X
 
-    double mX = 3.872;
-    reaction_kinematics * kX = new reaction_kinematics(mX);
+    // Uranium
+    double mU = 221.6977; // GeV
+    reaction_kinematics * kU = new reaction_kinematics(mX*mX, mU*mU, Q2);
 
-    primakoff_effect U(kX, "^{238}U");
-    U.set_params({92, 6.8054, 0.556, 3.2E-3});
-    // U.set_Q2(Q2);
+    primakoff_effect U(kU, "^{238}U");
+    U.set_params({92, 34.48, 3.07, 3.2E-3});
 
-    primakoff_effect Yb(kX, "^{176}Yb");
-    Yb.set_params({70, 6.3306, 0.486, 3.2E-3});
-    // Yb.set_Q2(Q2);
+    // Tin
+    double mSn = 115.3924; // GeV
+    reaction_kinematics * kSn = new reaction_kinematics(mX*mX, mSn*mSn, Q2);
 
-    primakoff_effect Zn(kX, "^{70}Zn");
-    Zn.set_params({30, 4.044, 0.583, 3.2E-3});
-    // Zn.set_Q2(Q2);
-   
+    primakoff_effect Sn(kSn, "^{124}Sn");
+    Sn.set_params({50, 27.56, 2.73, 3.2E-3});
+
+    // Zinc
+    double mZn = 65.1202; // GeV
+    reaction_kinematics * kZn = new reaction_kinematics(mX*mX, mZn*mZn, Q2);
+
+    primakoff_effect Zn(kZn, "^{70}Zn");
+    Zn.set_params({30, 22.34, 2.954, 3.2E-3});
 
     // ---------------------------------------------------------------------------
     // Plotting options
@@ -58,23 +64,24 @@ int main( int argc, char** argv )
     // which amps to plot
     std::vector<primakoff_effect*> amps;
     amps.push_back(&Zn);
-    amps.push_back(&Yb);
+    amps.push_back(&Sn);
     amps.push_back(&U);
 
-    int N = 50;
+    // number of nucleons 
+    double xNs[3] = {70., 124., 238.}; 
 
-    double  xmin = 7.5;
-    double  xmax = 30.;
+    int N = 200;
+    std::string filename = "primakoff_differential.pdf";
 
-    double  ymin = 2.E-2;
-    double  ymax = 70.;
+    // x - axis params
+    double  xmax = 0.1;
+    std::string xlabel = "#it{-t}   [GeV^{2}]";
 
-    // double  ymin = 1.E-2;
-    // double  ymax = 10.;
-
-    std::string filename = "primakoff_0.5.pdf";
-    std::string ylabel  = "#it{#sigma(#gamma N #rightarrow X N)}   [nb]";
-
+    // y - axis params
+    double  ymin = 2.E-5;
+    double  ymax = 2.E4;
+    std::string ylabel  = "#it{d#sigma_{L} /dt} (#gamma* A #rightarrow X A)   [nb GeV^{-2}]";
+ 
 
     // ---------------------------------------------------------------------------
     // You shouldnt need to change anything below this line
@@ -88,44 +95,37 @@ int main( int argc, char** argv )
     for (int n = 0; n < amps.size(); n++)
     {
         std::cout << std::endl << "Printing amplitude: " << amps[n]->identifier << "\n";
-
-        auto F = [&](double x)
+        
+        auto F = [&](double t)
         {
-            return amps[n]->integrated_xsection(x*x);
+            double s = W * W * xNs[n] * xNs[n];
+            return amps[n]->differential_xsection(s, -t);
         };
 
         std::array<std::vector<double>, 2> x_fx; 
-        if (xmin < amps[n]->kinematics->Wth())
-        {
-            x_fx = vec_fill(N, F, amps[n]->kinematics->Wth(), xmax, true);
 
-        }
-        else
-        {
-            x_fx = vec_fill(N, F, xmin, xmax, true);
-        }
+        x_fx = vec_fill(N, F, 4.43E-3, xmax, true);
 
         plotter->AddEntry(x_fx[0], x_fx[1], amps[n]->identifier);
     }
 
-    plotter->SetXaxis(ROOT_italics("W_{#gammaN}") + "  [GeV^{2}]", xmin, xmax);
-
       // Add a header to legend to specify the fixed energy
     std::ostringstream streamObj;
-    streamObj << std::setprecision(4) << Q2;
-    plotter->SetLegend(0.2, 0.76, "Q^{2} = " + streamObj.str() + " GeV^{2}");
+    streamObj << std::setprecision(4) << "Q^{2} = " << Q2 << " GeV^{2} \n";
+    std::string header = streamObj.str();
+    plotter->SetLegend(0.72, 0.6, header);
 
-    plotter->SetYaxis(ylabel, ymin, ymax);
-    plotter->SetYaxis(ylabel);
-    
-
+    // Set up axes
+    plotter->SetXaxis(xlabel, 0., xmax);
+    plotter->SetYaxis(ylabel, ymin, ymax);    
     plotter->SetYlogscale(true);
 
     // Output to file
     plotter->Plot(filename);
 
+    // Cleanup
     delete plotter;
-    delete kX;
+    delete kU, kSn, kZn;
 
     return 1.;
 };
