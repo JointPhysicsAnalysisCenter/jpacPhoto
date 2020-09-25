@@ -32,16 +32,15 @@ namespace jpacPhoto
             calculate_norm();
         };
 
-        inline void set_Q2(int _LT, double _Q2)
+        inline void set_LT(int _LT)
         {
             if (LT > 1 || LT < 0)
             {
-                std::cout << "error! invalid parameter in set_Q2(). \n";
+                std::cout << "error! invalid parameter in set_LT(). \n";
                 std::cout << "LT = 0 for longitudinal and 1 for transverse photon.\n";
             };
 
             LT = _LT;
-            Q2 = _Q2;
         };
 
         // individual helicity amplitudes not supported but need to provide definition for virtual class.
@@ -55,16 +54,6 @@ namespace jpacPhoto
         double differential_xsection(double s, double t);
         double integrated_xsection(double s);
 
-        // Fermi model nuclear charge distribution
-        inline double charge_distribution(double r)
-        {
-            return 1. / ( 1. + exp((r - R) / a) );
-        };
-
-        // Normalized fourier transform of the above charge_distributions 
-        double form_factor(double x);
-        double F_0;
-
         private:
 
         // Parameters
@@ -73,40 +62,46 @@ namespace jpacPhoto
         double R     = 0.;  // radius parameter
         double a     = 0.;  // skin thickness parameter
         double g     = 0.;  // X -> gamma gamma* coupling
-        double rho_0 = 0.;  // normalizaton
-        double Q2    = 0.;  // Q^2 > 0 of the external photon
+
+        // Fermi model nuclear charge distribution
+        inline double charge_distribution(double r)
+        {
+            return 1. / ( 1. + exp((r - R) / a) );
+        };
+
+        // Normalized fourier transform of the above charge_distributions 
+        double form_factor(double x);
+        double F_0; // Form factor at energy t
 
         // Calculate the normalization with above parameters
         void calculate_norm();     
+        double rho_0 = 0.;  // normalizaton
 
         // Kinematic quantities   
         double mX2 = kinematics->mVec2;
-        double nu, cX, sX, p;
+        double mA2 = kinematics->mBar2;
+        double Q2  = kinematics->Q2;
+
+        double nu, cX, sX, pX;
         inline void update_kinematics()
         {
             // lab frame momentum transfer
-            nu = (s - mPro2 + Q2) / (2. * mPro);
+            nu = (s - mA2 + Q2) / (2. * sqrt(mA2));
 
             // Momentum of the X
-            p  = sqrt(t*t + 4.*mPro*t*nu + 4.*mPro2*(nu*nu - mX2));
-            p /= 2. * mPro;
+            pX  = sqrt(t*t + 4.*sqrt(mA2)*t*nu + 4.*mA2*(nu*nu - mX2));
+            pX /= 2. * sqrt(mA2);
 
             // Cosine of scattering angle of the X in the lab frame
-            cX  = t + Q2 - mX2 + 2.*sqrt(p*p + mX2);
-            cX /= 2. * p * sqrt(nu*nu + Q2);
+            cX  = t + Q2 - mX2 + 2.*nu*sqrt(pX*pX + mX2);
+            cX /= 2. * pX * sqrt(nu*nu + Q2);
 
             // Sine of the above 
-            sX  = sqrt(1. - cX * cX);
+            sX = sin(TMath::ACos(cX));
         };
 
         // Spin averaged amplitude squared
         double amplitude_squared();
-
-        // Top tensor (spin averaged tensor of X -> gamma gamma* interaction)
-        std::complex<double> top_tensor(int mu, int nu);
-
-        // Hadronic bottom tensor (gamma* -> N Nbar)
-        std::complex<double> bottom_tensor(int mu, int nu);       
     };
 };
 

@@ -18,26 +18,24 @@ double jpacPhoto::primakoff_effect::differential_xsection(double xs, double xt)
     // Form factor
     F_0 = form_factor(t);
     
+    // output
+    double result;
+
+    // Additional factors
+    result  = e / t; // photon progagator
+    result *= Z * F_0; // bottom vertex
+    result *= 8. * mA2 / (t - 4. * mA2); 
+    result *= g / mX2; // from top vertex
+    // result *= e;
+    result *= result; //squared
+
     // Amplitude depends on LT
-    // double result = 1.;
-    double result = amplitude_squared();
+    result *= amplitude_squared();
 
-    // additional factors from nuclear tensor
-    result *= 16. * M_PI;
-    result *= Z * Z * 16. * mPro2 * mPro2 / (4. * M_PI);
-    result *= F_0 * F_0;
-    result /= (t - 4. * mPro2) * (t - 4. * mPro2);
-
-    // from photonic tensor
-    result *= (g / mX2) * (g / mX2);
-
-    // photon propagator (squared)
-    result *= e * e / (t * t);
-
-    // Normalization for dxs
-    // result /= 64. * M_PI * s;
-    // result /= real(pow(kinematics->initial->momentum(s), 2.));
-    // result /= (2.56819E-6); // Convert from GeV^-2 -> nb
+    // Flux factor
+    result /= 4.; 
+    result /= 32. * M_PI * (nu*nu + Q2);
+    result /= (2.56819E-6); // Convert from GeV^-2 -> nb
 
     return result;
 };
@@ -57,7 +55,7 @@ double jpacPhoto::primakoff_effect::integrated_xsection(double s)
   ig.SetFunction(wF);
 
   double t_min = kinematics->t_man(s, 0.);
-  double t_max = kinematics->t_man(s, M_PI);
+  double t_max = kinematics->t_man(s, 2. * deg2rad); // Fall off is extremely fast in t so only integrate over that little bit
 
   return ig.Integral(t_max, t_min);
 };
@@ -86,11 +84,11 @@ void jpacPhoto::primakoff_effect::calculate_norm()
 double jpacPhoto::primakoff_effect::form_factor(double x)
 {
     // momentum in the t channel
-    double q = sqrt(x * (x - 4. * mPro2)) / (2. * mPro);
+    double q = sqrt(x * (x - 4. * mA2)) / (2. * sqrt(mA2));
 
     auto dF = [&] (double r)
     {
-        return r * r * sin(q * r) * charge_distribution(r);
+        return r * sin(q * r) * charge_distribution(r);
     };
 
     ROOT::Math::GSLIntegrator ig(   ROOT::Math::IntegrationOneDim::kADAPTIVE,
@@ -114,15 +112,15 @@ double jpacPhoto::primakoff_effect::amplitude_squared()
         // Longitudinal photon
         case 0: 
         {
-            result = p*p * Q2 *nu*nu * sqrt(1. - cX*cX);
+            result = pX*pX * Q2 *nu*nu * sX ;
             break;
         };
         // Transverse photon
         case 1:
         {
-            result  = mX2 * (3.*p*p + 4.*(Q2 + nu*nu) + p*p*(cX*cX - sX*sX));
-            result += 2. * p*p * (Q2 + nu*nu) * sX*sX;
-            result -= 8. * mX2 *p * sqrt(Q2 + nu*nu) * cX;
+            result  = mX2 * (3.*pX*pX + 4.*(Q2 + nu*nu) + pX*pX*(cX*cX - sX*sX));
+            result += 2. * pX*pX * (Q2 + nu*nu) * sX*sX;
+            result -= 8. * mX2 *pX * sqrt(Q2 + nu*nu) * cX;
             result *= Q2*Q2 / (4. *mX2);
             break;
         };
