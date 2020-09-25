@@ -53,7 +53,8 @@ namespace jpacPhoto
 
     // Constructor with a set vector mass mV2, 
     // defaults to proton as baryon and real photon
-    reaction_kinematics(double mV2)
+    // string ID is deprecated but kept for backward compatibility
+    reaction_kinematics(double mV2, std::string id = "")
     : mVec(sqrt(mV2)), mVec2(mV2),
       mBar(mPro), mBar2(mPro2),
       Q2(0.)
@@ -66,6 +67,7 @@ namespace jpacPhoto
       eps_vec   = new polarization_vector(final);
       recoil    = new dirac_spinor(final);
     };
+
 
     // Constructor with a set mV2 and baryon mass mB2
     // defaults to real photon
@@ -115,6 +117,15 @@ namespace jpacPhoto
 
 
     // Change the vector mass squared
+    inline void set_vectormass(double m2)
+    {
+      mVec  = sqrt(m2);
+      mVec2 = m2;
+
+      // also update the vector mass in two_body_state
+      final->set_mV2(m2);
+    };
+    
     inline void set_mV2(double m2)
     {
       mVec  = sqrt(m2);

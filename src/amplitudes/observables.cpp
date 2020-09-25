@@ -15,7 +15,7 @@ void jpacPhoto::amplitude::check_cache(double _s, double _t)
   // check if saved version its the one we want
   if (  (abs(cached_s - _s) < 0.00001) && 
         (abs(cached_t - _t) < 0.00001) &&
-         (abs(cached_mVec - kinematics->mVec) < 0.00001) // important to make sure the value of mVec hasnt chanced since last time
+         (abs(cached_mVec2 - kinematics->mVec2) < 0.00001) // important to make sure the value of mVec hasnt chanced since last time
      )
   {
     return; // do nothing
@@ -28,7 +28,7 @@ void jpacPhoto::amplitude::check_cache(double _s, double _t)
     }
 
     // update cache info
-    cached_mVec = kinematics->mVec; cached_s = _s; cached_t = _t;
+    cached_mVec2 = kinematics->mVec2; cached_s = _s; cached_t = _t;
   }
 
   return;

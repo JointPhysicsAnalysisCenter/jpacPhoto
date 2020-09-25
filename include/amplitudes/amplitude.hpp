@@ -53,6 +53,7 @@ namespace jpacPhoto
     std::string identifier;
 
     // How the calculate the helicity amplitude
+    // Must be given a specific implementation in a user derived class
     virtual std::complex<double> helicity_amplitude(std::vector<int> helicities, double s, double t) = 0;
 
     // ---------------------------------------------------------------------------
@@ -69,24 +70,24 @@ namespace jpacPhoto
     double integrated_xsection(double s);
 
     // Spin asymmetries
-    double K_LL(double s, double t);
-
-    double A_LL(double s, double t);
+    double A_LL(double s, double t); // Beam and target
+    double K_LL(double s, double t); // Beam and recoil
 
     // Spin density matrix elements
     std::complex<double> SDME(int alpha, int lam, int lamp, double s, double t);
 
-    // Asymmetries
-    double beam_asymmetry_y(double s, double t);
-    double beam_asymmetry_4pi(double s, double t);
+    // Beam Asymmetries
+    double beam_asymmetry_y(double s, double t);    // Along the y direction
+    double beam_asymmetry_4pi(double s, double t);  // integrated along phi
 
+    // Parity asymmetry
     double parity_asymmetry(double s, double t);
 
     // ---------------------------------------------------------------------------
     // If helicity amplitudes have already been generated for a value of mV, s, t 
     // store them
     bool CACHED = false;
-    double cached_mVec = 0., cached_s = 0., cached_t = 0.;
+    double cached_mVec2 = 0., cached_s = 0., cached_t = 0.;
     std::array<std::complex<double>, 24> cached_helicity_amplitude;
 
     void check_cache(double _s, double _t);
@@ -102,6 +103,49 @@ namespace jpacPhoto
       }
     }
 
+    // ---------------------------------------------------------------------------
+    // Aliases for the above observables with option to change the produced meson mass
+    inline double probability_distribution(double M2, double s, double t)
+    {
+      kinematics->set_mV2(M2);
+      return probability_distribution(s, t);
+    };
+
+    inline double differential_xsection(double M2, double s, double t)
+    {
+      kinematics->set_mV2(M2);
+      return differential_xsection(s, t);
+    };
+
+    inline double integrated_xsection(double M2, double s)
+    {
+      kinematics->set_mV2(M2);
+      return integrated_xsection(s);
+    };
+
+    inline std::complex<double> SDME(int alpha, int lam, int lamp, double M2, double s, double t)
+    {
+      kinematics->set_mV2(M2);
+      return SDME(alpha, lam, lamp, s, t);
+    };
+
+    inline double beam_asymmetry_y(double M2, double s, double t)
+    {
+      kinematics->set_mV2(M2);
+      return beam_asymmetry_y(s, t);
+    };
+
+    inline double beam_asymmetry_4pi(double M2, double s, double t)
+    {
+      kinematics->set_mV2(M2);
+      return beam_asymmetry_4pi(s, t);
+    };
+
+    inline double parity_asymmetry(double M2, double s, double t)
+    {
+      kinematics->set_mV2(M2);
+      return parity_asymmetry(s, t);
+    };
   };
 };
 
