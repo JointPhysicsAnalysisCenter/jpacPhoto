@@ -72,36 +72,47 @@ namespace jpacPhoto
         // Normalized fourier transform of the above charge_distributions 
         double form_factor(double x);
         double F_0; // Form factor at energy t
-
-        // Calculate the normalization with above parameters
+        
         void calculate_norm();     
         double rho_0 = 0.;  // normalizaton
+        inline double W_00()
+        {
+            return 64. * Z*Z * mA2 * mA2 * mA2 * F_0 * F_0 / ((t - 4.*mA2) * (t - 4.*mA2));
+        };
 
         // Kinematic quantities   
-        double mX2 = kinematics->mVec2;
-        double mA2 = kinematics->mBar2;
-        double Q2  = kinematics->Q2;
+        long double mX2 = kinematics->mVec2;
+        long double mA2 = kinematics->mBar2;
+        long double Q2  = kinematics->Q2;
 
-        double nu, cX, sX, pX;
+        long double cX, sX2;
+        long double pGam, pX;
+        long double nu, EX;
         inline void update_kinematics()
         {
             // lab frame momentum transfer
             nu = (s - mA2 + Q2) / (2. * sqrt(mA2));
 
-            // Momentum of the X
+            // Momentum of photon
+            pGam = sqrt(nu*nu + Q2);
+
+            // // Momentum of the X
             pX  = sqrt(t*t + 4.*sqrt(mA2)*t*nu + 4.*mA2*(nu*nu - mX2));
             pX /= 2. * sqrt(mA2);
 
-            // Cosine of scattering angle of the X in the lab frame
-            cX  = t + Q2 - mX2 + 2.*nu*sqrt(pX*pX + mX2);
-            cX /= 2. * pX * sqrt(nu*nu + Q2);
+            // Energy of the X
+            EX = sqrt(pX*pX + mX2);
 
-            // Sine of the above 
-            sX = sin(TMath::ACos(cX));
+            // Cosine of scattering angle of the X in the lab frame
+            cX  = t + Q2 - mX2 + 2.*nu*EX;
+            cX /= 2. * pX * pGam;
+
+            // // Sine of the above 
+            sX2 = 1. - cX * cX;
         };
 
-        // Spin averaged amplitude squared
-        double amplitude_squared();
+        // Spin summed amplitude squared
+        long double amplitude_squared();
     };
 };
 

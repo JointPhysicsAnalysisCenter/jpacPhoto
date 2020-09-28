@@ -12,30 +12,24 @@
 double jpacPhoto::primakoff_effect::differential_xsection(double xs, double xt)
 {
     // update saved energies
-    s = xs; t = xt; theta = kinematics->theta_s(xs, xt);
+    s = xs; t = xt;
     update_kinematics(); // calculate the other kinematics
 
     // Form factor
     F_0 = form_factor(t);
     
     // output
-    double result;
-
-    // Additional factors
-    result  = e / t; // photon progagator
-    result *= Z * F_0; // bottom vertex
-    result *= 8. * mA2 / (t - 4. * mA2); 
-    result *= g / mX2; // from top vertex
-    // result *= e;
-    result *= result; //squared
+    long double result = 1.;
+    result  = M_ALPHA * g*g;
+    result /= 8. * sqrt(mA2) * mX2 * mX2 * pGam * t*t;
+    result /= (2. * sqrt(mA2) * nu - Q2);
+    result *= W_00();
 
     // Amplitude depends on LT
     result *= amplitude_squared();
-
-    // Flux factor
-    result /= 4.; 
-    result /= 32. * M_PI * (nu*nu + Q2);
-    result /= (2.56819E-6); // Convert from GeV^-2 -> nb
+    
+    // Convert from GeV^-2 -> nb
+    result /= (2.56819E-6); 
 
     return result;
 };
@@ -55,7 +49,7 @@ double jpacPhoto::primakoff_effect::integrated_xsection(double s)
   ig.SetFunction(wF);
 
   double t_min = kinematics->t_man(s, 0.);
-  double t_max = kinematics->t_man(s, 2. * deg2rad); // Fall off is extremely fast in t so only integrate over that little bit
+  double t_max = kinematics->t_man(s, 1. * deg2rad); // Fall off is extremely fast in t so only integrate over that little bit
 
   return ig.Integral(t_max, t_min);
 };
@@ -103,25 +97,33 @@ double jpacPhoto::primakoff_effect::form_factor(double x)
 
 // ---------------------------------------------------------------------------
 // Amplitude
-double jpacPhoto::primakoff_effect::amplitude_squared()
+long double jpacPhoto::primakoff_effect::amplitude_squared()
 {
-    double result;
+    long double result;
 
     switch (LT)
     {
         // Longitudinal photon
         case 0: 
         {
-            result = pX*pX * Q2 *nu*nu * sX ;
+            result = pX*pX * Q2 * EX*EX *  sX2;
             break;
         };
         // Transverse photon
         case 1:
         {
-            result  = mX2 * (3.*pX*pX + 4.*(Q2 + nu*nu) + pX*pX*(cX*cX - sX*sX));
-            result += 2. * pX*pX * (Q2 + nu*nu) * sX*sX;
-            result -= 8. * mX2 *pX * sqrt(Q2 + nu*nu) * cX;
-            result *= Q2*Q2 / (4. *mX2);
+            double coshalf2 = (1. + cX) / 2.;
+            double sinhalf2 = (1. - cX) / 2.;
+
+            double symC = pX*pGam*(pX + pGam) + EX*nu*(pGam-pX) - 2.*pX*pGam*pGam*cX;
+            double symS = pX*pGam*(pX - pGam) + EX*nu*(pGam+pX) - 2.*pX*pGam*pGam*cX;
+
+            double temp = pow(pGam*(nu*(mX2+2.*pX*pX) - 2.*EX*pX*pGam*cX), 2.) / (2. * mX2);
+
+            result  = pow(coshalf2 * symC, 2.);
+            result += pow(sinhalf2 * symS, 2.);
+            result += temp * sX2;
+
             break;
         };
         default: result = 0.;
