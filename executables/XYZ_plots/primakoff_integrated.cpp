@@ -33,7 +33,7 @@ int main( int argc, char** argv )
     // ---------------------------------------------------------------------------
     // Amplitude
     // ---------------------------------------------------------------------------
-    double Q2 = 0.1;
+    double Q2 = 0.3;
     double mX = 3.872;
 
     // Uranium
@@ -77,11 +77,10 @@ int main( int argc, char** argv )
     std::string xlabel  = "#it{W_{#gammaN}}    [GeV]";
 
     // y - axis params
-    double  ymin = 2.E-1;
-    double  ymax = 2.E5;
-    std::string ylabel  = "#it{#sigma_{L} (#gamma* A #rightarrow X A)}     [nb]";
-
- 
+    double  ymin = 2.E-5;
+    double  ymax = 7.;
+    std::string ylabel  = "#it{#sigma (#gamma* A #rightarrow X A)}     [nb]";
+    bool print_to_cmd = true;
 
     // ---------------------------------------------------------------------------
     // You shouldnt need to change anything below this line
@@ -93,10 +92,8 @@ int main( int argc, char** argv )
     // ---------------------------------------------------------------------------
     // Print the desired observable for each amplitude
     for (int n = 0; n < amps.size(); n++)
-    {
-        std::cout << std::endl << "Printing amplitude: " << amps[n]->identifier << "\n";
-        
-        double Wth = (amps[n]->kinematics->Wth() + EPS) / xNs[n];
+    {     
+        double xmin = (amps[n]->kinematics->Wth() + EPS) / xNs[n];
 
         auto F = [&](double x)
         {
@@ -104,17 +101,23 @@ int main( int argc, char** argv )
             return amps[n]->integrated_xsection(x*x);
         };
 
-        std::array<std::vector<double>, 2> x_fx; 
-        x_fx = vec_fill(N, F, Wth, xmax, true);
+        std::array<std::vector<double>, 2> x_fx, x_fx2; 
 
+        std::cout << std::endl << "Printing longitudinal xsection: " << amps[n]->identifier << "\n";
+        x_fx = vec_fill(N, F, xmin, xmax, print_to_cmd);
         plotter->AddEntry(x_fx[0], x_fx[1], amps[n]->identifier);
+
+        amps[n]->set_LT(1);
+        std::cout << std::endl << "Printing transverse xsection: " << amps[n]->identifier << "\n";
+        x_fx2 = vec_fill  (N, F, xmin, xmax, print_to_cmd);
+        plotter->AddDashedEntry(x_fx2[0], x_fx2[1]);
     }
 
       // Add a header to legend to specify the fixed Q2
     std::ostringstream streamObj;
     streamObj << std::setprecision(4) << "Q^{2} = " << Q2 << " GeV^{2}";
     std::string header = streamObj.str();
-    plotter->SetLegend(0.2, 0.66, header);
+    plotter->SetLegend(0.2, 0.74, header);
 
     // Set up axes
     plotter->SetXaxis(xlabel, kZn->Wth() / xNs[0], xmax);

@@ -32,7 +32,7 @@ int main( int argc, char** argv )
     // ---------------------------------------------------------------------------
     // Amplitude
     // ---------------------------------------------------------------------------
-    double Q2 = 0.1;   // fixed Q2
+    double Q2 = 0.3;   // fixed Q2
     double W  = 2.;    // Fixed energy per nucleon
     double mX = 3.872; // Mass of produced X
 
@@ -70,7 +70,7 @@ int main( int argc, char** argv )
     // number of nucleons 
     double xNs[3] = {70., 124., 238.}; 
 
-    int N = 200;
+    int N = 400;
     std::string filename = "primakoff_differential.pdf";
 
     // x - axis params
@@ -78,10 +78,11 @@ int main( int argc, char** argv )
     std::string xlabel = "#it{-t}   [GeV^{2}]";
 
     // y - axis params
-    double  ymin = 2.E-5;
-    double  ymax = 2.E4;
-    std::string ylabel  = "#it{d#sigma_{L} /dt} (#gamma* A #rightarrow X A)   [nb GeV^{-2}]";
- 
+    double  ymin = 2.E-6;
+    double  ymax = 80.;
+
+    std::string ylabel  = "#it{d#sigma/dt} (#gamma* A #rightarrow X A)   [nb GeV^{-2}]";
+    bool print_to_cmd = true;
 
     // ---------------------------------------------------------------------------
     // You shouldnt need to change anything below this line
@@ -94,26 +95,31 @@ int main( int argc, char** argv )
     // Print the desired observable for each amplitude
     for (int n = 0; n < amps.size(); n++)
     {
-        std::cout << std::endl << "Printing amplitude: " << amps[n]->identifier << "\n";
-        
+        double s = W * W * xNs[n] * xNs[n];
+        double xmin = -amps[n]->kinematics->t_man(s, 0.);
+
         auto F = [&](double t)
         {
-            double s = W * W * xNs[n] * xNs[n];
             return amps[n]->differential_xsection(s, -t);
         };
 
-        std::array<std::vector<double>, 2> x_fx; 
+        std::array<std::vector<double>, 2> x_fx, x_fx2; 
 
-        x_fx = vec_fill(N, F, 4.43E-3, xmax, true);
-
+        std::cout << std::endl << "Printing longitudinal xsection: " << amps[n]->identifier << "\n";
+        x_fx = vec_fill(N, F, xmin, xmax, print_to_cmd);
         plotter->AddEntry(x_fx[0], x_fx[1], amps[n]->identifier);
+
+        std::cout << std::endl << "Printing tranverse xsection: " << amps[n]->identifier << "\n";
+        amps[n]->set_LT(1);
+        x_fx2 = vec_fill  (N, F, xmin, xmax, print_to_cmd);
+        plotter->AddDashedEntry(x_fx2[0], x_fx2[1]);
     }
 
-      // Add a header to legend to specify the fixed energy
+    // Add a header to legend to specify the fixed energy
     std::ostringstream streamObj;
-    streamObj << std::setprecision(4) << "Q^{2} = " << Q2 << " GeV^{2} \n";
+    streamObj << std::setprecision(4) << "Q^{2} = " << Q2 << " GeV^{2},  W_{#gammaN} = " << W << " GeV";
     std::string header = streamObj.str();
-    plotter->SetLegend(0.72, 0.6, header);
+    plotter->SetLegend(0.52, 0.6, header);
 
     // Set up axes
     plotter->SetXaxis(xlabel, 0., xmax);
@@ -126,6 +132,5 @@ int main( int argc, char** argv )
     // Cleanup
     delete plotter;
     delete kU, kSn, kZn;
-
     return 1.;
 };
