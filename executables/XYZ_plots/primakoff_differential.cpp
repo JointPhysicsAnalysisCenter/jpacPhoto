@@ -32,7 +32,7 @@ int main( int argc, char** argv )
     // ---------------------------------------------------------------------------
     // Amplitude
     // ---------------------------------------------------------------------------
-    double Q2 = 0.3;   // fixed Q2
+    double Q2 = 0.5;   // fixed Q2
     double W  = 2.;    // Fixed energy per nucleon
     double mX = 3.872; // Mass of produced X
 
@@ -79,7 +79,7 @@ int main( int argc, char** argv )
 
     // y - axis params
     double  ymin = 2.E-6;
-    double  ymax = 80.;
+    double  ymax = 100.;
 
     std::string ylabel  = "#it{d#sigma/dt} (#gamma* A #rightarrow X A)   [nb GeV^{-2}]";
     bool print_to_cmd = true;
