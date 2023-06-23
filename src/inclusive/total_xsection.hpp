@@ -60,7 +60,9 @@ namespace jpacPhoto
         // Just need to define how to evaluate the cross-section
         // We may allow an additional variable q2 to consider virtuality effects 
         virtual double evaluate(double s, double q2) = 0;
-        inline  double evaluate(double s){ return evaluate(s, 0); };
+
+        // With no specified q2 we default to the on-shell mass of the beam
+        inline  double evaluate(double s){ return evaluate(s, _mB*_mB); };
 
         // Mass of beam and target
         double _mB = 0, _mT = 0;
