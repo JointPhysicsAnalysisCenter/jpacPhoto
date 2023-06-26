@@ -38,8 +38,7 @@ namespace jpacPhoto
             // If F_1 requested, import R values
             if (x == 1)
             {
-                auto Rs = import_data<2>("/data/other/R_vals.dat");
-                _RBS.SetData(Rs[0], Rs[1]);
+                _RBS.SetData(_interpQs, _interpRs);
             };
 
             _mode = x;
@@ -67,6 +66,11 @@ namespace jpacPhoto
             return (M_PROTON*_nu/_Q2) * F2 / (1+R());
         };
 
+        inline double R(double Q2)
+        {
+            return (Q2 < 1.5) ? _RBS.Eval(Q2) : _R0;
+        };
+        inline double R(){ return R(_Q2); };
 
         private:
 
@@ -82,11 +86,6 @@ namespace jpacPhoto
         // Instead of calcualting R from Christy & Bolsted,
         // Digitize and interpolate Fig. 15 of [1]
         ROOT::Math::Interpolator _RBS;
-        
-        inline double R()
-        {
-            return (_Q2 < 1.5) ? _RBS.Eval(_Q2) : _R0;
-        };
 
         // parameters
         std::array<double,3> _A   = {0.00151, 0.658,   1.01};  // normalizations
@@ -96,6 +95,41 @@ namespace jpacPhoto
         // Energy variables
         inline double nu(){ return (_s + _Q2 - M2_PROTON) / (2*M_PROTON); };
         inline double  x(){ return _Q2 / (_s + _Q2 - M2_PROTON); };
+
+        // Interpolate the plot for R(Q2) instead of evaluating the ratio explicitly
+        std::vector<double> _interpQs = {
+            0.0,
+            0.01699641458,
+            0.08440235397,
+            0.1363918851,
+            0.2574187985,
+            0.4021573047,
+            0.5311381068,
+            0.6737513805,
+            0.7905496135,
+            0.943401764,
+            1.149486392,
+            1.276574333,
+            1.453479372,
+            1.525638039
+        };
+        
+        std::vector<double> _interpRs = {
+            0.0,
+            0.005070422535,
+            0.06422535211,
+            0.1312676056,
+            0.243943662,
+            0.3025352113,
+            0.316056338,
+            0.3115492958,
+            0.3014084507,
+            0.2856338028,
+            0.2630985915,
+            0.2495774648,
+            0.2326760563,
+            0.2292957746
+        };
     };
 };
 
