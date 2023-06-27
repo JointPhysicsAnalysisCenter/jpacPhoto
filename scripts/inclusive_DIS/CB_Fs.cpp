@@ -54,21 +54,21 @@ void CB_Fs()
     Q2 = 1.0;
     p1.add_curve({M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 1.0 GeV^{2}");
 
-    // plot p2 = plotter.new_plot();
-    // p2.set_curve_points(1000);
-    // p2.set_ranges({1, 3}, {0, 0.5});
-    // p2.set_labels("#it{W} [GeV]", "#it{F}_{2}(#it{W}, #it{Q}^{2})");
-    // p2.set_legend(0.65,0.35);
+    plot p2 = plotter.new_plot();
+    p2.set_curve_points(1000);
+    p2.set_ranges({1, 3}, {0, 0.5});
+    p2.set_labels("#it{W} [GeV]", "#it{F}_{2}(#it{W}, #it{Q}^{2})");
+    p2.set_legend(0.65,0.35);
 
-    // Q2 = 0.1;
-    // p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.1 GeV^{2}");
+    Q2 = 0.1;
+    p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.1 GeV^{2}");
     
-    // Q2 = 0.5;
-    // p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.5 GeV^{2}");
+    Q2 = 0.5;
+    p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.5 GeV^{2}");
 
-    // Q2 = 1.0;
-    // p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 1.0 GeV^{2}");
+    Q2 = 1.0;
+    p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 1.0 GeV^{2}");
 
 
-    plotter.combine({2,1}, {p1,p1}, "BC_Fs.pdf");
+    plotter.combine({2,1}, {p1,p2}, "BC_Fs.pdf");
 };
