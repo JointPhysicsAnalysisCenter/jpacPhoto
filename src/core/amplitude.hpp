@@ -100,6 +100,34 @@ namespace jpacPhoto
     };
 
     // ---------------------------------------------------------------------------
+    // Sometimes we dont want to output an amplitude object
+    // This will allow us to directly print out a pointer to the raw class
+
+    template<class A>
+    inline std::shared_ptr<A> new_raw_amplitude(kinematics xkinem)
+    {
+        return std::dynamic_pointer_cast<A>(new_amplitude<A>(xkinem));
+    }
+
+    template<class A>
+    inline std::shared_ptr<A> new_raw_amplitude(kinematics xkinem, std::string id)
+    {
+        return std::dynamic_pointer_cast<A>(new_amplitude<A>(xkinem, id));
+    }
+
+    template<class A, typename B>
+    inline std::shared_ptr<A> new_raw_amplitude(kinematics xkinem, B extra1, std::string id)
+    {
+        return std::dynamic_pointer_cast<A>(new_amplitude<A>(xkinem, extra1, id));
+    }
+
+    template<class A, typename B, typename C>
+    inline std::shared_ptr<A> new_raw_amplitude(kinematics xkinem, B extra1, C extra2, std::string id)
+    {
+        return std::dynamic_pointer_cast<A>(new_amplitude<A>(xkinem, extra1, extra2, id));
+    }
+
+    // ---------------------------------------------------------------------------
     // Opreations to sum amplitudes together
 
     // Check if two amplitudes are compatible
