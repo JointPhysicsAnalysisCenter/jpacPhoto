@@ -42,7 +42,13 @@ namespace jpacPhoto
                 store(helicities, s, t);
                 _covariants->update(helicities, s, t);
 
-                return 1;
+                // Contract indices
+                complex result = contract( top_coupling(), bottom_coupling() );
+
+                // Divide by photon propagator 
+                result /= t;
+
+                return result;
             };
 
             inline helicity_frame native_helicity_frame(){ return S_CHANNEL; };
@@ -65,6 +71,7 @@ namespace jpacPhoto
             // Options choose either proton or neutron target
             static const int kProton  = 0;
             static const int kNeutron = 1;
+            static const int kDefault = kProton;
             inline void set_option (int opt)
             {
                 switch (opt)
@@ -89,7 +96,8 @@ namespace jpacPhoto
                 return sum;
             };
 
-            // Sach's magnetic form factor
+            // Sach's magnetic form factor 
+            // Normalization is divided by magnetic moment
             inline double G_M(double Q2)
             {
                 double z = z_conformal(Q2);
@@ -115,41 +123,45 @@ namespace jpacPhoto
             inline lorentz_tensor<complex,1> top_coupling()
             {
                 // Beam
-                auto q     = _covariants->q();
+                auto k     = _covariants->q();
                 auto eps   = _covariants->eps();
                 
                 // Outgoing meson
-                auto q_p   = _covariants->q_prime();
                 auto eps_p = _covariants->eps_prime();
+
+                // Exchange momentum
+                auto q = _covariants->k_t();
 
                 // Coupling function depends on
                 // the quantum numbers of the produced meson
-                lorentz_tensor<complex,1> T = levi_civita(q, eps, eps_p); 
-                return _gTop * T;
+                lorentz_tensor<complex,1> T = _t * levi_civita(k, eps, eps_p) - levi_civita(k, eps, q, eps_p) * q; 
+                return _gTop/_mX/_mX * T;
             };
 
-             // Bottom coupling refers to the gamma^*NNbar interation
+             // Bottom coupling refers to the gamma^* NNbar interation
             inline lorentz_tensor<complex,1> bottom_coupling()
             {
                 // Recalculate form_factors 
-                double GE  = G_E(_t), GM = G_M(_t);
-                double tau = -_t/(4*M2_PROTON);
+                double Q2  = - _t;
+                double mu  = (_option == kProton) ? _mup : _mun;
+                double GE  = G_E(Q2), GM = mu * G_M(Q2);
+                double tau = Q2/(4*M2_PROTON);
 
                 auto u     = _covariants->u();    // Target spinor
                 auto ubar  = _covariants->ubar(); // Recoil spinor
-                auto k     = _covariants->k_t();  // t-channel exchange momentum
+                auto q     = _covariants->k_t();  // t-channel exchange momentum
 
                 // This is also dependent on baryon quantum numbers
                 // We have two pieces for the vector and tensor currents
                 lorentz_tensor<complex,1> vector, tensor;
 
                 auto vector_current =  gamma_vector();
-                auto tensor_current = (gamma_vector()*slash(k) - slash(k)* gamma_vector())/2;
+                auto tensor_current = (gamma_vector()*slash(q) - slash(q)* gamma_vector())/2;
 
                 vector = bilinear(ubar, vector_current, u); 
                 tensor = bilinear(ubar, tensor_current, u);
 
-                return ((GE + tau*GM)*vector + (GM - GE)/(2*M_PROTON)*tensor ) / (1+tau);
+                return ((GE + tau*GM)*vector + (GM - GE)/(2*M_PROTON)*tensor) / (1+tau);
             };
 
             // Conformal expansion variable
