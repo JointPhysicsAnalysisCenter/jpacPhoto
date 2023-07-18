@@ -31,7 +31,7 @@ namespace jpacPhoto
             photon_exchange(amplitude_key key, kinematics xkinem, std::string id = "photon_exchange")
             : raw_amplitude(key, xkinem, id)
             {
-                initialize(1);
+                initialize(3);
             };
 
             // -----------------------------------------------------------------------
@@ -46,7 +46,7 @@ namespace jpacPhoto
                 complex result = contract( top_coupling(), bottom_coupling() );
 
                 // Divide by photon propagator 
-                result /= t;
+                result /= (t - _mEx*_mEx);
 
                 return result;
             };
@@ -60,12 +60,14 @@ namespace jpacPhoto
             inline void allocate_parameters(std::vector<double> pars)
             {
                 _gTop = pars[0];
+                _eta  = pars[1];
+                _mEx  = pars[2];
             };
 
             // Assign each parameter a name, useful for fitting utlities
             inline std::vector<std::string> parameter_labels()
             {
-                return {"gTop"};
+                return {"gTop", "etaEx", "mEx"};
             };
 
             // Options choose either proton or neutron target
@@ -85,7 +87,7 @@ namespace jpacPhoto
             // Sach's electric form factor
             inline double G_E(double Q2)
             {
-                double z = z_conformal(Q2);
+                double z  = z_conformal(Q2);
                 auto pars = (_option == kProton) ? _GEp_pars : _GEn_pars;
 
                 double sum = 0;
@@ -100,7 +102,7 @@ namespace jpacPhoto
             // Normalization is divided by magnetic moment
             inline double G_M(double Q2)
             {
-                double z = z_conformal(Q2);
+                double z  = z_conformal(Q2);
                 auto pars = (_option == kProton) ? _GMp_pars : _GMn_pars;
 
                 double sum = 0;
@@ -118,6 +120,8 @@ namespace jpacPhoto
 
             // A -- gamma -- gamma* coupling
             double _gTop = 0;
+            double _eta  = 1;
+            double _mEx  = 0;
 
              // Top coupling refers to the beam-gamma-meson interaction
             inline lorentz_tensor<complex,1> top_coupling()
@@ -135,17 +139,16 @@ namespace jpacPhoto
                 // Coupling function depends on
                 // the quantum numbers of the produced meson
                 lorentz_tensor<complex,1> T = _t * levi_civita(k, eps, eps_p) - levi_civita(k, eps, q, eps_p) * q; 
-                return _gTop/_mX/_mX * T;
+                return _eta*_gTop/_mX/_mX * T;
             };
 
              // Bottom coupling refers to the gamma^* NNbar interation
             inline lorentz_tensor<complex,1> bottom_coupling()
             {
                 // Recalculate form_factors 
-                double Q2  = - _t;
-                double mu  = (_option == kProton) ? _mup : _mun;
-                double GE  = G_E(Q2), GM = mu * G_M(Q2);
-                double tau = Q2/(4*M2_PROTON);
+                double mu  =  (_option == kProton) ? _mup : _mun;
+                double GE  =  G_E(-_t), GM = mu * G_M(-_t);
+                double tau =  -_t/(4*M2_PROTON);
 
                 auto u     = _covariants->u();    // Target spinor
                 auto ubar  = _covariants->ubar(); // Recoil spinor
@@ -160,8 +163,8 @@ namespace jpacPhoto
 
                 vector = bilinear(ubar, vector_current, u); 
                 tensor = bilinear(ubar, tensor_current, u);
-
-                return ((GE + tau*GM)*vector + (GM - GE)/(2*M_PROTON)*tensor) / (1+tau);
+                
+                return _eta*((GE + tau*GM)/(1+tau)*vector + (GM - GE) / (1+tau)/(2*M_PROTON)*tensor);
             };
 
             // Conformal expansion variable
