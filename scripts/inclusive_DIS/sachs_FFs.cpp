@@ -51,9 +51,9 @@ void sachs_FFs()
     pE.set_labels("#it{Q}^{2}  [GeV^{2}]", "G_{#it{E}} / G_{#it{D}}");
 
     primakoff->set_option( photon_exchange::kProton );
-    pE.add_curve({1E-2, 1E2}, GE_over_GD , "Proton");
+    pE.add_curve({1E-2, 1E2}, GE_over_GD , "#it{p}");
     primakoff->set_option( photon_exchange::kNeutron );
-    pE.add_curve({1E-2, 1E2}, GE_over_GD , "Neutron");
+    pE.add_curve({1E-2, 1E2}, GE_over_GD , "#it{n}");
 
     plot pM = plotter.new_plot();
     pM.color_offset(2);
@@ -64,9 +64,9 @@ void sachs_FFs()
     pM.set_labels("#it{Q}^{2}  [GeV^{2}]", "G_{#it{M}} / #mu_{#it{p}}G_{#it{D}}");
 
     primakoff->set_option( photon_exchange::kProton );
-    pM.add_curve({1E-2, 1E2}, GM_over_GD , "Proton");
+    pM.add_curve({1E-2, 1E2}, GM_over_GD , "#it{p}");
     primakoff->set_option( photon_exchange::kNeutron );
-    pM.add_curve({1E-2, 1E2}, GM_over_GD , "Neutron");
+    pM.add_curve({1E-2, 1E2}, GM_over_GD , "#it{n}");
 
     plotter.combine({2,1}, {pE, pM}, "GEp.pdf");
 };
