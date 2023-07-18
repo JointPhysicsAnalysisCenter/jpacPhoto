@@ -204,7 +204,14 @@ namespace jpacPhoto
 
         // If an an appropriate flag is passed, make appropriate changes.
         // By default this does nothing except save _option
-        virtual void set_option(int x){ _option = x; };
+        virtual void set_option(int x)
+        { 
+            _option = x; 
+            for (auto amp : _subamplitudes)
+            {
+                amp->set_option(x);
+            };            
+        };
         
         // Give each parameter a name if you'd like
         virtual std::vector<std::string> parameter_labels()
