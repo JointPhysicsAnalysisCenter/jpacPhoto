@@ -22,33 +22,34 @@ void CB_sigmaLT()
     auto CB = dynamic_pointer_cast<CB_F>(new_total_xsection<CB_F>(1)); 
 
     // Pick some fixed Q2
+    int   iso;
     double Q2 = 0.5;
 
     // Lambdas for all the different curves we want to plot
     auto sigT_R = [&](double W)
     {
-        return CB->sigmaT_R(W, Q2);
+        return CB->sigmaT_R(iso, W, Q2);
     };
     auto sigT_NR = [&](double W)
     {
-        return CB->sigmaT_NR(W, Q2);
+        return CB->sigmaT_NR(iso, W, Q2);
     };
     auto sigT = [&](double W)
     {
-        return CB->sigma_T(W, Q2);
+        return CB->sigma_T(iso, W, Q2);
     };
 
     auto sigL_R = [&](double W)
     {
-        return CB->sigmaL_R(W, Q2);
+        return CB->sigmaL_R(iso, W, Q2);
     };
     auto sigL_NR = [&](double W)
     {
-        return CB->sigmaL_NR(W, Q2);
+        return CB->sigmaL_NR(iso, W, Q2);
     };
     auto sigL = [&](double W)
     {
-        return CB->sigma_L(W, Q2);
+        return CB->sigma_L(iso, W, Q2);
     };
 
     plotter plotter;
@@ -61,9 +62,20 @@ void CB_sigmaLT()
     p1.add_header("#it{Q}^{2} = 0.5 GeV^{2}");
     p1.set_legend(0.65,0.5);
 
+    iso = CB_F::kProton;
     p1.add_curve({M_PROTON+M_PION, 3}, sigT_NR, "Non-resonant");
+    iso = CB_F::kNeutron;
+    p1.add_dashed({M_PROTON+M_PION, 3}, sigT_NR);
+
+    iso = CB_F::kProton;
     p1.add_curve({M_PROTON+M_PION, 3}, sigT_R,  "Resonances");
+    iso = CB_F::kNeutron;
+    p1.add_dashed({M_PROTON+M_PION, 3}, sigT_R);
+
+    iso = CB_F::kProton;
     p1.add_curve({M_PROTON+M_PION, 3}, sigT,    "Total");
+    iso = CB_F::kNeutron;
+    p1.add_dashed({M_PROTON+M_PION, 3}, sigT);
 
     // sigma_L
     plot p2 = plotter.new_plot();
@@ -73,9 +85,20 @@ void CB_sigmaLT()
     p2.add_header("#it{Q}^{2} = 0.5 GeV^{2}");
     p2.set_legend(0.65,0.6);
 
-    p2.add_curve({M_PROTON+M_PION, 3}, sigL_NR, "Non-resonant");
-    p2.add_curve({M_PROTON+M_PION, 3}, sigL_R,  "Resonances");
-    p2.add_curve({M_PROTON+M_PION, 3}, sigL,    "Total");
+    iso = CB_F::kProton;
+    p2.add_curve({M_PROTON+M_PION +EPS, 3}, sigL_NR, "Non-resonant");
+    iso = CB_F::kNeutron;
+    p2.add_dashed({M_PROTON+M_PION+EPS, 3}, sigL_NR);
+
+    iso = CB_F::kProton;
+    p2.add_curve({M_PROTON+M_PION+EPS, 3}, sigL_R,  "Resonances");
+    iso = CB_F::kNeutron;
+    p2.add_dashed({M_PROTON+M_PION+EPS, 3}, sigL_R);
+
+    iso = CB_F::kProton;
+    p2.add_curve({M_PROTON+M_PION+EPS, 3}, sigL,    "Total");
+    iso = CB_F::kNeutron;
+    p2.add_dashed({M_PROTON+M_PION+EPS, 3}, sigL);
 
     plotter.combine({2,1}, {p1,p2}, "BC_sigmas.pdf");
 };
