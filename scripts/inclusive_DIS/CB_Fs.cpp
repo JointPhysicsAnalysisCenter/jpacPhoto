@@ -19,21 +19,30 @@ void CB_Fs()
 {
     using namespace jpacPhoto;
 
-    auto xF1 = new_total_xsection<CB_F>(1); 
-    auto xF2 = new_total_xsection<CB_F>(2); 
+    int p = CB_F::kProton;
+    int n = CB_F::kNeutron;
 
-    // Pick some fixed Q2
-    double Q2 = 0.5;
+    auto pF1 = new_total_xsection<CB_F>(1, p); 
+    auto pF2 = new_total_xsection<CB_F>(2, p); 
+
+    auto nF1 = new_total_xsection<CB_F>(1, n); 
+    auto nF2 = new_total_xsection<CB_F>(2, n); 
+
+    double Q2;     
+    int iso;
 
     // Lambdas for all the different curves we want to plot
+
     auto F1 = [&](double W)
     {
-        return xF1->evaluate(W*W, -Q2);
+        return (iso == p) ? pF1->evaluate(W*W, -Q2)
+                          : nF1->evaluate(W*W, -Q2);
     };
 
     auto F2 = [&](double W)
     {
-        return xF2->evaluate(W*W, -Q2);
+        return (iso == p) ? pF2->evaluate(W*W, -Q2)
+                          : nF2->evaluate(W*W, -Q2);
     };
 
     plotter plotter;
@@ -46,14 +55,21 @@ void CB_Fs()
     p1.set_legend(0.25,0.7);
 
     Q2 = 0.1;
-    p1.add_curve({M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 0.1 GeV^{2}");
+    iso = p;
+    p1.add_curve( {M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 0.1 GeV^{2}");
+    iso = n;
+    p1.add_dashed({M_PROTON+M_PION, 3}, F1);
     
     Q2 = 0.5;
-    p1.add_curve({M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 0.5 GeV^{2}");
+    p1.add_curve( {M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 0.5 GeV^{2}");
+    iso = n;
+    p1.add_dashed({M_PROTON+M_PION, 3}, F1);
 
     Q2 = 1.0;
-    p1.add_curve({M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 1.0 GeV^{2}");
-
+    p1.add_curve( {M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 1.0 GeV^{2}");
+    iso = n;
+    p1.add_dashed({M_PROTON+M_PION, 3}, F1);
+    
     plot p2 = plotter.new_plot();
     p2.set_curve_points(1000);
     p2.set_ranges({1, 3}, {0, 0.5});
@@ -61,14 +77,20 @@ void CB_Fs()
     p2.set_legend(0.65,0.35);
 
     Q2 = 0.1;
-    p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.1 GeV^{2}");
+    iso = p;
+    p2.add_curve( {M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.1 GeV^{2}");
+    iso = n;
+    p2.add_dashed({M_PROTON+M_PION, 3}, F2);
     
     Q2 = 0.5;
-    p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.5 GeV^{2}");
+    p2.add_curve( {M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.5 GeV^{2}");
+    iso = n;
+    p2.add_dashed({M_PROTON+M_PION, 3}, F2);
 
     Q2 = 1.0;
-    p2.add_curve({M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 1.0 GeV^{2}");
+    p2.add_curve( {M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 1.0 GeV^{2}");
+    iso = n;
+    p2.add_dashed({M_PROTON+M_PION, 3}, F2);
 
-
-    plotter.combine({2,1}, {p1,p2}, "BC_Fs.pdf");
+    plotter.combine({2,1}, {p1,p2}, "CB_Fs.pdf");
 };
