@@ -14,7 +14,7 @@
 #include "covariant/photon_exchange.hpp"
 #include "analytic/vector_exchange.hpp"
 
-void X_photon()
+void elastic_primakoff()
 {
     using namespace jpacPhoto;
     using namespace covariant;
