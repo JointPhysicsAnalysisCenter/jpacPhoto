@@ -12,8 +12,8 @@
 // [1] - https://arxiv.org/abs/1707.09063
 // ------------------------------------------------------------------------------
 
-#ifndef PHOTON_EXCHANGE_HPP
-#define PHOTON_EXCHANGE_HPP
+#ifndef PRIMAKOFF_HPP
+#define PRIMAKOFF_HPP
 
 #include "constants.hpp"
 #include "kinematics.hpp"
@@ -24,14 +24,14 @@ namespace jpacPhoto
 {
     namespace covariant
     {
-        class photon_exchange : public raw_amplitude
+        class primakoff_effect : public raw_amplitude
         {
             public: 
 
-            photon_exchange(amplitude_key key, kinematics xkinem, std::string id = "photon_exchange")
+            primakoff_effect(amplitude_key key, kinematics xkinem, std::string id = "primakoff_effect")
             : raw_amplitude(key, xkinem, id)
             {
-                initialize(3);
+                initialize(4);
             };
 
             // -----------------------------------------------------------------------
@@ -48,20 +48,26 @@ namespace jpacPhoto
                 // Divide by photon propagator 
                 result /= (t - _mEx*_mEx);
 
+                if (!is_zero(_mEx) && !is_zero(_lam)) 
+                {
+                    result *= beta(t - _kinematics->t_min(s));
+                }
                 return result;
             };
 
-            inline helicity_frame native_helicity_frame(){ return S_CHANNEL; };
+            // Covariants are always natively s-channel helicity amplitudes
+            inline helicity_frame native_helicity_frame(){  return S_CHANNEL; };
 
             // Specify which final state particles amplitude can acommodate
-            inline std::vector<particle> allowed_mesons() { return {AXIALVECTOR}; };
-            inline std::vector<particle> allowed_baryons(){ return {HALFPLUS}; };
+            inline std::vector<particle> allowed_mesons() { return { AXIALVECTOR }; };
+            inline std::vector<particle> allowed_baryons(){ return { HALFPLUS    }; };
 
             inline void allocate_parameters(std::vector<double> pars)
             {
                 _gTop = pars[0];
                 _eta  = pars[1];
                 _mEx  = pars[2];
+                _lam  = pars[3];
             };
 
             // Assign each parameter a name, useful for fitting utlities
@@ -113,6 +119,18 @@ namespace jpacPhoto
                 return sum;
             }
 
+            // Simple dipole form factor
+            inline double G_D(double Q2)
+            {
+                return 1. / pow(1+Q2/0.71, 2);
+            };
+
+            // Ratio of form factors for a massive vector exchange
+            inline double beta(double t)
+            {
+                return exp(t/_lam/_lam) / G_D(-t);
+            }
+
             // -----------------------------------------------------------------------
             // Internal data members 
 
@@ -122,6 +140,7 @@ namespace jpacPhoto
             double _gTop = 0;
             double _eta  = 1;
             double _mEx  = 0;
+            double _lam  = 1;
 
              // Top coupling refers to the beam-gamma-meson interaction
             inline lorentz_tensor<complex,1> top_coupling()
@@ -138,7 +157,7 @@ namespace jpacPhoto
 
                 // Coupling function depends on
                 // the quantum numbers of the produced meson
-                lorentz_tensor<complex,1> T = _t * levi_civita(k, eps, eps_p) - levi_civita(k, eps, q, eps_p) * q; 
+                lorentz_tensor<complex,1> T = _t*levi_civita(k, eps, eps_p) - levi_civita(k, eps, q, eps_p) * q; 
                 return _eta*_gTop/_mX/_mX * T;
             };
 
@@ -147,7 +166,7 @@ namespace jpacPhoto
             {
                 // Recalculate form_factors 
                 double mu  =  (_option == kProton) ? _mup : _mun;
-                double GE  =  G_E(-_t), GM = mu * G_M(-_t);
+                double GE  =  G_E(-_t), GM = mu*G_M(-_t);
                 double tau =  -_t/(4*M2_PROTON);
 
                 auto u     = _covariants->u();    // Target spinor
@@ -163,9 +182,12 @@ namespace jpacPhoto
 
                 vector = bilinear(ubar, vector_current, u); 
                 tensor = bilinear(ubar, tensor_current, u);
-                
-                return _eta*((GE + tau*GM)/(1+tau)*vector + (GM - GE) / (1+tau)/(2*M_PROTON)*tensor);
+
+                return _eta * E*((GE+tau*GM)*vector + (GM-GE)/(2*M_PROTON)*tensor)/(1+tau);
             };
+
+            //---------------------------------------------------------------------
+            // Rest is related to the form factors G_E and G_M
 
             // Conformal expansion variable
             inline double z_conformal(double Q2)
