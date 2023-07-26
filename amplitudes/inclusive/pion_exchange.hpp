@@ -43,29 +43,31 @@ namespace jpacPhoto
         // The invariant cross section used S T and M2 as independent vareiables
         inline double invariant_xsection(double s, double t, double xm2)
         {
-            double M2, phase_space, propagator;
+            double M2, K, P_pi;
+        
             if (_regge)
             {
                 double x    = xm2;
                 if (is_zero(x-1)) return 0;
 
-                M2          = M2fromTX(t, x);
-                propagator  = std::abs(regge_propagator(t, x));
-                phase_space = (1 - x);
+                M2    = M2fromTX(t, x);
+                P_pi  = regge_propagator(t, x);
+                K     = (1 - x);
             }
             else 
             {
-                M2          = xm2;
-                propagator  = 1 / (M2_PROTON - t);
-                phase_space = sqrt(Kallen(M2, t, M2_PROTON)/Kallen(s, 0., M2_PROTON));
+                M2    = xm2;
+                P_pi  = 1 / (M2_PION - t);
+                K     = sqrt(Kallen(M2, t, M2_PROTON)/Kallen(s, 0., M2_PROTON));
 
             };
 
             if (are_equal(M2, minimum_M2())) return 0.;
 
             // Total cross-section always gets the physical M2 
-            double  sigmatot    = _sigma->evaluate(M2, t) * 1E6; // in nb
-            return pow(coupling(t)*propagator, 2)*sigmatot*phase_space / (16*PI*PI*PI);
+            double  sigmatot  = _sigma->evaluate(M2, t) * 1E6; // in nb
+            
+            return K/(16*PI*PI*PI) * pow(coupling(t)*P_pi, 2) * sigmatot;
         };
 
         // Options are the parameterization of the sigma_tot
@@ -91,7 +93,13 @@ namespace jpacPhoto
 
         inline double coupling(double t)
         {
-            return exp((t - TMINfromM2(M2_PROTON))/_LamPi2) * (_g/sqrt(_mX2))*(_mX2 - t)/2;
+            // Exponential form factor
+            double beta_pi =  exp((t - TMINfromM2(M2_PROTON))/_lamPi/_lamPi);
+
+            // Scalar coupling
+            double T_pi    = (_g/sqrt(_mX2)) * (_mX2 - t)/2;
+
+            return beta_pi * T_pi ;
         };
 
         inline double regge_propagator(double t, double x)
@@ -115,9 +123,9 @@ namespace jpacPhoto
         private:
         
         total_xsection _sigma;
-        int    _pm     = +1;     // Charge of the produced meson
-        double _g      = 0;      // Top coupling
-        double _LamPi2 = 0.9;    // Exponential cut-off
+        int    _pm     = +1;    // Charge of the produced meson
+        double _g      = 0;     // Top coupling
+        double _lamPi  = 0.9;   // Exponential cut-off
 
         // Pion regge trajectory parameters
         double _alphap = 0.7;
