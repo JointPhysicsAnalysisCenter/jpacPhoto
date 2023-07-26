@@ -239,7 +239,7 @@ namespace jpacPhoto
         {
             return dsigma_dtdM2(s, t, M2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
+        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
         return ig.Integral(M2MINfromT(t), M2MAXfromT(t));
@@ -253,7 +253,7 @@ namespace jpacPhoto
         {
             return dsigma_dtdM2(s, t, M2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
+        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
 
@@ -271,7 +271,7 @@ namespace jpacPhoto
         {
             return dsigma_dxdy2(s, x, y2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
+        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
 
@@ -286,7 +286,7 @@ namespace jpacPhoto
         {
             return dsigma_dxdy2(s, x, y2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
+        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
 
@@ -300,30 +300,31 @@ namespace jpacPhoto
         if (sqrt(s) < sqrt(_mX2) + sqrt(minimum_M2())) return 0;
         set_total_energy(s);
 
-        auto dSigma = [&](const double * rcos)
+        gErrorIgnoreLevel = 6001;
+
+        if ( use_TX() )
         {
-            double r = rcos[0], cos = rcos[1];
+            auto dSigma = [&](double x)
+            {
+                return dsigma_dx(s, x);
+            };
+            ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+            ROOT::Math::Functor1D wF(dSigma);
+            ig.SetFunction(wF);
 
-            double t  = TfromRCOS( r, cos);
-            double mx = (use_TX()) ? XfromRCOS(r, cos) : M2fromRCOS(r, cos);
+            return ig.Integral(0, 1);
+        }
+        else
+        {
+            auto dSigma = [&](double m2)
+            {
+                return dsigma_dM2(s, m2);
+            };
+            ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+            ROOT::Math::Functor1D wF(dSigma);
+            ig.SetFunction(wF);
 
-            // print(s, r, cos, t, M2);
-            return jacobianRCOS(r, cos) * invariant_xsection(s, t, mx); 
+            return ig.Integral(minimum_M2(), pow(sqrt(s) - sqrt(_mX2), 2));
         };
-        ROOT::Math::IntegratorMultiDim ig(ROOT::Math::IntegrationMultiDim::Type::kVEGAS, 1E-6, 1E-6);
-
-        double min[2] = {0., -1.}, max[2] = {1., 1.};
-        return ig.Integral(dSigma, 2, min, max);
-
-        // auto dSigma = [&](double m2)
-        // {
-        //     return dsigma_dM2(s, m2);
-        // };
-        // ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
-        // ROOT::Math::Functor1D wF(dSigma);
-        // ig.SetFunction(wF);
-
-        // return ig.Integral(minimum_M2(), pow(sqrt(s) - sqrt(_mX2), 2));
-
     };
 };
