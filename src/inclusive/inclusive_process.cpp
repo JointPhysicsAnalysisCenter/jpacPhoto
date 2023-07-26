@@ -310,29 +310,44 @@ namespace jpacPhoto
 
         gErrorIgnoreLevel = 6001;
 
-        if ( use_TX() )
-        {
-            auto dSigma = [&](double x)
-            {
-                return dsigma_dx(s, x);
-            };
-            ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
-            ROOT::Math::Functor1D wF(dSigma);
-            ig.SetFunction(wF);
+        // if ( use_TX() )
+        // {
+        //     auto dSigma = [&](double x)
+        //     {
+        //         return dsigma_dx(s, x);
+        //     };
+        //     ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
+        //     ROOT::Math::Functor1D wF(dSigma);
+        //     ig.SetFunction(wF);
 
-            return ig.Integral(0, 1);
-        }
-        else
-        {
-            auto dSigma = [&](double m2)
-            {
-                return dsigma_dM2(s, m2);
-            };
-            ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
-            ROOT::Math::Functor1D wF(dSigma);
-            ig.SetFunction(wF);
+        //     return ig.Integral(0, 1);
+        // }
+        // else
+        // {
+        //     auto dSigma = [&](double m2)
+        //     {
+        //         return dsigma_dM2(s, m2);
+        //     };
+        //     ROOT::Math::IntegratorOneDim ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
+        //     ROOT::Math::Functor1D wF(dSigma);
+        //     ig.SetFunction(wF);
 
-            return ig.Integral(minimum_M2(), pow(sqrt(s) - sqrt(_mX2), 2));
+        //     return ig.Integral(minimum_M2(), pow(sqrt(s) - sqrt(_mX2), 2));
+        // };
+
+        auto dSigma = [&](const double * rcos)
+        {
+            double r = rcos[0], cos = rcos[1];
+
+            double t  = TfromRCOS( r, cos);
+            double mx = (use_TX()) ? XfromRCOS(r, cos) : M2fromRCOS(r, cos);
+
+            // print(s, r, cos, t, M2);
+            return jacobianRCOS(r, cos) * invariant_xsection(s, t, mx); 
         };
+        ROOT::Math::IntegratorMultiDim ig(ROOT::Math::IntegrationMultiDim::Type::kVEGAS, 1E-5, 1E-5);
+        double min[2] = {0., -1.}, max[2] = {1., 1.};
+        
+        return ig.Integral(dSigma, 2, min, max);
     };
 };

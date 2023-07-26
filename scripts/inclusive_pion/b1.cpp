@@ -94,11 +94,9 @@ void b1()
 
     inclusive_process b1p = new_inclusive_process<inclusive::pion_exchange>(M_B1, +1, "b_{1}(1235)^{#plus}");
     b1p->set_parameters(g_b1);
-    b1p->use_nonadaptive_integration(true);
     
     inclusive_process b1m = new_inclusive_process<inclusive::pion_exchange>(M_B1, -1, "b_{1}(1235)^{#minus}");
     b1m->set_parameters(g_b1);
-    b1m->use_nonadaptive_integration(true);
 
     // ---------------------------------------------------------------------------
     // Make plot
@@ -137,10 +135,11 @@ void b1()
     p1.set_ranges(bounds, {0, 10});
     p1.set_labels("#it{W}_{#gammap}  [GeV]", "#sigma [#mub]");
 
-    p1.add_curve( bounds, func_PiN, "b_{1}^{#minus} (#Delta^{#plus#plus}#rightarrow#pi^{#plus} #it{p}) from BW");
-    kb1D->set_recoil_mass(M_B1);
-    p1.add_dashed( bounds, func_D);
+    // p1.add_curve( bounds, func_PiN, "b_{1}^{#minus} (#Delta^{#plus#plus}#rightarrow#pi^{#plus} #it{p}) from BW");
+    // kb1D->set_recoil_mass(M_B1);
+    // p1.add_dashed( bounds, func_D);
 
+    p1.set_curve_points(50);
     b1m->set_option(inclusive::pion_exchange::kPwave);
     p1.add_curve( bounds, func_m, "b_{1}^{#minus} (#Delta^{#plus#plus}#rightarrow#pi^{#plus} #it{p}) from SAID");
     b1m->set_option(inclusive::pion_exchange::kJPAC);
@@ -148,6 +147,7 @@ void b1()
 
     // p2 = comparison of total inclusive b1+ and b1-
     plot p2 = plotter.new_plot();
+    p2.set_curve_points(50);
     p2.set_legend(0.7, 0.7);
     p2.set_ranges(bounds, {0, 8});
     p2.set_labels("#it{W}_{#gammap}  [GeV]", "#sigma [#mub]");
