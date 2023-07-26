@@ -18,14 +18,11 @@
 #include "inclusive/phase_space.hpp"
 #include "plotter.hpp"
 
-using namespace jpacPhoto;
-
 void chew_low()
 {
     using namespace jpacPhoto;
-    using complex = std::complex<double>;
 
-    inclusive_process b1 = new_inclusive_process<phase_space>(M_B1, M_PROTON + M_PION, "b_{1} Phase space");
+    inclusive_process b1 = new_inclusive_process<inclusive::phase_space>(M_B1, M_PROTON + M_PION, "b_{1} Phase space");
     b1->set_total_energy(9);
 
 

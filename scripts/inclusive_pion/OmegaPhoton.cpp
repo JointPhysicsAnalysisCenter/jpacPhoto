@@ -20,7 +20,6 @@
 void OmegaPhoton()
 {
     using namespace jpacPhoto;
-    using complex = std::complex<double>;
     
     plotter plotter;
 
@@ -41,7 +40,7 @@ void OmegaPhoton()
     // Inclusive amplitude
     // ---------------------------------------------------------------------------
 
-    inclusive_process b1p = new_inclusive_process<pion_exchange>(M_B1, +1, "b_{1}(1235)^{#plus}");
+    inclusive_process b1p = new_inclusive_process<inclusive::pion_exchange>(M_B1, +1, "b_{1}(1235)^{#plus}");
     b1p->reggeized(true);
     b1p->set_parameters({0.24});
     
@@ -68,12 +67,11 @@ void OmegaPhoton()
     p1.add_data(x, sig, {dx, dsig}, "Omega Photon");
 
     // Plot both the cross section with resonances 
-    b1p->set_option(pion_exchange::kJPAC);
+    b1p->set_option(inclusive::pion_exchange::kJPAC);
     p1.add_curve( bounds, dsigdx, "Inclusive #it{b}_{1}(1235)^{#plus}");
     // and without
-    b1p->set_option(pion_exchange::kPDG);
+    b1p->set_option(inclusive::pion_exchange::kPDG);
     p1.add_dashed(bounds, dsigdx);
-
 
     p1.save("b1_OmegaPhoton.pdf");
 };

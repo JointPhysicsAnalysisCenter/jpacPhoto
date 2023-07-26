@@ -21,12 +21,9 @@
 #include "Math/IntegrationTypes.h"
 #include "plotter.hpp"
 
-using namespace jpacPhoto;
-
 void b1()
 {
     using namespace jpacPhoto;
-    using complex = std::complex<double>;
     
     plotter plotter;
 
@@ -95,11 +92,13 @@ void b1()
     // Inclusives
     // ---------------------------------------------------------------------------
 
-    inclusive_process b1p = new_inclusive_process<pion_exchange>(M_B1, +1, "b_{1}(1235)^{#plus}");
-    b1p->set_parameters({g_b1});
+    inclusive_process b1p = new_inclusive_process<inclusive::pion_exchange>(M_B1, +1, "b_{1}(1235)^{#plus}");
+    b1p->set_parameters(g_b1);
+    b1p->use_nonadaptive_integration(true);
     
-    inclusive_process b1m = new_inclusive_process<pion_exchange>(M_B1, -1, "b_{1}(1235)^{#minus}");
-    b1m->set_parameters({g_b1});
+    inclusive_process b1m = new_inclusive_process<inclusive::pion_exchange>(M_B1, -1, "b_{1}(1235)^{#minus}");
+    b1m->set_parameters(g_b1);
+    b1m->use_nonadaptive_integration(true);
 
     // ---------------------------------------------------------------------------
     // Make plot
@@ -142,9 +141,9 @@ void b1()
     kb1D->set_recoil_mass(M_B1);
     p1.add_dashed( bounds, func_D);
 
-    b1m->set_option(pion_exchange::kPwave);
+    b1m->set_option(inclusive::pion_exchange::kPwave);
     p1.add_curve( bounds, func_m, "b_{1}^{#minus} (#Delta^{#plus#plus}#rightarrow#pi^{#plus} #it{p}) from SAID");
-    b1m->set_option(pion_exchange::kJPAC);
+    b1m->set_option(inclusive::pion_exchange::kJPAC);
     p1.add_curve( bounds, func_m, "Inclusive b_{1}^{#minus}");
 
     // p2 = comparison of total inclusive b1+ and b1-

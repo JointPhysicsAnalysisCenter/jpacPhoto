@@ -235,11 +235,13 @@ namespace jpacPhoto
     {
         set_total_energy(s);
 
+        gErrorIgnoreLevel = 6001;
+
         auto dSigma = [&](double M2)
         {
             return dsigma_dtdM2(s, t, M2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+        ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
         return ig.Integral(M2MINfromT(t), M2MAXfromT(t));
@@ -249,11 +251,13 @@ namespace jpacPhoto
     {
         set_total_energy(s);
 
+        gErrorIgnoreLevel = 6001;
+
         auto dSigma = [&](double t)
         {
             return dsigma_dtdM2(s, t, M2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+        ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
 
@@ -267,11 +271,13 @@ namespace jpacPhoto
     {
         set_total_energy(s);
 
+        gErrorIgnoreLevel = 6001;
+
         auto dSigma = [&](double x)
         {
             return dsigma_dxdy2(s, x, y2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+        ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
 
@@ -282,11 +288,13 @@ namespace jpacPhoto
     {
         set_total_energy(s);
 
+        gErrorIgnoreLevel = 6001;
+
         auto dSigma = [&](double y2)
         {
             return dsigma_dxdy2(s, x, y2);
         };
-        ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+        ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
         ROOT::Math::Functor1D wF(dSigma);
         ig.SetFunction(wF);
 
@@ -308,7 +316,7 @@ namespace jpacPhoto
             {
                 return dsigma_dx(s, x);
             };
-            ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+            ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
             ROOT::Math::Functor1D wF(dSigma);
             ig.SetFunction(wF);
 
@@ -320,7 +328,7 @@ namespace jpacPhoto
             {
                 return dsigma_dM2(s, m2);
             };
-            ROOT::Math::GSLIntegrator ig(ROOT::Math::IntegrationOneDim::kNONADAPTIVE, ROOT::Math::Integration::kGAUSS61);
+            ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
             ROOT::Math::Functor1D wF(dSigma);
             ig.SetFunction(wF);
 

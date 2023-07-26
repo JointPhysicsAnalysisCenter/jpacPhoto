@@ -93,6 +93,11 @@ namespace jpacPhoto
         // This function is what a user actually calls
         // It wraps the protected vitual method allocate_parameters() with checks of correct size and caching
         void set_parameters( std::vector<double> x );
+        inline void set_parameters( double x )
+        { 
+            std::vector<double> pars = {x};
+            set_parameters(pars); 
+        };
 
         // Given a vector of double of appropriate length, allocate free parameters to model
         // By default we do nothing

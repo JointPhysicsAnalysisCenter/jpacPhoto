@@ -16,12 +16,9 @@
 #include "sigma_tot/JPAC_piN.hpp"
 #include "plotter.hpp"
 
-using namespace jpacPhoto;
-
 void sigmatot_piN()
 {
     using namespace jpacPhoto;
-    using complex = std::complex<double>;
 
     total_xsection PDG_pimp  = new_PDG_sigmatot(pimp);
     total_xsection JPAC_pimp = new_total_xsection<JPAC_piN>(-1);
