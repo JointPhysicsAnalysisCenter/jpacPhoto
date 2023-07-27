@@ -27,7 +27,7 @@ namespace jpacPhoto
             DIS_like(inclusive_key key, double mX, std::string id = "")
             : raw_inclusive_process(key, mX, id),
               F1(new_total_xsection<CB_F>(1, kProton)),
-              F2(new_total_xsection<CB_F>(1, kProton))
+              F2(new_total_xsection<CB_F>(2, kProton))
             {
                 set_N_pars(4);
             };
@@ -35,7 +35,7 @@ namespace jpacPhoto
             DIS_like(inclusive_key key, double mX, int pn, std::string id = "")
             : raw_inclusive_process(key, mX, id),
               F1(new_total_xsection<CB_F>(1, pn)),
-              F2(new_total_xsection<CB_F>(1, pn))
+              F2(new_total_xsection<CB_F>(2, pn))
             {
                 set_N_pars(4);
             };
@@ -74,7 +74,8 @@ namespace jpacPhoto
                 double tprime  = t - TMINfromM2( M2_PROTON );
                 double beta_ex = (is_zero(_mEx2)) ? 1. : exp(tprime/_lam2)/pow(1-tprime/0.71,-2);
 
-                return flux * pow(P_ex * beta_ex * _eta * E, 2) * TdotW / (8*PI*PI) / (2.56819E-6); 
+                // in nanobarn!!!!!
+                return flux * pow(P_ex * beta_ex * _eta*_eta * E, 2) * TdotW / (8*PI*PI) / (2.56819E-6); 
             };
 
             // Options select proton or neutron target
