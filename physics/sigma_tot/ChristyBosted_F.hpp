@@ -12,12 +12,12 @@
 // [1] - https://arxiv.org/abs/0712.3731
 // ------------------------------------------------------------------------------
 
-#ifndef CB_F_HPP
-#define CB_F_HPP
+#ifndef ChristyBosted_HPP
+#define ChristyBosted_HPP
 
 #include "constants.hpp"
 #include "data_set.hpp"
-#include "total_xsection.hpp"
+#include "inclusive_function.hpp"
 #include <Math/Interpolator.h>
 
 namespace jpacPhoto
@@ -151,11 +151,11 @@ namespace jpacPhoto
     };
 
     // Now we can write the form factors from Bosted and Christy in terms of the above 
-    class CB_F : public raw_total_xsection
+    class ChristyBosted_F : public raw_inclusive_function
     {
         public:
 
-        CB_F(unsigned x, unsigned y = kProton)
+        ChristyBosted_F(unsigned x, unsigned y = kProton)
         {
             if (x != 1 && x != 2)
             {

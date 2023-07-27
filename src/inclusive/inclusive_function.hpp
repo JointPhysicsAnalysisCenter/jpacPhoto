@@ -1,4 +1,6 @@
-// Abstract class to represent a total hadronic cross-section
+// Abstract class to represent a function of two variables which generalizes 
+// a bottom vertex to inclusive process.
+// This is usually a total hadronic cross section or structure function
 //
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2023)
@@ -8,52 +10,52 @@
 //               dwinney@scnu.edu.cn
 // ------------------------------------------------------------------------------
 
-#ifndef TOTAL_XSECTION_HPP
-#define TOTAL_XSECTION_HPP
+#ifndef INCLUSIVE_FUNCTION_HPP
+#define INCLUSIVE_FUNCTION_HPP
 
 #include <memory>
 #include "constants.hpp"
 
 namespace jpacPhoto
 {
-    class raw_total_xsection;
-    using total_xsection = std::shared_ptr<raw_total_xsection>;
+    class raw_inclusive_function;
+    using inclusive_function = std::shared_ptr<raw_inclusive_function>;
 
     template<class T>
-    inline total_xsection new_total_xsection()
+    inline inclusive_function new_inclusive_function()
     {
-        total_xsection ptr = std::make_shared<T>();
+        inclusive_function ptr = std::make_shared<T>();
         return ptr;
     };
 
     template<class T, class A>
-    inline total_xsection new_total_xsection(A par)
+    inline inclusive_function new_inclusive_function(A par)
     {
-        total_xsection ptr = std::make_shared<T>(par);
+        inclusive_function ptr = std::make_shared<T>(par);
         return ptr;
     };
 
     template<class T, class A, class B>
-    inline total_xsection new_total_xsection(A par1, B par2)
+    inline inclusive_function new_inclusive_function(A par1, B par2)
     {
-        total_xsection ptr = std::make_shared<T>(par1, par2);
+        inclusive_function ptr = std::make_shared<T>(par1, par2);
         return ptr;
     };
 
     template<class T, class A, class B, class C>
-    inline total_xsection new_total_xsection(A par1, B par2, C par3)
+    inline inclusive_function new_inclusive_function(A par1, B par2, C par3)
     {
-        total_xsection ptr = std::make_shared<T>(par1, par2, par3);
+        inclusive_function ptr = std::make_shared<T>(par1, par2, par3);
         return ptr;
     };
 
-    class raw_total_xsection 
+    class raw_inclusive_function
     {
         public: 
         
-        raw_total_xsection(){};
+        raw_inclusive_function(){};
 
-        raw_total_xsection(std::array<double, 2> m)
+        raw_inclusive_function(std::array<double, 2> m)
         : _mB(m[0]), _mT(m[1])
         {};
 

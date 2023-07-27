@@ -12,21 +12,21 @@
 // [1] - https://arxiv.org/abs/0712.3731
 // ------------------------------------------------------------------------------
 
-#include "sigma_tot/CB_F.hpp"
+#include "sigma_tot/ChristyBosted_F.hpp"
 #include "plotter.hpp"
 
-void CB_Fs()
+void ChristyBosted_Fs()
 {
     using namespace jpacPhoto;
 
-    int p = CB_F::kProton;
-    int n = CB_F::kNeutron;
+    int p = ChristyBosted_F::kProton;
+    int n = ChristyBosted_F::kNeutron;
 
-    auto pF1 = new_total_xsection<CB_F>(1, p); 
-    auto pF2 = new_total_xsection<CB_F>(2, p); 
+    auto pF1 = new_inclusive_function<ChristyBosted_F>(1, p); 
+    auto pF2 = new_inclusive_function<ChristyBosted_F>(2, p); 
 
-    auto nF1 = new_total_xsection<CB_F>(1, n); 
-    auto nF2 = new_total_xsection<CB_F>(2, n); 
+    auto nF1 = new_inclusive_function<ChristyBosted_F>(1, n); 
+    auto nF2 = new_inclusive_function<ChristyBosted_F>(2, n); 
 
     double Q2;     
     int iso;

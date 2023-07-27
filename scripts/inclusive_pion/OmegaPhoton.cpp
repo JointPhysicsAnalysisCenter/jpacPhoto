@@ -42,7 +42,7 @@ void OmegaPhoton()
 
     inclusive_process b1p = new_inclusive_process<inclusive::pion_exchange>(M_B1, +1, "b_{1}(1235)^{#plus}");
     b1p->reggeized(true);
-    b1p->set_parameters({0.24});
+    b1p->set_parameters(0.24);
     
     // ---------------------------------------------------------------------------
     // Make plot

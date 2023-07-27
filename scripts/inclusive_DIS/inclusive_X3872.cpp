@@ -1,6 +1,7 @@
+// Calculates the integrated cross section for both inclusive and exclusive 
+// X(3872) via photon and vector meson exchanges
 //
-//
-// OUTPUT: 
+// OUTPUT: inclusive_X.pdf
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2023)
 // Affiliation:  Joint Physics Analysis Center (JPAC),
@@ -14,7 +15,7 @@
 #include "analytic/vector_exchange.hpp"
 #include "covariant/primakoff_effect.hpp"
 
-void X3872_inclusive()
+void inclusive_X3872()
 {
     using namespace jpacPhoto;
 
@@ -126,7 +127,7 @@ void X3872_inclusive()
 
     p1.set_curve_points(30);
     p1.set_logscale(false, true);
-    p1.set_ranges({4.6, 7}, {10E-2, 2E1});
+    p1.set_ranges({4.6, 7}, {1E-3, 4E1});
     p1.set_legend(0.27, 0.72);
     p1.add_header("Primakoff Effect");
     p1.set_labels( "#it{W}_{#gamma#it{N}}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [fb]");
@@ -159,5 +160,5 @@ void X3872_inclusive()
     exc_mesons_n->set_option(n);
     p2.add_dashed(NT, sigma_w, exc_mesons_n);
 
-    plotter.combine({2,1}, {p1,p2}, "primakoff_inclusive.pdf");
+    plotter.combine({2,1}, {p1, p2}, "inclusive_X.pdf");
 };

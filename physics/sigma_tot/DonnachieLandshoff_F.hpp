@@ -17,16 +17,16 @@
 
 #include "constants.hpp"
 #include "data_set.hpp"
-#include "total_xsection.hpp"
+#include "inclusive_function.hpp"
 #include <Math/Interpolator.h>
 
 namespace jpacPhoto
 {
-    class DL_F : public raw_total_xsection
+    class DonnachieLandshoff_F : public raw_inclusive_function
     {
         public: 
 
-        DL_F(unsigned x)
+        DonnachieLandshoff_F(unsigned x)
         : raw_total_xsection({0, M_PROTON}) // Massless photon
         {
             if (x != 1 && x != 2)

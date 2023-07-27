@@ -14,7 +14,7 @@
 
 #include "constants.hpp"
 #include "inclusive_process.hpp"
-#include "sigma_tot/CB_F.hpp"
+#include "sigma_tot/ChristyBosted_F.hpp"
 
 namespace jpacPhoto
 {
@@ -26,16 +26,16 @@ namespace jpacPhoto
 
             DIS_like(inclusive_key key, double mX, std::string id = "")
             : raw_inclusive_process(key, mX, id),
-              F1(new_total_xsection<CB_F>(1, kProton)),
-              F2(new_total_xsection<CB_F>(2, kProton))
+              F1(new_inclusive_function<ChristyBosted_F>(1, kProton)),
+              F2(new_inclusive_function<ChristyBosted_F>(2, kProton))
             {
                 set_N_pars(4);
             };
 
             DIS_like(inclusive_key key, double mX, int pn, std::string id = "")
             : raw_inclusive_process(key, mX, id),
-              F1(new_total_xsection<CB_F>(1, pn)),
-              F2(new_total_xsection<CB_F>(2, pn))
+              F1(new_inclusive_function<ChristyBosted_F>(1, pn)),
+              F2(new_inclusive_function<ChristyBosted_F>(2, pn))
             {
                 set_N_pars(4);
             };
@@ -82,8 +82,8 @@ namespace jpacPhoto
             static const int kProton = 0, kNeutron = 1;
             inline void set_option (int opt)
             {
-                F1 = new_total_xsection<CB_F>(1, opt);
-                F2 = new_total_xsection<CB_F>(2, opt);
+                F1 = new_inclusive_function<ChristyBosted_F>(1, opt);
+                F2 = new_inclusive_function<ChristyBosted_F>(2, opt);
                 return;
             };
 
@@ -124,7 +124,7 @@ namespace jpacPhoto
             double _F1, _F2;
 
             // Proton form factors
-            total_xsection F1, F2;
+            inclusive_function F1, F2;
         };
     };
 };

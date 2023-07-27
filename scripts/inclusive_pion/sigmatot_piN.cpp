@@ -20,13 +20,13 @@ void sigmatot_piN()
 {
     using namespace jpacPhoto;
 
-    total_xsection PDG_pimp  = new_PDG_sigmatot(pimp);
-    total_xsection JPAC_pimp = new_total_xsection<JPAC_piN>(-1);
+    inclusive_function PDG_pimp  = new_PDG_sigmatot(pimp);
+    inclusive_function JPAC_pimp = new_inclusive_function<JPAC_piN>(-1);
 
-    total_xsection PDG_pipp  = new_PDG_sigmatot(pipp);
-    total_xsection JPAC_pipp = new_total_xsection<JPAC_piN>(+1);
+    inclusive_function PDG_pipp  = new_PDG_sigmatot(pipp);
+    inclusive_function JPAC_pipp = new_inclusive_function<JPAC_piN>(+1);
 
-    total_xsection to_plot;
+    inclusive_function to_plot;
     auto sig = [&](double w)
     {
         return to_plot->evaluate(w*w, M2_PION);

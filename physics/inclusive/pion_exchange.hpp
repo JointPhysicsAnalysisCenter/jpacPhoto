@@ -13,7 +13,7 @@
 
 #include "constants.hpp"
 #include "inclusive_process.hpp"
-#include "total_xsection.hpp"
+#include "inclusive_function.hpp"
 #include "sigma_tot/JPAC_piN.hpp"
 #include "sigma_tot/PDG.hpp"
 #include "cgamma.hpp"
@@ -29,7 +29,7 @@ namespace jpacPhoto
 
             pion_exchange(inclusive_key key, double mX, int pm, std::string id = "")
             : raw_inclusive_process(key, mX, id), _pm(pm),
-                _sigma(new_total_xsection<JPAC_piN>(-pm))
+                _sigma(new_inclusive_function<JPAC_piN>(-pm))
             {
                 set_N_pars(1);
             };
@@ -81,9 +81,9 @@ namespace jpacPhoto
             {
                 switch (opt)
                 {
-                    case kJPAC:  { _sigma = new_total_xsection<JPAC_piN>(-_pm); 
+                    case kJPAC:  { _sigma = new_inclusive_function<JPAC_piN>(-_pm); 
                                     _option = opt; break; };
-                    case kPwave: { _sigma = new_total_xsection<JPAC_piN>(-_pm, 1); 
+                    case kPwave: { _sigma = new_inclusive_function<JPAC_piN>(-_pm, 1); 
                                     _option = opt; break; };
                     case kPDG:   { PDG_total_xsections pdgpm = (_pm == -1) ? pipp : pimp; 
                                     _sigma = new_PDG_sigmatot(pdgpm); 
@@ -125,7 +125,7 @@ namespace jpacPhoto
 
             private:
             
-            total_xsection _sigma;
+            inclusive_function _sigma;
             int    _pm     = +1;    // Charge of the produced meson
             double _g      = 0;     // Top coupling
             double _lamPi  = 0.9;   // Exponential cut-off

@@ -22,7 +22,7 @@ void Load()
     TString main_lib    = main_dir + "/lib/libJPACPHOTO." + lib_ext;
 
     // Supplementary header files 
-    TString amplitudes  = main_dir + "/amplitudes";
+    TString amplitudes  = main_dir + "/physics";
     TString data        = main_dir + "/data";
 
     if (!gSystem->AccessPathName(main_lib.Data()))
