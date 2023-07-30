@@ -27,7 +27,7 @@ namespace jpacPhoto
         public: 
 
         DonnachieLandshoff_F(unsigned x)
-        : raw_total_xsection({0, M_PROTON}) // Massless photon
+        : raw_inclusive_function({0, M_PROTON}) // Massless photon
         {
             if (x != 1 && x != 2)
             {
@@ -50,20 +50,24 @@ namespace jpacPhoto
             _s = s; _w = sqrt(s); _Q2 = -q2;
             _nu = nu(); _x = x();
 
-            // Calculate F2 by summing regge terms
-            double F2 = 0;
+            // Calculate residues for each exchange
             for (int i = 0; i < 3; i++)
             {
-                double f_i = _A[i] * pow(_Q2 / (1.+ _Q2/_Q20[i]), 1.+_eps[i]);    
-                if (i == 0)   f_i *= pow(1.+_Q2/_Q20[i], _eps[i]/2.);        
-
-                F2 += f_i * pow(_x, -_eps[i]);    
+                _f[i] = _A[i] * pow(_Q2 / (1.+ _Q2/_Q20[i]), 1.+_eps[i]);    
+                if (i == 0) _f[i] *= pow(1.+_Q2/_Q20[i], _eps[i]/2.);        
             };
 
-            if (_mode == 2) return F2;
+            // Sum terms with the appropriate Regge propagator
+            double F = 0;
+            for (int i = 0; i < 3; i++)
+            {
+                double exponent = (_mode == 2) ? -_eps[i] : -(1+_eps[i]);
+                F += _f[i] * pow(_x, exponent);
+            };
 
-            // Calculate F1 by rescaling
-            return (M_PROTON*_nu/_Q2) * F2 / (1+R());
+            if (_mode == 1) F /= 2*(1+R());
+
+            return F;
         };
 
         inline double R(double Q2)
@@ -78,8 +82,12 @@ namespace jpacPhoto
 
         // Saved external variables
         double _s, _w, _Q2;
+
         // Saved internal variables
         double _nu, _x;
+
+        // Residues
+        std::array<double,3> _f;
 
         // R = sigma_L / sigma_T parameters
         double _R0 = 0.23;
