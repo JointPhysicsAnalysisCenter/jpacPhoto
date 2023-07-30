@@ -76,9 +76,9 @@ void inclusive_X3872()
     amplitude exc_rho_m = new_amplitude<covariant::primakoff_effect>(kX, "#minus Rho Exhange");
     exc_rho->set_parameters({-gRho,   etaRho,   M_RHO,   lamRho  });
 
-    amplitude exc_mesons_p = exc_omega/*  + exc_rho */;
+    amplitude exc_mesons_p = exc_omega + exc_rho;
     exc_mesons_p->set_id("Exclusive");
-    amplitude exc_mesons_n = exc_omega /* + exc_rho_m */;
+    amplitude exc_mesons_n = exc_omega + exc_rho_m;
     exc_mesons_n->set_id("Exclusive");
 
     // --------------------------------------------------------------------------
@@ -103,18 +103,12 @@ void inclusive_X3872()
     // For meson exchanges we include both rho and omega contributions
     // However, this depends on isospin of the target
     // For protons they sum, for neutrons they subtract
-    auto inc_mesons_p = [&]  (double W)
+    auto inc_mesons = [&]  (double W)
     {
-        double sig = inc_omega->integrated_xsection(W*W) /* + inc_rho->integrated_xsection(W*W) */;
+        double sig = inc_omega->integrated_xsection(W*W) + inc_rho->integrated_xsection(W*W);
         print(W, sig);
         return sig;
     };    
-    auto inc_mesons_n = [&]  (double W)
-    {
-        double sig = inc_omega->integrated_xsection(W*W) /* - inc_rho->integrated_xsection(W*W) */;
-        print(W, sig);
-        return sig;
-    };
 
     // --------------------------------------------------------------------------
     // Plot results
@@ -148,13 +142,13 @@ void inclusive_X3872()
     p2.set_logscale(false, true);
     p2.set_ranges({4.6, 7}, {10E-2, 2E3});
     p2.set_legend(0.27, 0.72);
-    p2.add_header("#omega Exchange");
+    p2.add_header("#rho / #omega Exchange");
     p2.set_labels( "#it{W}_{#gamma#it{N}}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [nb]");
     p2.color_offset(2);
 
-    p2.add_curve( NT, inc_mesons_p, "Semi-inclusive");
+    p2.add_curve( NT, inc_mesons, "Semi-inclusive");
     inc_rho->set_option(n); inc_omega->set_option(n);
-    p2.add_dashed(NT, inc_mesons_n);
+    p2.add_dashed(NT, inc_mesons);
 
     p2.add_curve( NT, sigma_w, exc_mesons_p);
     exc_mesons_n->set_option(n);
