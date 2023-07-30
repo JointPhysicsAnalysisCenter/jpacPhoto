@@ -72,7 +72,7 @@ namespace jpacPhoto
 
                 // Form factor in the case of massive vectors
                 double tprime  = t - TMINfromM2( M2_PROTON );
-                double beta_ex = (is_zero(_mEx2)) ? 1. : exp(tprime/_lam2)/pow(1-tprime/0.71,-2);
+                double beta_ex = (is_zero(_mEx2) || is_zero(_lam2)) ? 1. : exp(tprime/_lam2)/pow(1-tprime/0.71,-2);
 
                 // in nanobarn!!!!!
                 return flux * pow(P_ex * beta_ex * _eta*_eta * E, 2) * TdotW / (8*PI*PI) / (2.56819E-6); 
