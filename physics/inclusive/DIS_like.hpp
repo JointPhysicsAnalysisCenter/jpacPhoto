@@ -25,20 +25,22 @@ namespace jpacPhoto
         {
             public: 
 
-            DIS_like(inclusive_key key, double mX, std::string id = "")
+            DIS_like(inclusive_key key, double mX, double mE, std::string id = "")
             : raw_inclusive_process(key, mX, id),
+              _photon(is_zero(mE)), _mEx2(mE*mE),
               F1(new_inclusive_function<combined_F>(1, kProton)),
               F2(new_inclusive_function<combined_F>(2, kProton))
             {
-                set_N_pars(4);
+                set_N_pars(3);
             };
 
-            DIS_like(inclusive_key key, double mX, int pn, std::string id = "")
-            : raw_inclusive_process(key, mX, id),
+            DIS_like(inclusive_key key, double mX, double mE, int pn, std::string id = "")
+            : raw_inclusive_process(key, mX, id), 
+              _photon(is_zero(mE)), _mEx2(mE*mE),
               F1(new_inclusive_function<combined_F>(1, pn)),
               F2(new_inclusive_function<combined_F>(2, pn))
             {
-                set_N_pars(4);
+                set_N_pars(3);
             };
 
             // Minimum mass is the proton 
@@ -49,8 +51,7 @@ namespace jpacPhoto
             {
                 _g     = pars[0];
                 _eta   = pars[1];
-                _mEx2  = pars[2]*pars[2];
-                _lam2  = pars[3]*pars[3];
+                _lam2  = pars[2]*pars[2];
 
                 // Cutoff for regge amplitude
                 _cutoff = exp(1./_lam2/_alphaP) / _alphaP;
@@ -67,7 +68,7 @@ namespace jpacPhoto
                 for (int i = 0; i < _gammas.size(); i++)
                 {
                     double tpiece, spiece, alpha;
-                    if (!_regge)
+                    if (_photon || !_regge)
                     {
                         alpha  = 1;
                         tpiece = pow(_mEx2 - t, -2);
@@ -88,7 +89,7 @@ namespace jpacPhoto
 
                 // Form factor in the case of massive vectors
                 double tprime  = t - TMINfromM2( M2_PROTON );
-                double beta_ex = (is_zero(_mEx2) || is_zero(_lam2)) ? 1. : exp(tprime/_lam2)/pow(1-tprime/0.71,-2);
+                double beta_ex = (_photon || is_zero(_lam2)) ? 1. : exp(tprime/_lam2)/pow(1-tprime/0.71,-2);
 
                 // in nanobarn!!!!!
                 return flux * pow(beta_ex * _eta*_eta * E, 2) * PTdotW / (8*PI*PI) / (2.56819E-6); 
@@ -98,10 +99,32 @@ namespace jpacPhoto
             static const int kProton = 0, kNeutron = 1;
             inline void set_option (int opt)
             {
+                if (_photon && _regge)
+                {
+                    F1 = new_inclusive_function<DonnachieLandshoff_F>(1);
+                    F2 = new_inclusive_function<DonnachieLandshoff_F>(2);  
+                    return;
+                };
+
                 F1 = new_inclusive_function<combined_F>(1, opt);
                 F2 = new_inclusive_function<combined_F>(2, opt);
                 return;
             };
+
+            // Everything regarding reggeization is handled in the code
+            // except when a photon exchange is evaluated at high energies
+            // even through photon doesnt reggeize we have to treat this 
+            // case special to avoid probing Q2 > 300 GeV^2!
+            virtual inline void reggeized(bool x)
+            { 
+                _regge = x; 
+                if (_photon)
+                {
+                    F1 = new_inclusive_function<DonnachieLandshoff_F>(1);
+                    F2 = new_inclusive_function<DonnachieLandshoff_F>(2);   
+                };
+            };
+
 
             protected:
 
@@ -133,6 +156,9 @@ namespace jpacPhoto
 
             private:
 
+            // Whether we consider a photon exchange
+            bool _photon = true;
+
             // Free parameters
             double _g    = 0; // Top couplings
             double _eta  = 1; // VMD coupling for exchange
@@ -151,6 +177,7 @@ namespace jpacPhoto
             // Regge trajectory parameters
             double _alpha0 = 0.5, _alphaP = 0.9;
             double _cutoff;
+
         };
     };
 };

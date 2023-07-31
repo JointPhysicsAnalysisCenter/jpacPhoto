@@ -107,7 +107,7 @@ namespace jpacPhoto
         virtual inline void set_option( int opt ){ _option = opt; };
 
         // Specify whether our cross section is reggeized
-        inline void reggeized(bool x){ _regge = x; };
+        virtual inline void reggeized(bool x){ _regge = x; };
         
         // ----------------------------------------------------------------------
         // Kinematics 
