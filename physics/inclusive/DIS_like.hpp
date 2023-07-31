@@ -25,6 +25,24 @@ namespace jpacPhoto
         {
             public: 
 
+            DIS_like(inclusive_key key, double mX, std::string id = "")
+            : raw_inclusive_process(key, mX, id),
+              _photon(true), _mEx2(0),
+              F1(new_inclusive_function<combined_F>(1, kProton)),
+              F2(new_inclusive_function<combined_F>(2, kProton))
+            {
+                set_N_pars(3);
+            };
+            
+            DIS_like(inclusive_key key, double mX, int pn, std::string id = "")
+            : raw_inclusive_process(key, mX, id), 
+              _photon(true), _mEx2(0),
+              F1(new_inclusive_function<combined_F>(1, pn)),
+              F2(new_inclusive_function<combined_F>(2, pn))
+            {
+                set_N_pars(3);
+            };
+
             DIS_like(inclusive_key key, double mX, double mE, std::string id = "")
             : raw_inclusive_process(key, mX, id),
               _photon(is_zero(mE)), _mEx2(mE*mE),

@@ -27,7 +27,7 @@ void primakoff_compare()
     // Pure Primakoff
 
     amplitude primakoff = new_amplitude<primakoff_effect>(kX, "#gamma^{*}");
-    primakoff->set_parameters({3.2E-3, 1, 0, 0});
+    primakoff->set_parameters({3.2E-3, 1, 0});
     
     // cross section in femto
     auto sig_fb = [&] (double w)
@@ -38,11 +38,11 @@ void primakoff_compare()
     //-----------------------------------------
     // Rescaling the Primakoff with VMD to get the meson exchange
 
-    amplitude rho_VMD   = new_amplitude<primakoff_effect>(kX, "#rho");
-    rho_VMD->set_parameters(  {3.2E-3, 16.37, M_RHO, 1.4});
+    amplitude rho_VMD   = new_amplitude<primakoff_effect>(kX, M_RHO, "#rho");
+    rho_VMD->set_parameters(  {3.2E-3, 16.37, 1.4});
 
-    amplitude omega_VMD = new_amplitude<primakoff_effect>(kX, "#omega");
-    omega_VMD->set_parameters({3.2E-3, 56.34, M_OMEGA, 1.2});
+    amplitude omega_VMD = new_amplitude<primakoff_effect>(kX, M_OMEGA, "#omega");
+    omega_VMD->set_parameters({3.2E-3, 56.34, 1.2});
 
     amplitude sum_VMD   = rho_VMD + omega_VMD;
     sum_VMD->set_id("Rescaled");
@@ -93,7 +93,7 @@ void primakoff_compare()
 
     sum_VMD->set_option(  primakoff_effect::kNeutron);
     sum_VMD->set_id("#it{n}");
-    omega_VMD->set_parameters({-3.2E-3, 56.34, M_OMEGA, 1.2}); // For the neutron, the omega term gains an overall minus sign
+    omega_VMD->set_parameters({-3.2E-3, 56.34, 1.2}); // For the neutron, the omega term gains an overall minus sign
     p2.add_curve(  sigma_w, sum_VMD, {kX->Wth(), 7});
 
     plotter.combine({2,1}, {p1, p2}, "primakoff_compare.pdf");

@@ -29,9 +29,15 @@ namespace jpacPhoto
             public: 
 
             primakoff_effect(amplitude_key key, kinematics xkinem, std::string id = "primakoff_effect")
-            : raw_amplitude(key, xkinem, id)
+            : raw_amplitude(key, xkinem, id), _mEx(0)
             {
-                initialize(4);
+                initialize(3);
+            };
+
+            primakoff_effect(amplitude_key key, kinematics xkinem, double mEx, std::string id = "primakoff_effect")
+            : raw_amplitude(key, xkinem, id), _mEx(mEx)
+            {
+                initialize(3);
             };
 
             // -----------------------------------------------------------------------
@@ -66,8 +72,7 @@ namespace jpacPhoto
             {
                 _gTop = pars[0];
                 _eta  = pars[1];
-                _mEx  = pars[2];
-                _lam  = pars[3];
+                _lam  = pars[2];
             };
 
             // Assign each parameter a name, useful for fitting utlities

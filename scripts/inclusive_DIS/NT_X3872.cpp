@@ -15,7 +15,7 @@
 #include "analytic/vector_exchange.hpp"
 #include "covariant/primakoff_effect.hpp"
 
-void inclusive_X3872()
+void NT_X3872()
 {
     using namespace jpacPhoto;
 
@@ -41,9 +41,9 @@ void inclusive_X3872()
     double lamOmega = 1.2;
 
     std::vector<double> parsGamma, parsRho, parsOmega;
-    parsGamma = {gGamma, 1,        0,       0       };
-    parsRho   = {gRho,   etaRho,   M_RHO,   lamRho  };
-    parsOmega = {gOmega, etaOmega, M_OMEGA, lamOmega};
+    parsGamma = {gGamma, 1,        0       };
+    parsRho   = {gRho,   etaRho,   lamRho  };
+    parsOmega = {gOmega, etaOmega, lamOmega};
 
     //----------------------------------------------------------------------------
     // Set up inclusive amplitudes
@@ -51,10 +51,10 @@ void inclusive_X3872()
     inclusive_process inc_gamma = new_inclusive_process<inclusive::DIS_like>(M_X3872, "Inclusive");
     inc_gamma->set_parameters(parsGamma);
 
-    inclusive_process inc_omega = new_inclusive_process<inclusive::DIS_like>(M_X3872, "Inclusive");
+    inclusive_process inc_omega = new_inclusive_process<inclusive::DIS_like>(M_X3872, M_OMEGA, "Inclusive");
     inc_omega->set_parameters(parsOmega);
 
-    inclusive_process inc_rho   = new_inclusive_process<inclusive::DIS_like>(M_X3872, "Inclusive");
+    inclusive_process inc_rho   = new_inclusive_process<inclusive::DIS_like>(M_X3872, M_RHO, "Inclusive");
     inc_rho->set_parameters(parsRho);
 
     //----------------------------------------------------------------------------
@@ -66,15 +66,15 @@ void inclusive_X3872()
     amplitude exc_gamma = new_amplitude<covariant::primakoff_effect>(kX, "Exclusive");
     exc_gamma->set_parameters(parsGamma);
 
-    amplitude exc_omega = new_amplitude<covariant::primakoff_effect>(kX, "Omega Exchange");
+    amplitude exc_omega = new_amplitude<covariant::primakoff_effect>(kX, M_OMEGA, "Omega Exchange");
     exc_omega->set_parameters(parsOmega);
 
-    amplitude exc_rho   = new_amplitude<covariant::primakoff_effect>(kX, "Rho Exchange");
+    amplitude exc_rho   = new_amplitude<covariant::primakoff_effect>(kX, M_RHO, "Rho Exchange");
     exc_rho->set_parameters(parsRho);
 
     // For the neutron target we need to flip the sign of the coupling for the rho
-    amplitude exc_rho_m = new_amplitude<covariant::primakoff_effect>(kX, "#minus Rho Exhange");
-    exc_rho->set_parameters({-gRho,   etaRho,   M_RHO,   lamRho  });
+    amplitude exc_rho_m = new_amplitude<covariant::primakoff_effect>(kX, M_RHO, "#minus Rho Exhange");
+    exc_rho->set_parameters({-gRho,   etaRho,   lamRho  });
 
     amplitude exc_mesons_p = exc_omega + exc_rho;
     exc_mesons_p->set_id("Exclusive");

@@ -45,21 +45,21 @@ void chic1_compare()
     double lamOmega = 1.2;
 
     std::vector<double> parsRho, parsOmega, parsPhi, parsPsi;
-    parsRho   = {gRho,   etaRho,   M_RHO,   lamRho  };
-    parsOmega = {gOmega, etaOmega, M_OMEGA, lamOmega};
-    parsPhi   = {gPhi,   etaPhi,   M_PHI,   lamOmega};
-    parsPsi   = {gPsi,   etaPsi,   M_JPSI,  0.};
+    parsRho   = {gRho,   etaRho,   lamRho  };
+    parsOmega = {gOmega, etaOmega, lamOmega};
+    parsPhi   = {gPhi,   etaPhi,   lamOmega};
+    parsPsi   = {gPsi,   etaPsi,   0.};
 
     //----------------------------------------------------------------------------
     // Set up inclusive amplitudes
 
-    inclusive_process inc_omega = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, "#omega");
+    inclusive_process inc_omega = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, M_OMEGA, "#omega");
     inc_omega->set_parameters(parsOmega);
 
-    inclusive_process inc_rho   = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, "#rho");
+    inclusive_process inc_rho   = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, M_RHO, "#rho");
     inc_rho->set_parameters(parsRho);
 
-    inclusive_process inc_phi   = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, "#phi");
+    inclusive_process inc_phi   = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, M_PHI, "#phi");
     inc_phi->set_parameters(parsPhi);
 
     std::vector<inclusive_process> exchanges = {inc_rho, inc_omega, inc_phi};
@@ -70,21 +70,21 @@ void chic1_compare()
     kinematics kChi = new_kinematics(M_CHIC1);
     kChi->set_meson_JP(AXIALVECTOR);
 
-    amplitude exc_omega = new_amplitude<covariant::primakoff_effect>(kChi, "#omega");
+    amplitude exc_omega = new_amplitude<covariant::primakoff_effect>(kChi, M_OMEGA, "#omega");
     exc_omega->set_parameters(parsOmega);
 
-    amplitude exc_rho   = new_amplitude<covariant::primakoff_effect>(kChi, "#rho");
+    amplitude exc_rho   = new_amplitude<covariant::primakoff_effect>(kChi, M_RHO, "#rho");
     exc_rho->set_parameters(parsRho);
 
-    amplitude exc_phi   = new_amplitude<covariant::primakoff_effect>(kChi, "#phi");
+    amplitude exc_phi   = new_amplitude<covariant::primakoff_effect>(kChi, M_PHI, "#phi");
     exc_phi->set_parameters(parsPhi);
 
-    amplitude exc_psi   = new_amplitude<covariant::primakoff_effect>(kChi, "J/#psi");
+    amplitude exc_psi   = new_amplitude<covariant::primakoff_effect>(kChi, M_JPSI, "J/#psi");
     exc_psi->set_parameters(parsPsi);
 
     // For the neutron target we need to flip the sign of the coupling for the rho
-    amplitude exc_rho_m = new_amplitude<covariant::primakoff_effect>(kChi, "#minus #rho Exhange");
-    exc_rho->set_parameters({-gRho,   etaRho,   M_RHO,   lamRho  });
+    amplitude exc_rho_m = new_amplitude<covariant::primakoff_effect>(kChi, M_RHO, "#minus #rho Exhange");
+    exc_rho->set_parameters({-gRho,   etaRho,  lamRho  });
 
     amplitude exc_mesons_p = exc_rho + exc_omega  + exc_phi + exc_psi;
     exc_mesons_p->set_id("Exclusive");
