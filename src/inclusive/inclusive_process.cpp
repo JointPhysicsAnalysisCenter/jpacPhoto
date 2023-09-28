@@ -170,7 +170,6 @@ namespace jpacPhoto
         return _s + _mX2 - 2*sqrt(_s)*EfromXY(x, sqrt(y2));
     }; 
 
-
     // Similarly, momentum transfer from XY
     double raw_inclusive_process::TfromXY(double x, double y)
     {
@@ -179,8 +178,8 @@ namespace jpacPhoto
     double raw_inclusive_process::TfromXY2(double x, double y2){ return TfromXY(x, sqrt(y2)); };
 
     // Bounds of integration for T at fixed X
-    double raw_inclusive_process::TMINfromX(double x) { return TfromXY(x, sqrt(1 - x*x)); };
-    double raw_inclusive_process::TMAXfromX(double x) { return TfromXY(x, 0); };
+    double raw_inclusive_process::TMINfromX(double x) { return TMINfromM2( M2fromXY(x, sqrt(1.-x*x))); };
+    double raw_inclusive_process::TMAXfromX(double x) { return TMAXfromM2( M2fromXY(x, 0)); };
 
     // Jacobian for mixed variables
     double raw_inclusive_process::jacobianTX(double t, double x)
