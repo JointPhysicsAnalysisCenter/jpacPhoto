@@ -99,12 +99,13 @@ namespace jpacPhoto
             inline double G_E(double Q2)
             {
                 double z  = z_conformal(Q2);
+
                 auto pars = (_option == kProton) ? _GEp_pars : _GEn_pars;
 
                 double sum = 0;
                 for (int i = 0; i < pars.size(); i++)
                 {
-                    sum += pars[i] * pow(z, i);
+                    sum += pars[i] * pow(z, double(i));
                 };
                 return sum;
             };
@@ -114,14 +115,16 @@ namespace jpacPhoto
             inline double G_M(double Q2)
             {
                 double z  = z_conformal(Q2);
+
                 auto pars = (_option == kProton) ? _GMp_pars : _GMn_pars;
+                double mu = (_option == kProton) ? _mup : _mun;
 
                 double sum = 0;
                 for (int i = 0; i < pars.size(); i++)
                 {
                     sum += pars[i] * pow(z, double(i));
                 };
-                return sum;
+                return mu*sum;
             }
 
             // Simple dipole form factor
@@ -170,8 +173,7 @@ namespace jpacPhoto
             inline lorentz_tensor<complex,1> bottom_coupling()
             {
                 // Recalculate form_factors 
-                double mu  =  (_option == kProton) ? _mup : _mun;
-                double GE  =  G_E(-_t), GM = mu*G_M(-_t);
+                double GE  =  G_E(-_t), GM = G_M(-_t);
                 double tau =  -_t/(4*M2_PROTON);
 
                 auto u     = _covariants->u();    // Target spinor
