@@ -12,10 +12,10 @@
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"
-#include "covariant/primakoff_effect.hpp"
+#include "covariant/photon_exchange.hpp"
 #include "analytic/vector_exchange.hpp"
 
-void primakoff_compare()
+void X_compare()
 {
     using namespace jpacPhoto;
     using namespace covariant;
@@ -26,7 +26,7 @@ void primakoff_compare()
     // -----------------------------------------
     // Pure Primakoff
 
-    amplitude primakoff = new_amplitude<primakoff_effect>(kX, "#gamma^{*}");
+    amplitude primakoff = new_amplitude<photon_exchange>(kX, "#gamma^{*}");
     primakoff->set_parameters({3.2E-3, 1, 0});
     
     // cross section in femto
@@ -38,10 +38,10 @@ void primakoff_compare()
     //-----------------------------------------
     // Rescaling the Primakoff with VMD to get the meson exchange
 
-    amplitude rho_VMD   = new_amplitude<primakoff_effect>(kX, M_RHO, "#rho");
+    amplitude rho_VMD   = new_amplitude<photon_exchange>(kX, M_RHO, "#rho");
     rho_VMD->set_parameters(  {3.2E-3, 16.37, 1.4});
 
-    amplitude omega_VMD = new_amplitude<primakoff_effect>(kX, M_OMEGA, "#omega");
+    amplitude omega_VMD = new_amplitude<photon_exchange>(kX, M_OMEGA, "#omega");
     omega_VMD->set_parameters({3.2E-3, 56.34, 1.2});
 
     amplitude sum_VMD   = rho_VMD + omega_VMD;
@@ -74,7 +74,7 @@ void primakoff_compare()
     p1.add_header("#gamma^{*} exchange");
 
     p1.add_curve(  {kX->Wth(), 7}, sig_fb, "#it{p}");
-    primakoff->set_option(  primakoff_effect::kNeutron);
+    primakoff->set_option(  photon_exchange::kNeutron);
     p1.add_curve(  {kX->Wth(), 7}, sig_fb, "#it{n}");
 
     // Plot of vector meson exchanges in nb 
@@ -91,7 +91,7 @@ void primakoff_compare()
     p2.add_curve(  sigma_w, sum_VMD, {kX->Wth(), 7});
     p2.add_dashed( sigma_w, sum,     {kX->Wth(), 7});
 
-    sum_VMD->set_option(  primakoff_effect::kNeutron);
+    sum_VMD->set_option(  photon_exchange::kNeutron);
     sum_VMD->set_id("#it{n}");
     omega_VMD->set_parameters({-3.2E-3, 56.34, 1.2}); // For the neutron, the omega term gains an overall minus sign
     p2.add_curve(  sigma_w, sum_VMD, {kX->Wth(), 7});

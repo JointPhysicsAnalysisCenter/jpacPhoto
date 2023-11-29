@@ -12,17 +12,17 @@
 // [1] - https://arxiv.org/abs/0712.3731
 // ------------------------------------------------------------------------------
 
-#include "sigma_tot/ChristyBosted_F.hpp"
+#include "sigma_tots/CB_F.hpp"
 #include "plotter.hpp"
 
 void CB_sigmaLT()
 {
     using namespace jpacPhoto;
 
-    auto CB = dynamic_pointer_cast<ChristyBosted_F>(new_inclusive_function<ChristyBosted_F>(1)); 
+    auto CB = dynamic_pointer_cast<CB_F>(new_inclusive_function<CB_F>(1)); 
 
-    int p = ChristyBosted_F::kProton;
-    int n = ChristyBosted_F::kNeutron;
+    int p = CB_F::kProton;
+    int n = CB_F::kNeutron;
 
     // Pick some fixed Q2
     int    iso;

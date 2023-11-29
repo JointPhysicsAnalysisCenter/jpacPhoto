@@ -12,8 +12,8 @@
 // [1] 	arXiv:2209.05882 [hep-ph]
 // ------------------------------------------------------------------------------
 
-#include "sigma_tot/PDG.hpp"
-#include "sigma_tot/JPAC_piN.hpp"
+#include "sigma_tots/PDG_piN.hpp"
+#include "sigma_tots/JPAC_piN.hpp"
 #include "plotter.hpp"
 
 void sigmatot_piN()

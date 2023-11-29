@@ -9,8 +9,8 @@
 //               dwinney@scnu.edu.cn
 // ------------------------------------------------------------------------------
 
-#ifndef PDG_HPP
-#define PDG_HPP
+#ifndef PDG_PIN_HPP
+#define PDG_PIN_HPP
 
 #include "constants.hpp"
 #include "inclusive_function.hpp"

@@ -12,8 +12,8 @@
 // [1] - https://arxiv.org/abs/1707.09063
 // ------------------------------------------------------------------------------
 
-#ifndef PRIMAKOFF_HPP
-#define PRIMAKOFF_HPP
+#ifndef PHOTON_EXCHANGE_HPP
+#define PHOTON_EXCHANGE_HPP
 
 #include "constants.hpp"
 #include "kinematics.hpp"
@@ -24,17 +24,17 @@ namespace jpacPhoto
 {
     namespace covariant
     {
-        class primakoff_effect : public raw_amplitude
+        class photon_exchange : public raw_amplitude
         {
             public: 
 
-            primakoff_effect(amplitude_key key, kinematics xkinem, std::string id = "primakoff_effect")
+            photon_exchange(amplitude_key key, kinematics xkinem, std::string id = "photon_exchange")
             : raw_amplitude(key, xkinem, id), _mEx(0)
             {
                 initialize(3);
             };
 
-            primakoff_effect(amplitude_key key, kinematics xkinem, double mEx, std::string id = "primakoff_effect")
+            photon_exchange(amplitude_key key, kinematics xkinem, double mEx, std::string id = "photon_exchange")
             : raw_amplitude(key, xkinem, id), _mEx(mEx)
             {
                 initialize(3);

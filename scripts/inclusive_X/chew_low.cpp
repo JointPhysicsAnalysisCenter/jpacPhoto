@@ -24,7 +24,7 @@ void chew_low()
     using namespace jpacPhoto;
     using complex = std::complex<double>;
 
-    inclusive_process X = new_inclusive_process<phase_space>(M_X3872, M_PROTON + M_PION, "X(3872) Phase space");
+    inclusive_process X = new_inclusive_process<inclusive::phase_space>(M_X3872, M_PROTON + M_PION, "X(3872) Phase space");
 
     double Wth = M_PROTON + M_PION;
     std::array<double,2> bounds;

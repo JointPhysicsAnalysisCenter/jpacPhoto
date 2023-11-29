@@ -11,17 +11,17 @@
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"
-#include "inclusive/DIS_like.hpp"
+#include "inclusive/vector_exchange.hpp"
 #include "analytic/vector_exchange.hpp"
-#include "covariant/primakoff_effect.hpp"
+#include "covariant/photon_exchange.hpp"
 #include "analytic/vector_exchange.hpp"
 
-void chic1_compare()
+void chic1()
 {
     using namespace jpacPhoto;
 
-    const int p = inclusive::DIS_like::kProton;
-    const int n = inclusive::DIS_like::kNeutron;
+    const int p = inclusive::vector_exchange::kProton;
+    const int n = inclusive::vector_exchange::kNeutron;
 
     double Wth = M_CHIC1 + M_PROTON;
     
@@ -53,13 +53,13 @@ void chic1_compare()
     //----------------------------------------------------------------------------
     // Set up inclusive amplitudes
 
-    inclusive_process inc_omega = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, M_OMEGA, "#omega");
+    inclusive_process inc_omega = new_inclusive_process<inclusive::vector_exchange>(M_CHIC1, M_OMEGA, "#omega");
     inc_omega->set_parameters(parsOmega);
 
-    inclusive_process inc_rho   = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, M_RHO, "#rho");
+    inclusive_process inc_rho   = new_inclusive_process<inclusive::vector_exchange>(M_CHIC1, M_RHO, "#rho");
     inc_rho->set_parameters(parsRho);
 
-    inclusive_process inc_phi   = new_inclusive_process<inclusive::DIS_like>(M_CHIC1, M_PHI, "#phi");
+    inclusive_process inc_phi   = new_inclusive_process<inclusive::vector_exchange>(M_CHIC1, M_PHI, "#phi");
     inc_phi->set_parameters(parsPhi);
 
     std::vector<inclusive_process> exchanges = {inc_rho, inc_omega, inc_phi};
@@ -70,20 +70,20 @@ void chic1_compare()
     kinematics kChi = new_kinematics(M_CHIC1);
     kChi->set_meson_JP(AXIALVECTOR);
 
-    amplitude exc_omega = new_amplitude<covariant::primakoff_effect>(kChi, M_OMEGA, "#omega");
+    amplitude exc_omega = new_amplitude<covariant::photon_exchange>(kChi, M_OMEGA, "#omega");
     exc_omega->set_parameters(parsOmega);
 
-    amplitude exc_rho   = new_amplitude<covariant::primakoff_effect>(kChi, M_RHO, "#rho");
+    amplitude exc_rho   = new_amplitude<covariant::photon_exchange>(kChi, M_RHO, "#rho");
     exc_rho->set_parameters(parsRho);
 
-    amplitude exc_phi   = new_amplitude<covariant::primakoff_effect>(kChi, M_PHI, "#phi");
+    amplitude exc_phi   = new_amplitude<covariant::photon_exchange>(kChi, M_PHI, "#phi");
     exc_phi->set_parameters(parsPhi);
 
-    amplitude exc_psi   = new_amplitude<covariant::primakoff_effect>(kChi, M_JPSI, "J/#psi");
+    amplitude exc_psi   = new_amplitude<covariant::photon_exchange>(kChi, M_JPSI, "J/#psi");
     exc_psi->set_parameters(parsPsi);
 
     // For the neutron target we need to flip the sign of the coupling for the rho
-    amplitude exc_rho_m = new_amplitude<covariant::primakoff_effect>(kChi, M_RHO, "#minus #rho Exhange");
+    amplitude exc_rho_m = new_amplitude<covariant::photon_exchange>(kChi, M_RHO, "#minus #rho Exhange");
     exc_rho->set_parameters({-gRho,   etaRho,  lamRho  });
 
     amplitude exc_mesons_p = exc_rho + exc_omega  + exc_phi + exc_psi;
@@ -131,7 +131,7 @@ void chic1_compare()
     // Aux functions to help plotting easier
 
     // Bounds to plot
-    std::array<double,2> NT = {Wth, 7};
+    std::array<double,2> NT = {Wth + EPS, 7};
     
     // For meson exchanges we include both rho and omega contributions
     auto inc_mesons = [&]  (double W)
@@ -162,7 +162,7 @@ void chic1_compare()
     
     p1.set_curve_points(100);
     p1.set_logscale(false, true);
-    p1.set_ranges({4.3, 7}, {1E-4, 300});
+    p1.set_ranges({4.35, 7}, {1E-4, 300});
     p1.set_legend(0.22, 0.7);
     p1.add_header("Exclusive");
     p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi#it{p})  [nb]");

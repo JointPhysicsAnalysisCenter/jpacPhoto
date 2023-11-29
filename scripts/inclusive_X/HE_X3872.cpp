@@ -11,16 +11,16 @@
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"
-#include "inclusive/DIS_like.hpp"
+#include "inclusive/vector_exchange.hpp"
 #include "regge/vector_exchange.hpp"
-#include "covariant/primakoff_effect.hpp"
+#include "covariant/photon_exchange.hpp"
 
 void HE_X3872()
 {
     using namespace jpacPhoto;
 
-    const int p = inclusive::DIS_like::kProton;
-    const int n = inclusive::DIS_like::kNeutron;
+    const int p = inclusive::vector_exchange::kProton;
+    const int n = inclusive::vector_exchange::kNeutron;
 
     double Wth = M_X3872 + M_PROTON;
     
@@ -62,15 +62,15 @@ void HE_X3872()
     //----------------------------------------------------------------------------
     // Set up inclusive amplitudes
 
-    inclusive_process inc_gamma = new_inclusive_process<inclusive::DIS_like>(M_X3872, 0, "Inclusive");
+    inclusive_process inc_gamma = new_inclusive_process<inclusive::vector_exchange>(M_X3872, 0, "Inclusive");
     inc_gamma->set_parameters(parsGamma);
     inc_gamma->reggeized(true);
 
-    inclusive_process inc_omega = new_inclusive_process<inclusive::DIS_like>(M_X3872, M_OMEGA, "Inclusive");
+    inclusive_process inc_omega = new_inclusive_process<inclusive::vector_exchange>(M_X3872, M_OMEGA, "Inclusive");
     inc_omega->reggeized(true);
     inc_omega->set_parameters(parsOmega);
 
-    inclusive_process inc_rho   = new_inclusive_process<inclusive::DIS_like>(M_X3872, M_RHO, "Inclusive");
+    inclusive_process inc_rho   = new_inclusive_process<inclusive::vector_exchange>(M_X3872, M_RHO, "Inclusive");
     inc_rho->reggeized(true);
     inc_rho->set_parameters(parsRho);
 
@@ -80,7 +80,7 @@ void HE_X3872()
     kinematics kX = new_kinematics(M_X3872);
     kX->set_meson_JP(AXIALVECTOR);
 
-    amplitude exc_gamma = new_amplitude<covariant::primakoff_effect>(kX, "#gamma^{*} exchange");
+    amplitude exc_gamma = new_amplitude<covariant::photon_exchange>(kX, "#gamma^{*} exchange");
     exc_gamma->set_parameters(parsGamma);
     
     // X(3872)

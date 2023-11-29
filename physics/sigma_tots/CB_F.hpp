@@ -12,8 +12,8 @@
 // [1] - https://arxiv.org/abs/0712.3731
 // ------------------------------------------------------------------------------
 
-#ifndef ChristyBosted_HPP
-#define ChristyBosted_HPP
+#ifndef CB_HPP
+#define CB_HPP
 
 #include "constants.hpp"
 #include "data_set.hpp"
@@ -151,11 +151,11 @@ namespace jpacPhoto
     };
 
     // Now we can write the form factors from Bosted and Christy in terms of the above 
-    class ChristyBosted_F : public raw_inclusive_function
+    class CB_F : public raw_inclusive_function
     {
         public:
 
-        ChristyBosted_F(unsigned x, unsigned y = kProton)
+        CB_F(unsigned x, unsigned y = kProton)
         {
             if (x != 1 && x != 2)
             {

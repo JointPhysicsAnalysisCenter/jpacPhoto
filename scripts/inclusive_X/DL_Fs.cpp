@@ -13,16 +13,16 @@
 // [1] - https://arxiv.org/abs/hep-ph/0402081
 // ------------------------------------------------------------------------------
 
-#include "sigma_tot/DonnachieLandshoff_F.hpp"
+#include "sigma_tots/DL_F.hpp"
 #include "plotter.hpp"
 
-void DonnachieLandshoff_Fs()
+void DL_Fs()
 {
     using namespace jpacPhoto;
     using complex = std::complex<double>;
 
-    total_xsection F1 = new_inclusive_function<DonnachieLandshoff_F>(1);
-    total_xsection F2 = new_inclusive_function<DonnachieLandshoff_F>(2);
+    inclusive_function F1 = new_inclusive_function<DL_F>(1);
+    inclusive_function F2 = new_inclusive_function<DL_F>(2);
 
     std::vector<std::array<double,2>> Q2xs = 
     {

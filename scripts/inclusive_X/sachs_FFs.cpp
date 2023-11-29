@@ -18,13 +18,11 @@
 void sachs_FFs()
 {
     using namespace jpacPhoto;
-    using namespace covariant;
-
     
     kinematics kX = new_kinematics(M_X3872);
     kX->set_meson_JP(AXIALVECTOR);
 
-    auto primakoff = new_raw_amplitude<photon_exchange>(kX);
+    auto primakoff = new_raw_amplitude<covariant::photon_exchange>(kX);
 
     // Standard dipole form factor
     auto GD = [&] (double Q2)

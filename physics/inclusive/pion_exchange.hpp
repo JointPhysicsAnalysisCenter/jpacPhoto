@@ -14,8 +14,8 @@
 #include "constants.hpp"
 #include "inclusive_process.hpp"
 #include "inclusive_function.hpp"
-#include "sigma_tot/JPAC_piN.hpp"
-#include "sigma_tot/PDG.hpp"
+#include "sigma_tots/JPAC_piN.hpp"
+#include "sigma_tots/PDG_piN.hpp"
 #include "cgamma.hpp"
 
 namespace jpacPhoto

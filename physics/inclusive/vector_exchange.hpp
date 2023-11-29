@@ -9,23 +9,23 @@
 //               dwinney@scnu.edu.cn
 // ------------------------------------------------------------------------------
 
-#ifndef DIS_LIKE_HPP       
-#define DIS_LIKE_HPP
+#ifndef VECTOR_EXCHANGE_HPP       
+#define VECTOR_EXCHANGE_HPP
 
 #include "constants.hpp"
 #include "inclusive_process.hpp"
 #include "cgamma.hpp"
-#include "sigma_tot/combined_F.hpp"
+#include "sigma_tots/combined_F.hpp"
 
 namespace jpacPhoto
 {
     namespace inclusive
     {
-        class DIS_like : public raw_inclusive_process
+        class vector_exchange : public raw_inclusive_process
         {
             public: 
 
-            DIS_like(inclusive_key key, double mX, std::string id = "")
+            vector_exchange(inclusive_key key, double mX, std::string id = "")
             : raw_inclusive_process(key, mX, id),
               _photon(true), _mEx2(0),
               F1(new_inclusive_function<combined_F>(1, kProton)),
@@ -34,7 +34,7 @@ namespace jpacPhoto
                 set_N_pars(3);
             };
             
-            DIS_like(inclusive_key key, double mX, int pn, std::string id = "")
+            vector_exchange(inclusive_key key, double mX, int pn, std::string id = "")
             : raw_inclusive_process(key, mX, id), 
               _photon(true), _mEx2(0),
               F1(new_inclusive_function<combined_F>(1, pn)),
@@ -43,7 +43,7 @@ namespace jpacPhoto
                 set_N_pars(3);
             };
 
-            DIS_like(inclusive_key key, double mX, double mE, std::string id = "")
+            vector_exchange(inclusive_key key, double mX, double mE, std::string id = "")
             : raw_inclusive_process(key, mX, id),
               _photon(is_zero(mE)), _mEx2(mE*mE),
               F1(new_inclusive_function<combined_F>(1, kProton)),
@@ -52,7 +52,7 @@ namespace jpacPhoto
                 set_N_pars(3);
             };
 
-            DIS_like(inclusive_key key, double mX, double mE, int pn, std::string id = "")
+            vector_exchange(inclusive_key key, double mX, double mE, int pn, std::string id = "")
             : raw_inclusive_process(key, mX, id), 
               _photon(is_zero(mE)), _mEx2(mE*mE),
               F1(new_inclusive_function<combined_F>(1, pn)),
@@ -119,8 +119,8 @@ namespace jpacPhoto
             {
                 if (_photon && _regge)
                 {
-                    F1 = new_inclusive_function<DonnachieLandshoff_F>(1);
-                    F2 = new_inclusive_function<DonnachieLandshoff_F>(2);  
+                    F1 = new_inclusive_function<DL_F>(1);
+                    F2 = new_inclusive_function<DL_F>(2);  
                     return;
                 };
 
@@ -138,8 +138,8 @@ namespace jpacPhoto
                 _regge = x; 
                 if (_photon)
                 {
-                    F1 = new_inclusive_function<DonnachieLandshoff_F>(1);
-                    F2 = new_inclusive_function<DonnachieLandshoff_F>(2);   
+                    F1 = new_inclusive_function<DL_F>(1);
+                    F2 = new_inclusive_function<DL_F>(2);   
                 };
             };
 

@@ -20,8 +20,8 @@
 #include "constants.hpp"
 #include "data_set.hpp"
 #include "inclusive_function.hpp"
-#include "sigma_tot/ChristyBosted_F.hpp"
-#include "sigma_tot/DonnachieLandshoff_F.hpp"
+#include "sigma_tots/CB_F.hpp"
+#include "sigma_tots/DL_F.hpp"
 
 #include <Math/Interpolator.h>
 
@@ -33,8 +33,8 @@ namespace jpacPhoto
 
         combined_F(unsigned x, int p_or_n)
         : raw_inclusive_function({0, M_PROTON}),
-          _low( new_inclusive_function<ChristyBosted_F>(x, p_or_n)),
-          _high(new_inclusive_function<DonnachieLandshoff_F>(x))
+          _low( new_inclusive_function<CB_F>(x, p_or_n)),
+          _high(new_inclusive_function<DL_F>(x))
         {
             if (x != 1 && x != 2)
             {

@@ -22,11 +22,11 @@
 
 namespace jpacPhoto
 {
-    class DonnachieLandshoff_F : public raw_inclusive_function
+    class DL_F : public raw_inclusive_function
     {
         public: 
 
-        DonnachieLandshoff_F(unsigned x)
+        DL_F(unsigned x)
         : raw_inclusive_function({0, M_PROTON}) // Massless photon
         {
             if (x != 1 && x != 2)
