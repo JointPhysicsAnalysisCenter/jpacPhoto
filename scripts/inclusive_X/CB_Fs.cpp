@@ -19,78 +19,40 @@ void CB_Fs()
 {
     using namespace jpacPhoto;
 
-    int p = CB_F::kProton;
-    int n = CB_F::kNeutron;
+    int p = CB_F::kProton, n = CB_F::kNeutron;
 
-    auto pF1 = new_inclusive_function<CB_F>(1, p); 
-    auto pF2 = new_inclusive_function<CB_F>(2, p); 
+    auto pF1 = new_inclusive_function<CB_F>(1, p), pF2 = new_inclusive_function<CB_F>(2, p); 
+    auto nF1 = new_inclusive_function<CB_F>(1, n), nF2 = new_inclusive_function<CB_F>(2, n); 
 
-    auto nF1 = new_inclusive_function<CB_F>(1, n); 
-    auto nF2 = new_inclusive_function<CB_F>(2, n); 
 
-    double Q2;     
-    int iso;
-
-    // Lambdas for all the different curves we want to plot
-
-    auto F1 = [&](double W)
-    {
-        return (iso == p) ? pF1->evaluate(W*W, -Q2)
-                          : nF1->evaluate(W*W, -Q2);
-    };
-
-    auto F2 = [&](double W)
-    {
-        return (iso == p) ? pF2->evaluate(W*W, -Q2)
-                          : nF2->evaluate(W*W, -Q2);
-    };
-
-    plotter plotter;
-
+    std::array<double,2> range = {M_PROTON+M_PION, 3};
     // F1 plot
+    plotter plotter;
     plot p1 = plotter.new_plot();
     p1.set_curve_points(1000);
     p1.set_ranges({1, 3}, {0, 4});
-    p1.set_labels("#it{W} [GeV]", "#it{F}_{1}(#it{W}, #it{Q}^{2})");
-    p1.set_legend(0.25,0.7);
+    p1.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{1}(#it{M}_{#it{X}}^{2}, #it{t})");
+    p1.set_legend(0.25,0.75);
 
-    Q2 = 0.1;
-    iso = p;
-    p1.add_curve( {M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 0.1 GeV^{2}");
-    iso = n;
-    p1.add_dashed({M_PROTON+M_PION, 3}, F1);
-    
-    Q2 = 0.5;
-    p1.add_curve( {M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 0.5 GeV^{2}");
-    iso = n;
-    p1.add_dashed({M_PROTON+M_PION, 3}, F1);
+    p1.add_curve( range, [&](double w){ return pF1->evaluate(w*w, -0.1);}, "#it{t} = #minus 0.1 GeV^{2}");
+    p1.add_dashed(range, [&](double w){ return nF1->evaluate(w*w, -0.1);});
+    p1.add_curve( range, [&](double w){ return pF1->evaluate(w*w, -1.0);}, "#it{t} = #minus 1.0 GeV^{2}");
+    p1.add_dashed(range, [&](double w){ return nF1->evaluate(w*w, -1.0);});
+    p1.add_curve( range, [&](double w){ return pF1->evaluate(w*w, -10);}, "#it{t} = #minus 10 GeV^{2}");
+    p1.add_dashed(range, [&](double w){ return nF1->evaluate(w*w, -10);});
 
-    Q2 = 1.0;
-    p1.add_curve( {M_PROTON+M_PION, 3}, F1, "#it{Q}^{2} = 1.0 GeV^{2}");
-    iso = n;
-    p1.add_dashed({M_PROTON+M_PION, 3}, F1);
-    
     plot p2 = plotter.new_plot();
     p2.set_curve_points(1000);
     p2.set_ranges({1, 3}, {0, 0.5});
-    p2.set_labels("#it{W} [GeV]", "#it{F}_{2}(#it{W}, #it{Q}^{2})");
-    p2.set_legend(0.65,0.35);
+    p2.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{2}(#it{M}_{#it{X}}^{2}, #it{t})");
+    p2.set_legend(0.25,0.75);
 
-    Q2 = 0.1;
-    iso = p;
-    p2.add_curve( {M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.1 GeV^{2}");
-    iso = n;
-    p2.add_dashed({M_PROTON+M_PION, 3}, F2);
-    
-    Q2 = 0.5;
-    p2.add_curve( {M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 0.5 GeV^{2}");
-    iso = n;
-    p2.add_dashed({M_PROTON+M_PION, 3}, F2);
-
-    Q2 = 1.0;
-    p2.add_curve( {M_PROTON+M_PION, 3}, F2, "#it{Q}^{2} = 1.0 GeV^{2}");
-    iso = n;
-    p2.add_dashed({M_PROTON+M_PION, 3}, F2);
+    p2.add_curve( range, [&](double w){ return pF2->evaluate(w*w, -0.1);}, "#it{t} = #minus 0.1 GeV^{2}");
+    p2.add_dashed(range, [&](double w){ return nF2->evaluate(w*w, -0.1);});
+    p2.add_curve( range, [&](double w){ return pF2->evaluate(w*w, -1.0);}, "#it{t} = #minus 1.0 GeV^{2}");
+    p2.add_dashed(range, [&](double w){ return nF2->evaluate(w*w, -1.0);});
+    p2.add_curve( range, [&](double w){ return pF2->evaluate(w*w, -10);}, "#it{t} = #minus 10 GeV^{2}");
+    p2.add_dashed(range, [&](double w){ return nF2->evaluate(w*w, -10);});
 
     plotter.combine({2,1}, {p1,p2}, "CB_Fs.pdf");
 };

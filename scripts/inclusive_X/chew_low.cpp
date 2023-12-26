@@ -12,7 +12,7 @@
 // [1] 	arXiv:2209.05882 [hep-ph]
 // ------------------------------------------------------------------------------
 
-#include "inclusive_process.hpp"
+#include "semi_inclusive.hpp"
 #include "inclusive/phase_space.hpp"
 #include "plotter.hpp"
 #include "print.hpp"
@@ -24,7 +24,7 @@ void chew_low()
     using namespace jpacPhoto;
     using complex = std::complex<double>;
 
-    inclusive_process X = new_inclusive_process<inclusive::phase_space>(M_X3872, M_PROTON + M_PION, "X(3872) Phase space");
+    semi_inclusive X = new_semi_inclusive<inclusive::phase_space>(M_X3872, M_PROTON + M_PION, "X(3872) Phase space");
 
     double Wth = M_PROTON + M_PION;
     std::array<double,2> bounds;

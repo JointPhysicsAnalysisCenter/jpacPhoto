@@ -19,81 +19,40 @@ void CB_sigmaLT()
 {
     using namespace jpacPhoto;
 
-    auto CB = dynamic_pointer_cast<CB_F>(new_inclusive_function<CB_F>(1)); 
+    int p = CB_F::kProton, n = CB_F::kNeutron, N = CB_F::kAvgNucleon;
+    auto CB = dynamic_pointer_cast<CB_F>(new_inclusive_function<CB_F>(1));
 
-    int p = CB_F::kProton;
-    int n = CB_F::kNeutron;
-
-    // Pick some fixed Q2
-    int    iso;
-    double Q2 = 0.5;
-
-    // Lambdas for all the different curves we want to plot
-    auto sigT_R   = [&](double W)
-    {
-        return CB->sigmaT_R( iso, W, Q2);
-    };
-    auto sigT_NR = [&](double W)
-    {
-        return CB->sigmaT_NR(iso, W, Q2);
-    };
-    auto sigT    = [&](double W)
-    {
-        return CB->sigma_T(  iso, W, Q2);
-    };
-
-    auto sigL_R  = [&](double W)
-    {
-        return CB->sigmaL_R( iso, W, Q2);
-    };
-    auto sigL_NR = [&](double W)
-    {
-        return CB->sigmaL_NR(iso, W, Q2);
-    };
-    auto sigL    = [&](double W)
-    {
-        return CB->sigma_L(  iso, W, Q2);
-    };
-
-    plotter plotter;
+    // Pick some fixed -t 
+    std:array<double,2> range = {M_PROTON+M_PION + 10.*EPS, 3.};
 
     // sigma_T plot
-    plot p1 = plotter.new_plot();
-    p1.set_curve_points(500);
-    p1.set_ranges({1, 3}, {0, 400});
-    p1.set_labels("#it{W} [GeV]", "#sigma_{#it{T}}(#it{W}, #it{Q}^{2})  [#mub]");
-    p1.add_header("#it{Q}^{2} = 0.5 GeV^{2}");
-    p1.set_legend(0.65,0.5);
+    plotter plotter;
+    plot pT = plotter.new_plot();
+    pT.set_curve_points(500);
+    pT.set_ranges({1, 3}, {0, 400});
+    pT.add_header("#it{t} = #minus 0.5 GeV^{2}");
+    pT.set_labels("#it{M}_{#it{X}} [GeV]", "#sigma_{#it{T}}(#it{M}_{#it{X}}^{2}, #it{t})  [#mub]");
+    pT.set_legend(0.65,0.5);
 
-    iso = p;
-    p1.add_curve( {M_PROTON+M_PION, 3}, sigT_NR, "Non-resonant");
-    iso = n;
-    p1.add_dashed({M_PROTON+M_PION, 3}, sigT_NR);
+    pT.add_curve(  range, [&](double M){ return CB->sigma_T(  p, M, 0.5); }, "Total");
+    pT.add_dashed( range, [&](double M){ return CB->sigma_T(  n, M, 0.5); });
+    pT.add_curve(  range, [&](double M){ return CB->sigmaT_R( p, M, 0.5); }, "Resonant");
+    pT.add_dashed( range, [&](double M){ return 2.*CB->sigmaT_R(N, M, 0.5) - CB->sigmaT_R(p, M, 0.5); });
+    pT.add_curve(  range, [&](double M){ return CB->sigmaT_NR(p, M, 0.5); }, "Non-resonant");
+    pT.add_dashed( range, [&](double M){ return 2.*CB->sigmaT_NR(N, M, 0.5) - CB->sigmaT_NR(p, M, 0.5); });
 
-    iso = p;
-    p1.add_curve( {M_PROTON+M_PION, 3}, sigT_R,  "Resonances");
-    iso = n;
-    p1.add_dashed({M_PROTON+M_PION, 3}, sigT_R);
+    plot pL = plotter.new_plot();
+    pL.set_curve_points(500);
+    pL.set_ranges({1, 3}, {0, 40});
+    pL.add_header("#it{t} = #minus 0.5 GeV^{2}");
+    pL.set_labels("#it{M}_{#it{X}} [GeV]", "#sigma_{#it{L}}(#it{M}_{#it{X}}^{2}, #it{t})  [#mub]");
+    pL.set_legend(0.65,0.6);
 
-    iso = p;
-    p1.add_curve( {M_PROTON+M_PION, 3}, sigT,    "Total");
-    iso = n;
-    p1.add_dashed({M_PROTON+M_PION, 3}, sigT);
+    pL.add_curve(  range, [&](double M){ return CB->sigma_L(  p, M, 0.5); }, "Total");
+    pL.add_dashed( range, [&](double M){ return CB->sigma_L(  n, M, 0.5); });
+    pL.add_curve(  range, [&](double M){ return CB->sigmaL_R( p, M, 0.5); }, "Resonant");
+    pL.add_curve(  range, [&](double M){ return CB->sigmaL_NR(p, M, 0.5); }, "Non-resonant");
 
-    // sigma_L plot
-    plot p2 = plotter.new_plot();
-    p2.set_curve_points(500);
-    p2.set_ranges({1, 3}, {0, 35});
-    p2.set_labels("#it{W} [GeV]", "#sigma_{#it{L}}(#it{W}, #it{Q}^{2})  [#mub]");
-    p2.add_header("#it{Q}^{2} = 0.5 GeV^{2}");
-    p2.set_legend(0.65,0.6);
+    plotter.combine({2,1}, {pT, pL}, "sigmas.pdf");
 
-    iso = p;
-    p2.add_curve( {M_PROTON+M_PION, 3}, sigL_NR, "Non-resonant");
-    p2.add_curve( {M_PROTON+M_PION, 3}, sigL_R,  "Resonances");
-    p2.add_curve( {M_PROTON+M_PION, 3}, sigL,    "Total");
-    iso = n;
-    p2.add_dashed({M_PROTON+M_PION, 3}, sigL);
-
-    plotter.combine({2,1}, {p1, p2}, "CB_sigmas.pdf");
 };

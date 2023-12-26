@@ -162,13 +162,13 @@ namespace jpacPhoto
                 error("CB_F", "Error! Integer argument must be 1 or 2 for F_1 and F_2 respectively! Defaulting to F_1...");
                 return;
             }
-            if (y != kProton && y != kNeutron)
+            _mode = x;
+            if (y != kProton && y != kNeutron && y != kAvgNucleon)
             {
-                error("CB_F", "Error! Particle selection argument must be kProton (0) or kNeutron (1)! Defaulting to proton...");
+                error("CB_F", "Error! Particle selection argument must be kProton (0), kNeutron (1), or kAvgNucleon (2)! Defaulting to proton...");
                 return;
             }
-
-            _mode = x; _isospin = y;
+            _isospin = y;
         };
 
         inline double evaluate(double s, double q2)
@@ -190,21 +190,24 @@ namespace jpacPhoto
         // ----------------------------------------------------------------------
         // POLARIZED CROSS SECTIONS
 
-        inline double sigma_T(int iso, double W, double Q2){ return sigmaT_NR(iso, W, Q2) + sigmaT_R(iso, W, Q2); };
+        inline double sigma_T(int iso, double W, double Q2)
+        {
+            double p = sigmaT_NR(kProton, W, Q2) + sigmaT_R(kProton, W, Q2);
+            if (iso == kProton) return p;
+            
+            double N = sigmaT_NR(kAvgNucleon, W, Q2) + sigmaT_R(kAvgNucleon, W, Q2);
+            if (iso == kAvgNucleon) return N;
+
+            return 2*N - p;
+
+        };
         inline double sigma_T(int iso){ return sigma_T(iso, _w, _Q2); };
 
         inline double sigma_L(int iso, double W, double Q2)
         { 
-            if (iso == kProton)
-            {
-                return sigmaL_NR(kProton, W, Q2) + sigmaL_R(kProton, W, Q2); 
-            }
-            else 
-            {
-                // Check threshold
-                if (W <= M_PROTON + M_PION + EPS) return 0;
-                return (sigma_L(kProton, W, Q2) / sigma_T(kProton, W, Q2)) * sigma_T(kNeutron, W, Q2);
-            };
+            if (W <= M_PROTON + M_PION) return 0;
+            if (iso == kProton) return sigmaL_NR(kProton, W, Q2) + sigmaL_R(kProton, W, Q2); 
+            return (sigma_L(kProton, W, Q2) / sigma_T(kProton, W, Q2)) * sigma_T(kNeutron, W, Q2);
         };
         inline double sigma_L(int iso){ return sigma_L(iso, _w, _Q2); };
     
@@ -216,6 +219,7 @@ namespace jpacPhoto
         {
             // Check threshold
             if (W <= M_PROTON + M_PION) return 0;
+            _w = W; _s = W*W; _Q2 = Q2;
             
             // Parameters
             double Q20 = 0.05;
@@ -257,6 +261,8 @@ namespace jpacPhoto
             // Check threshold
             if (W <= M_PROTON + M_PION) return 0;
             if (iso == kNeutron) return 0;
+
+            _w = W; _s = W*W; _Q2 = Q2;
 
             // Parameters
             double sigma0 = 86.7;
@@ -305,7 +311,7 @@ namespace jpacPhoto
         };
 
         // Flags to denote which cross-sections we're looking for
-        static const int kProton = 0, kNeutron = 1;
+        static const int kProton = 0, kNeutron = 1, kAvgNucleon = 2;
 
         // ----------------------------------------------------------------------
     
