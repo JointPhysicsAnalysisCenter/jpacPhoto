@@ -13,7 +13,8 @@
 // [1] 	arXiv:2209.05882 [hep-ph]
 // ------------------------------------------------------------------------------
 
-#include "inclusive_process.hpp"
+#include "semi_inclusive.hpp"
+#include "kinematics.hpp"
 #include "inclusive/pion_exchange.hpp"
 #include "plotter.hpp"
 
@@ -40,7 +41,7 @@ void OmegaPhoton()
     // Inclusive amplitude
     // ---------------------------------------------------------------------------
 
-    inclusive_process b1p = new_inclusive_process<inclusive::pion_exchange>(M_B1, +1, "b_{1}(1235)^{#plus}");
+    semi_inclusive b1p = new_semi_inclusive<inclusive::pion_exchange>(new_kinematics(M_B1), +1, "b_{1}(1235)^{#plus}");
     b1p->reggeized(true);
     b1p->set_parameters(0.24);
     
@@ -50,12 +51,6 @@ void OmegaPhoton()
 
     int N = 1000;
     std::array<double,2> bounds = {0.7, 1};
-
-    // b1 minus plot
-    auto dsigdx = [&](double x)
-    {
-        return b1p->dsigma_dx(s, x) * 1E-3; // in mub
-    };
     
     plot p1 = plotter.new_plot();
     p1.set_curve_points(N);
@@ -68,10 +63,10 @@ void OmegaPhoton()
 
     // Plot both the cross section with resonances 
     b1p->set_option(inclusive::pion_exchange::kJPAC);
-    p1.add_curve( bounds, dsigdx, "Inclusive #it{b}_{1}(1235)^{#plus}");
+    p1.add_curve( bounds, [&](double x){ return b1p->dsigma_dx(s, x) * 1E-3; }, "Inclusive #it{b}_{1}(1235)^{#plus}");new_kinematics(M_B1)
     // and without
     b1p->set_option(inclusive::pion_exchange::kPDG);
-    p1.add_dashed(bounds, dsigdx);
+    p1.add_dashed(bounds, [&](double x){ return b1p->dsigma_dx(s, x) * 1E-3; });
 
     p1.save("b1_OmegaPhoton.pdf");
 };

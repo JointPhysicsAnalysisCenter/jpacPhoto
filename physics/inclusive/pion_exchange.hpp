@@ -12,7 +12,7 @@
 #define PION_EXCHANGE_HPP
 
 #include "constants.hpp"
-#include "inclusive_process.hpp"
+#include "semi_inclusive.hpp"
 #include "inclusive_function.hpp"
 #include "sigma_tots/JPAC_piN.hpp"
 #include "sigma_tots/PDG_piN.hpp"
@@ -23,12 +23,12 @@ namespace jpacPhoto
     namespace inclusive
     {
 
-        class pion_exchange : public raw_inclusive_process
+        class pion_exchange : public raw_semi_inclusive
         {
             public: 
 
-            pion_exchange(key k, double mX, int pm, std::string id = "")
-            : raw_inclusive_process(k, mX, id), _pm(pm),
+            pion_exchange(key k, kinematics kinem, int pm, std::string id = "")
+            : raw_semi_inclusive(k, kinem, id), _pm(pm),
                 _sigma(new_inclusive_function<JPAC_piN>(-pm))
             {
                 set_N_pars(1);
@@ -46,16 +46,16 @@ namespace jpacPhoto
             // The invariant cross section used S T and M2 as independent vareiables
             inline double invariant_xsection(double s, double t, double xm2)
             {
+                store(s, t, xm2);
+                
                 double M2, K, P_pi;
-            
                 if (_regge)
                 {
-                    double x    = xm2;
-                    if (is_zero(x-1)) return 0;
+                    if (is_zero(_x - 1)) return 0;
 
-                    M2    = M2fromTX(t, x);
-                    P_pi  = regge_propagator(t, x);
-                    K     = (1 - x);
+                    M2    = M2fromTX(s, t, xm2);
+                    P_pi  = regge_propagator();
+                    K     = (1 - _x);
                 }
                 else 
                 {
@@ -70,7 +70,7 @@ namespace jpacPhoto
                 // Total cross-section always gets the physical M2 
                 double  sigmatot  = _sigma->evaluate(M2, t) * 1E6; // in nb
                 
-                return K/(16*PI*PI*PI) * pow(coupling(t)*P_pi, 2) * sigmatot;
+                return K/(16*PI*PI*PI) * pow(coupling()*P_pi, 2) * sigmatot;
             };
 
             // Options are the parameterization of the sigma_tot
@@ -94,29 +94,29 @@ namespace jpacPhoto
 
             protected:
 
-            inline double coupling(double t)
+            inline double coupling()
             {
                 // Exponential form factor
-                double beta_pi =  exp((t - TMINfromM2(M2_PROTON))/_lamPi/_lamPi);
+                double beta_pi =  exp((_t - TMINfromM2(_s, M2_PROTON))/_lamPi/_lamPi);
 
                 // Scalar coupling
-                double T_pi    = (_g/sqrt(_mX2)) * (_mX2 - t)/2;
+                double T_pi    = (_g/sqrt(_mX2)) * (_mX2 - _t)/2;
 
                 return beta_pi * T_pi ;
             };
 
-            inline double regge_propagator(double t, double x)
+            inline double regge_propagator()
             {
                 // Cutoff 
-                if (std::abs(t) > 8.3) return 0;
+                if (std::abs(_t) > 8.3) return 0;
 
                 // Trajectory
-                double alpha = _alpha0 + _alphap*t;
+                double alpha = _alpha0 + _alphap*_t;
 
                 // Half angle factor
                 complex xi = (1. + exp(-I*PI*alpha))/2.;
 
-                complex result = _alphap * xi * cgamma(-alpha) * pow(1 - x, -alpha);
+                complex result = _alphap * xi * cgamma(-alpha) * pow(1 - _x, -alpha);
                 return std::abs(result);
             };
 

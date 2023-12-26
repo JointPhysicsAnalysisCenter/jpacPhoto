@@ -96,23 +96,30 @@ pwave->integrated_xsection(s); // Only P-wave contribution of sum
 ```
 
 ## SEMI-INCLUSIVE DISTRIBUTIONS
-Methods to add models for inclusive processes can be added via the [`inclusive_process`](./src/inclusive_process.hpp) class. These are used for example in [[3]](#references) to investigate inclusive XYZ production. 
-Since semi-inclusive models lose helicity dependence only unpolarized observables are currently available: (Units of GeV and nb assumed where appropriate):
-| Observable                                       |   | Callable `inclusive_process` function |
+Methods to add models for inclusive processes can be added via the [`semi_inclusive`](./src/semi_inclusive.hpp) class. These are used for example in [[3]](#references) to investigate inclusive XYZ production. 
+Since semi-inclusive models are implemented at the cross section level, they lose helicity dependence only unpolarized observables are currently available: (Units of GeV and nb assumed where appropriate):
+| Observable                                       |   | Callable `semi_inclusive` function |
 |--------------------------------------------------|---|---------------------------------------|
-| Invariant cross section | $E_{\mathcal{Q}} \, \frac{d^3\sigma}{d^3\mathbf{q}}$  | `invariant_xsection(double s, double t, double M2)`  |
-| Doubly-differential cross section | $\frac{d^2\sigma}{dt \, dM^2}$, <br /> $\frac{d^2\sigma}{dt \, dx}$ <br /> $\frac{d^2\sigma}{dx \, dy^2}$  | `dsigma_dtdM2(double s, double t, double M2)` <br />  `dsigma_dtdx(double s, double t, double x)`<br /> `dsigma_dxdy2(double s, double x, double y2)` |
-| Singly-differential cross section | $\frac{d\sigma}{dt}$, <br /> $\frac{d\sigma}{dM^2}$ <br /> $\frac{d\sigma}{dx}$ <br /> $\dots$ | `dsigma_dt(double s, double t)` <br />  `dsigma_dM2(double s, double M2)`<br /> `dsigma_dx(double s, double x)` <br /> $\dots$ |
+| Lorentz-invariant cross section | $E_{\mathcal{Q}} \frac{d^3\sigma}{d^3\mathbf{q}}$  | `invariant_xsection(double s, double t, double M2)`  |
+| Doubly-differential cross section | $\frac{d^2\sigma}{dt  dM^2}$, <br /> $\frac{d^2\sigma}{dt dx}$, <br /> $\frac{d^2\sigma}{dx dy^2}$,  | `dsigma_dtdM2(double s, double t, double M2)` <br />  `dsigma_dtdx(double s, double t, double x)`<br /> `dsigma_dxdy2(double s, double x, double y2)` |
+| Singly-differential cross section | $\frac{d\sigma}{dt}$, <br /> $\frac{d\sigma}{dM^2}$, <br /> $\frac{d\sigma}{dx}$, <br /> $\dots$ | `dsigma_dt(double s, double t)` <br />  `dsigma_dM2(double s, double M2)`<br /> `dsigma_dx(double s, double x)` <br /> $\dots$ |
 | Fully integrated cross section | $\sigma$ | `integrated_xsection(double s)`|
 
 Much of the syntax is the same as with exclusive amplitudes although models are implemented at the level of amplitude-squared. 
 ``` c++
-// Inclusive Z production
-inclusive_process Z = new_inclusive_process<my_model>(M_Z, /* other parameter */);
+// Use same interface with amplitudes
+kinematics kZ = new_kinematics(M_Z);
+
+// Semi-inclusive Z production
+semi_inclusive Z = new_semi_inclusive<inclusive_model>(kZ, /* other parameter */);
 Z->set_parameters({ /* couplings, etc */ });
 
+// Some processes we want to add the exclusive amplitude
+amplitude Z_exc = new_amplitude<exclusive_model>(kZ, /* etc */);
+Z += Z_exc; // Add to the purely inclusive distribution
+
 // Get observables
-Z->integrated_xsection(double s);
+Z->integrated_xsection(s);
 ```
 
 ##  REFERENCES

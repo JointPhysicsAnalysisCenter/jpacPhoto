@@ -11,7 +11,7 @@ ROOT_GENERATE_DICTIONARY(G__JPACPHOTO
     lorentz_tensor.hpp
     fitter.hpp
     data_set.hpp
-    inclusive_process.hpp
+    semi_inclusive.hpp
     LINKDEF JPACPHOTOLinkDef.h
 )
 add_library(JPACPHOTO SHARED ${SRC} G__JPACPHOTO.cxx )

@@ -23,7 +23,7 @@ namespace jpacPhoto
     {
         // Two amplitudes are compatible if they point to the same
         // kinematics object (i.e. are synced together)
-        bool same_kinem   = (a->_kinematics == b->_kinematics);
+        bool same_kinem   = (a->get_kinematics() == b->get_kinematics());
 
         // But also they must have helicites defined in the same frame
         // TODO: add helicity crossing relations so this is not a necessity
@@ -75,7 +75,7 @@ namespace jpacPhoto
     {
         // Two amplitudes are compatible if they point to the same
         // kinematics object (i.e. are synced together)
-        bool same_kinem   = (new_amp->_kinematics == _kinematics);
+        bool same_kinem   = (new_amp->get_kinematics() == _kinematics);
 
         // But also they must have helicites defined in the same frame
         // TODO: add helicity crossing relations so this is not a necessity
@@ -93,7 +93,7 @@ namespace jpacPhoto
         // If our list is empty, capture the first entry we encounter
         if (_subamplitudes.size() == 0)
         {
-            _kinematics = new_amp->_kinematics; _N_pars     = new_amp->N_pars();
+            _kinematics = new_amp->get_kinematics(); _N_pars     = new_amp->N_pars();
             _subamplitudes.push_back(new_amp);
             return;
         };

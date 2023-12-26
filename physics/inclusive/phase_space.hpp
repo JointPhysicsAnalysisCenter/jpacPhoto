@@ -12,18 +12,19 @@
 #define PHASESPACE_HPP
 
 #include "constants.hpp"
-#include "inclusive_process.hpp"
+#include "semi_inclusive.hpp"
+#include "kinematics.hpp"
 
 namespace jpacPhoto
 {
     namespace inclusive
     {
-        class phase_space : public raw_inclusive_process
+        class phase_space : public raw_semi_inclusive
         {
             public: 
 
-            phase_space(key k, double mX, double mMin, std::string id = "")
-            : raw_inclusive_process(k, mX, id), _mMin2(mMin*mMin)
+            phase_space(key k, kinematics mX, double mMin, std::string id = "")
+            : raw_semi_inclusive(k, mX, id), _mMin2(mMin*mMin)
             {
                 set_N_pars(0);
             };

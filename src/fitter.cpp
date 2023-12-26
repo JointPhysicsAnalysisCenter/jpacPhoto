@@ -222,7 +222,7 @@ namespace jpacPhoto
             double s = W*W;
 
             double t = (data._negt) ? -data._t[i] : data._t[i];
-            if (data._tprime) t += _amplitude->_kinematics->t_min(s);
+            if (data._tprime) t += _amplitude->get_kinematics()->t_min(s);
 
             double sigma_th = pow(_norm._value, 2) * _amplitude->differential_xsection(s, t);
             double sigma_ex = data._obs[i];

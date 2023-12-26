@@ -10,11 +10,13 @@
 //               dwinney@scnu.edu.cn
 // ------------------------------------------------------------------------------
 
-#ifndef INCLUSIVE_PROCESS_HPP
-#define INCLUSIVE_PROCESS_HPP
+#ifndef SEMI_INCLUSIVE_HPP
+#define SEMI_INCLUSIVE_HPP
 
 #include "constants.hpp"
 #include "key.hpp"
+#include "kinematics.hpp"
+#include "amplitude.hpp"
 
 #include "Math/IntegratorMultiDim.h"
 #include "Math/GSLIntegrator.h"
@@ -28,35 +30,57 @@
 namespace jpacPhoto
 {
     // Forward declare for typedef 
-    class raw_inclusive_process;
+    class raw_semi_inclusive;
 
     // Similar to amplitudes, we only want our inclusive objects to exist as pointers 
-    using inclusive_process = std::shared_ptr<raw_inclusive_process>;
+    using semi_inclusive = std::shared_ptr<raw_semi_inclusive>;
 
+    //----------------------------------------------------------------------------------------------
     // Use these functions as our constructor
     template<class A>
-    inline inclusive_process new_inclusive_process(double mX, std::string id)
+    inline semi_inclusive new_semi_inclusive(kinematics mX, std::string id)
     {
         auto ptr = std::make_shared<A>(key(), mX, id);
-        return std::static_pointer_cast<raw_inclusive_process>(ptr);
+        return std::static_pointer_cast<raw_semi_inclusive>(ptr);
     };
 
     template<class A, class B>
-    inline inclusive_process new_inclusive_process(double mX, B parameter, std::string id)
+    inline semi_inclusive new_semi_inclusive(kinematics mX, B parameter, std::string id)
     {
         auto ptr = std::make_shared<A>(key(), mX, parameter, id);
-        return std::static_pointer_cast<raw_inclusive_process>(ptr);
+        return std::static_pointer_cast<raw_semi_inclusive>(ptr);
     };
+    
+    //----------------------------------------------------------------------------------------------
+    // Methods for adding terms together
 
-    class raw_inclusive_process
+    bool are_compatible(semi_inclusive a, semi_inclusive b);
+    bool are_compatible(semi_inclusive a, amplitude b);
+    bool are_compatible(amplitude a, semi_inclusive b);
+
+    semi_inclusive operator+(semi_inclusive a, semi_inclusive b);
+    semi_inclusive operator+(semi_inclusive a, amplitude b);
+    inline semi_inclusive operator+(amplitude a, semi_inclusive b){ return b + a; };
+    void operator+=(semi_inclusive a, amplitude b);
+
+    //----------------------------------------------------------------------------------------------
+
+    class raw_semi_inclusive
     {
         public: 
 
         // Set both observed particle and target masses
-        raw_inclusive_process(key k, double mX, std::string id)
-        : _mX2(mX*mX), _id(id)
+        raw_semi_inclusive(key k, kinematics kinem, std::string id)
+        : _kinematics(kinem), _mX2(_kinematics->get_meson_mass()*_kinematics->get_meson_mass()), 
+          _id(id)
         {};
 
+        raw_semi_inclusive(key k, kinematics kinem, std::vector<semi_inclusive> x, std::vector<amplitude> y, std::string id)
+        : _kinematics(kinem), _mX2(_kinematics->get_meson_mass()*_kinematics->get_meson_mass()),  
+          _inclusives(x), _exclusives(y),
+          _id(id)
+        {};
+        
         // Access internals
         inline double get_observed_mass(){ return sqrt(_mX2); };
         inline double get_target_mass()  { return sqrt(_mT2); };
@@ -68,14 +92,13 @@ namespace jpacPhoto
         inline void set_id(std::string id){ _id = id; };
 
         // Every implementation needs to set the minimum missing mass 
-        virtual double minimum_M2() = 0;
-
-        // Set the total center of mass energy
-        inline void   set_total_energy(double s){ _s = s; };
-        inline double get_total_energy(){ return _s; };
+        virtual double minimum_M2(){ return _inclusives[0]->minimum_M2(); };
 
         // Number of free parameters
         inline int N_pars(){ return _N_pars; };
+
+        // If we are a sum
+        inline bool is_sum(){ return (_inclusives.size() > 0) || (_exclusives.size() > 0); };
 
         // This function is what a user actually calls
         // It wraps the protected vitual method allocate_parameters() with checks of correct size and caching
@@ -99,46 +122,48 @@ namespace jpacPhoto
         // ----------------------------------------------------------------------
         // Kinematics 
 
+        kinematics get_kinematics(){ return _kinematics; };
+
         // Momentum of the photon
-        double qGamma();
+        double qGamma(double s);
 
         // Max momentum of the produced particle (exclusive limit)
-        double pMax();
+        double pMax(double s);
 
         // POLAR VARIABLES (r, cos)
-        double EfromRCOS(   double r, double cos);
-        double jacobianRCOS(double r, double cos);
+        double EfromRCOS(   double s, double r, double cos);
+        double jacobianRCOS(double s, double r, double cos);
 
         // CARTESIAN VARIABLES (x, y)
-        double EfromXY(    double x, double y);
-        double jacobianXY( double x, double y);
-        double EfromXY2(   double x, double y2);
-        double jacobianXY2(double x, double y2);
-        double XfromRCOS(  double r, double cos);
-        double XfromTM2(   double t, double M2);
+        double EfromXY(    double s, double x, double y);
+        double jacobianXY( double s, double x, double y);
+        double EfromXY2(   double s, double x, double y2);
+        double jacobianXY2(double s, double x, double y2);
+        double XfromRCOS(  double s, double r, double cos);
+        double XfromTM2(   double s, double t, double M2);
 
         // INVARIANT variables (t, M2)
-        double pXfromM2(   double M2);
-        double COSfromTM2( double t,  double M2);
-        double RfromTM2(   double t,  double M2);
-        double jacobianTM2(double t,  double M2);
-        double TfromM2COS( double M2, double cos);
-        double M2fromRCOS( double r,  double cos);
-        double TfromRCOS(  double r,  double cos);
-        double TMINfromM2( double M2);
-        double TMAXfromM2( double M2);
-        double M2MINfromT( double t);
-        double M2MAXfromT( double t);
+        double pXfromM2(   double s, double M2);
+        double COSfromTM2( double s, double t,  double M2);
+        double RfromTM2(   double s, double t,  double M2);
+        double jacobianTM2(double s, double t,  double M2);
+        double TfromM2COS( double s, double M2, double cos);
+        double M2fromRCOS( double s, double r,  double cos);
+        double TfromRCOS(  double s, double r,  double cos);
+        double TMINfromM2( double s, double M2);
+        double TMAXfromM2( double s, double M2);
+        double M2MINfromT( double s, double t);
+        double M2MAXfromT( double s, double t);
 
         // MIXED variables (t, x)
-        double M2fromXY(  double x, double y);
-        double M2fromXY2( double x, double y2);
-        double TfromXY(   double x, double y);
-        double TfromXY2(  double x, double y2);
-        double jacobianTX(double t, double x);
-        double M2fromTX(  double t, double x);
-        double TMINfromX( double x);
-        double TMAXfromX( double x);
+        double M2fromXY(  double s, double x, double y);
+        double M2fromXY2( double s, double x, double y2);
+        double TfromXY(   double s, double x, double y);
+        double TfromXY2(  double s, double x, double y2);
+        double jacobianTX(double s, double t, double x);
+        double M2fromTX(  double s, double t, double x);
+        double TMINfromX( double s, double x);
+        double TMAXfromX( double s, double x);
 
         //--------------------------------------------------------------------
         // d3sigma/d3p (invariant cross-section)
@@ -146,9 +171,8 @@ namespace jpacPhoto
         // The third argument (double mm) can be either M2 or x
         // which is assumed to correspond to the _useTX member above
 
-    
         // Alias function to rename d3sigma_d3p to more human name
-        virtual double invariant_xsection(double s, double t, double mm) = 0;
+        virtual double invariant_xsection(double s, double t, double mm);
 
         // Doubly differential 
         double dsigma_dtdM2(double s, double t, double M2);
@@ -168,9 +192,27 @@ namespace jpacPhoto
         inline double dsigma_dy(double  s,  double y ){ return dsigma_dy2(s, y*y) / (2.*y); };
 
         // Fully integrated
-        double integrated_xsection(double s);   
+        double integrated_xsection(double s, double cos_min = -1.);   
         
         protected:
+
+        // Instance of a kinematics object
+        kinematics _kinematics;
+
+        // Same as amplitude save state variables to be able to pass around
+        // This also makes sure masses are synced with the kinematics object
+        inline void store(double s, double t, double xm2)
+        {
+            _s = s; _t = t; 
+            // Since xm2 can either be x or M2, save the same value twice to avoid confusion
+            _x = xm2; _m2 = xm2;
+
+            // Sync masses
+            _mX2 = _kinematics->get_meson_mass()*_kinematics->get_meson_mass();
+            _mT2 = _kinematics->get_target_mass()*_kinematics->get_target_mass();
+        };
+        // Total center-of-mass energy
+        double _s = 0., _t = 0., _x = 0., _m2 = 0;
 
         // Int flag used to signal desired changes to amplitude
         int _option = 0;
@@ -181,9 +223,6 @@ namespace jpacPhoto
         // Mass of the observed and target particles
         double _mX2 = 0, _mT2 = M2_PROTON;
 
-        // Total center-of-mass energy
-        double _s = 100;
-
         // Different parameterizations may use different variables which make things tricky
         // when integrating. So I include this flag (set to default as false):
         // False -> assume independent variables are t and M2 
@@ -191,7 +230,7 @@ namespace jpacPhoto
         inline virtual bool use_TX(){ return false; };   
 
         // String ID 
-        std::string _id = "inclusive_process";
+        std::string _id = "semi_inclusive";
 
         // Number of parameters
         inline void set_N_pars(int Npars){ _N_pars = Npars; };
@@ -199,6 +238,17 @@ namespace jpacPhoto
 
         // Simple check that a given vector is of the expected size
         bool correct_size(std::vector<double> pars);
+
+        //---------------------------------------------------------------------------
+        // Methods for summing terms together
+
+        friend semi_inclusive operator+(semi_inclusive a, semi_inclusive b);
+        friend semi_inclusive operator+(semi_inclusive a, amplitude b);
+        friend void operator+=(semi_inclusive a, amplitude b);
+
+        // Sub diagrams / processes
+        std::vector<semi_inclusive> _inclusives;
+        std::vector<amplitude>      _exclusives;
     };
 };
 

@@ -80,6 +80,21 @@ namespace jpacPhoto
         std::cout << std::endl;
     };
 
+    template<typename T>
+    inline void print_quit(T x)
+    {
+        std::cout << std::boolalpha << std::left << std::setprecision(9);  
+        std::cout << std::setw(PRINT_SPACING) << x << std::endl;
+        exit(1);
+    };
+    template <typename First, typename... Rest>
+    inline void print_quit(First first, Rest... rest)
+    {
+        std::cout << std::boolalpha << std::left << std::setprecision(9);  
+        std::cout << std::setw(PRINT_SPACING) << first;
+        print_quit(rest...);
+    } 
+
     // ---------------------------------------------------------------------------
     // String operations
 

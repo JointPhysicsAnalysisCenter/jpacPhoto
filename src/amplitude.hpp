@@ -127,8 +127,8 @@ namespace jpacPhoto
             add(subamps);
         };
 
-        // Access to the kinematics object we have stored
-        kinematics _kinematics = nullptr;
+        // Access kinematics pointer;
+        kinematics get_kinematics(){ return _kinematics; };
 
         // ---------------------------------------------------------------------------
         // Virtual functions which must be defined by a given model
@@ -307,6 +307,9 @@ namespace jpacPhoto
 
         // ---------------------------------------------------------------------------
         protected:
+
+        // Access to the kinematics object we have stored
+        kinematics _kinematics = nullptr;
         
         // String identifier
         std::string _id = "amplitude";
