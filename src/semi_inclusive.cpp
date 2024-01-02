@@ -96,9 +96,13 @@ namespace jpacPhoto
         if (sqrt(s) >= sqrt(_mX2) + sqrt(minimum_M2()))
             for (semi_inclusive term : _inclusives) sum += term->invariant_xsection(s, t, mm);
 
-        for (amplitude term : _exclusives) 
-            if (are_equal(mm, term->get_kinematics()->get_recoil_mass(),term->get_kinematics()->get_recoil_mass())) 
-                sum += term->differential_xsection(s, t);
+        // Add any exclusive pole if applicable 
+        if (_exclusives.size() > 0 && !use_TX() && are_equal(sqrt(mm), _kinematics->get_recoil_mass()))
+        {
+            amplitude amp = (_exclusives.size() > 1) ? _exclusives[0] + _exclusives[1] : _exclusives[0];
+            for (int i = 2; i < _exclusives.size(); i++) amp += _exclusives[i];
+            sum += amp->differential_xsection(s, t); 
+        };
 
         return sum;
     };
@@ -108,20 +112,14 @@ namespace jpacPhoto
 
     bool raw_semi_inclusive::correct_size(std::vector<double> pars)
     {
-        if (pars.size() != _N_pars)
-        {
-            return error(id()+"::set_parameters", "Number of parameters passed not the expected size!", false);
-        };
+        if (pars.size() != _N_pars) return error(id()+"::set_parameters", "Number of parameters passed not the expected size!", false);
         return true;
     };
 
     void raw_semi_inclusive::set_parameters( std::vector<double> x )
     {
         // Check the size is alright
-        if (!correct_size(x))
-        {
-            return;
-        };
+        if (!correct_size(x)) return;
 
         // Allocate them (amplitude specific)
         allocate_parameters(x);
@@ -319,14 +317,9 @@ namespace jpacPhoto
     {
         gErrorIgnoreLevel = 6001;
 
-        auto dSigma = [&](double M2)
-        {
-            return dsigma_dtdM2(s, t, M2);
-        };
         ROOT::Math::GSLIntegrator ig( ROOT::Math::IntegrationOneDim::kADAPTIVE, ROOT::Math::Integration::kGAUSS15);
-        ROOT::Math::Functor1D wF(dSigma);
+        ROOT::Math::Functor1D wF( [&](double M2){ return dsigma_dtdM2(s, t, M2); } );
         ig.SetFunction(wF);
-
         double total =  ig.Integral(M2MINfromT(s, t), M2MAXfromT(s, t));
 
         if (_exclusives.size() != 0)
@@ -407,8 +400,13 @@ namespace jpacPhoto
             
             total = ig.Integral(dSigma, 2, min, max);
         };
-
-        for (amplitude amp : _exclusives) total += amp->integrated_xsection(s);
+        
+        if (_exclusives.size() > 0)
+        {
+            amplitude amp = (_exclusives.size() > 1) ? _exclusives[0] + _exclusives[1] : _exclusives[0];
+            for (int i = 2; i < _exclusives.size(); i++) amp += _exclusives[i];
+            total += amp->integrated_xsection(s); 
+        };
 
         return total;
     };

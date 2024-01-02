@@ -53,16 +53,16 @@ void chic1()
     //----------------------------------------------------------------------------
     // Set up inclusive amplitudes
 
-    inclusive_process inc_omega = new_inclusive_process<inclusive::vector_exchange>(M_CHIC1, M_OMEGA, "#omega");
+    semi_inclusive inc_omega = new_semi_inclusive<inclusive::vector_exchange>(M_CHIC1, M_OMEGA, "#omega");
     inc_omega->set_parameters(parsOmega);
 
-    inclusive_process inc_rho   = new_inclusive_process<inclusive::vector_exchange>(M_CHIC1, M_RHO, "#rho");
+    semi_inclusive inc_rho   = new_semi_inclusive<inclusive::vector_exchange>(M_CHIC1, M_RHO, "#rho");
     inc_rho->set_parameters(parsRho);
 
-    inclusive_process inc_phi   = new_inclusive_process<inclusive::vector_exchange>(M_CHIC1, M_PHI, "#phi");
+    semi_inclusive inc_phi   = new_semi_inclusive<inclusive::vector_exchange>(M_CHIC1, M_PHI, "#phi");
     inc_phi->set_parameters(parsPhi);
 
-    std::vector<inclusive_process> exchanges = {inc_rho, inc_omega, inc_phi};
+    std::vector<semi_inclusive> exchanges = {inc_rho, inc_omega, inc_phi};
 
     //----------------------------------------------------------------------------
     // Set up exclusives amplitudes
@@ -158,22 +158,22 @@ void chic1()
 
     //---------------------------------------------------
     // 
-    plot p1 = plotter.new_plot();
+    // plot p1 = plotter.new_plot();
     
-    p1.set_curve_points(100);
-    p1.set_logscale(false, true);
-    p1.set_ranges({4.35, 7}, {1E-4, 300});
-    p1.set_legend(0.22, 0.7);
-    p1.add_header("Exclusive");
-    p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi#it{p})  [nb]");
+    // p1.set_curve_points(100);
+    // p1.set_logscale(false, true);
+    // p1.set_ranges({4.35, 7}, {1E-4, 300});
+    // p1.set_legend(0.22, 0.7);
+    // p1.add_header("Exclusive");
+    // p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi#it{p})  [nb]");
 
-    std::vector<amplitude> exc_exchanges = extract_subamplitudes(exc_mesons_p);
-    std::vector<amplitude> hadron_exc    = extract_subamplitudes(ChiC1_L);
-    for (int i = 0; i < exc_exchanges.size(); i++)
-    {
-        p1.add_curve( NT,  sigma_w, exc_exchanges[i]);
-        p1.add_dashed(NT, sigma_w,  hadron_exc[i]);
-    };
+    // std::vector<amplitude> exc_exchanges = extract_subamplitudes(exc_mesons_p);
+    // std::vector<amplitude> hadron_exc    = extract_subamplitudes(ChiC1_L);
+    // for (int i = 0; i < exc_exchanges.size(); i++)
+    // {
+    //     p1.add_curve( NT,  sigma_w, exc_exchanges[i]);
+    //     p1.add_dashed(NT, sigma_w,  hadron_exc[i]);
+    // };
 
     // Plot of vector meson exchange in nb
     plot p2 = plotter.new_plot();
@@ -193,5 +193,6 @@ void chic1()
     p2.color_offset(1);
     p2.add_curve( NT, inc_mesons, "Sum");
 
-    plotter.combine({2,1}, {p1, p2}, "chic1.pdf");
+    p2.save("chic1.pdf");
+    // plotter.combine({2,1}, {p1, p2}, "chic1.pdf");
 };

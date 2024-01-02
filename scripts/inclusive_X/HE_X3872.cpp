@@ -59,26 +59,28 @@ void HE_X3872()
     double inter = 0.5;
     double slope = 0.9;
 
+    kinematics kX = new_kinematics(M_X3872);
+    kX->set_meson_JP(AXIALVECTOR);
+
     //----------------------------------------------------------------------------
     // Set up inclusive amplitudes
 
-    inclusive_process inc_gamma = new_inclusive_process<inclusive::vector_exchange>(M_X3872, 0, "Inclusive");
-    inc_gamma->set_parameters(parsGamma);
+    semi_inclusive inc_gamma = new_semi_inclusive<inclusive::vector_exchange>(kX, 0, "Inclusive");
     inc_gamma->reggeized(true);
+    inc_gamma->set_parameters(parsGamma);
 
-    inclusive_process inc_omega = new_inclusive_process<inclusive::vector_exchange>(M_X3872, M_OMEGA, "Inclusive");
+    semi_inclusive inc_omega = new_semi_inclusive<inclusive::vector_exchange>(kX, M_OMEGA, "Inclusive");
     inc_omega->reggeized(true);
     inc_omega->set_parameters(parsOmega);
 
-    inclusive_process inc_rho   = new_inclusive_process<inclusive::vector_exchange>(M_X3872, M_RHO, "Inclusive");
+    semi_inclusive inc_rho   = new_semi_inclusive<inclusive::vector_exchange>(kX, M_RHO, "Inclusive");
     inc_rho->reggeized(true);
     inc_rho->set_parameters(parsRho);
 
+    semi_inclusive inc_mesons = inc_omega + inc_rho;
+
     //----------------------------------------------------------------------------
     // Set up exclusives amplitudes
-
-    kinematics kX = new_kinematics(M_X3872);
-    kX->set_meson_JP(AXIALVECTOR);
 
     amplitude exc_gamma = new_amplitude<covariant::photon_exchange>(kX, "#gamma^{*} exchange");
     exc_gamma->set_parameters(parsGamma);
@@ -90,60 +92,28 @@ void HE_X3872()
     amplitude exc_rho   = new_amplitude<regge::vector_exchange>(kX, "#rho exchange");
     exc_rho->set_parameters({gX_rho, gV_rho, gT_rho, lamRho, inter, slope});
 
-    amplitude exc_rho_m = new_amplitude<regge::vector_exchange>(kX, "#rho exchange");
-    exc_rho_m->set_parameters({-gX_rho, gV_rho, gT_rho, lamRho, inter, slope});
-    
-    amplitude exc_mesons_p = exc_omega + exc_rho;
-    exc_mesons_p->set_id("Exclusive");
-    amplitude exc_mesons_n = exc_omega + exc_rho_m;
-    exc_mesons_n->set_id("Exclusive");
-
-    // --------------------------------------------------------------------------
-    // Aux functions to help plotting easier
-
-    // Bounds to plot
-    std::array<double,2> HE = {20, 60};
-
-    auto inc_primakoff = [&]  (double W)
-    {
-        double sig = inc_gamma->integrated_xsection(W*W);
-        print(W, sig);
-        return sig;
-    };    
-
-    auto inc_mesons = [&]  (double W)
-    {
-        double sig = (inc_omega->integrated_xsection(W*W) + inc_rho->integrated_xsection(W*W));
-        print(W, sig);
-        return sig;
-    };    
-
-    auto exc_primakoff_1E3 = [&] (double W)
-    {
-        double sig = exc_gamma->integrated_xsection(W*W) * 1E3;
-        print(W, sig);
-        return sig;
-    };
+    amplitude exc_mesons = exc_omega + exc_rho;
+    exc_mesons->set_id("Exclusive");
 
     // --------------------------------------------------------------------------
     // Plot results
 
-    plotter plotter;
+    // Bounds to plot
+    std::array<double,2> HE = {20, 60};
 
-    //---------------------------------------------------
-    // Plot of pure primakoff in fb
+    plotter plotter;
     plot p1 = plotter.new_plot();
 
-    p1.set_curve_points(30);
+    p1.set_curve_points(40);
     p1.set_logscale(false, true);
     p1.set_ranges(HE, {1E-3, 5});
-    p1.set_legend(0.25, 0.69);
+    p1.set_legend(0.22, 0.75);
     p1.set_labels( "#it{W}_{#gamma#it{N}}  [GeV]", "#sigma  [nb]");
 
-    p1.add_curve( HE, inc_primakoff, "Primakoff Effect");
-    p1.add_dashed(HE, exc_primakoff_1E3);
-    p1.add_curve( HE, inc_mesons, "Meson Exchanges");
-    p1.add_dashed(HE, sigma_w, exc_mesons_p);
+    p1.add_curve( HE, [&](double W){ return inc_gamma->integrated_xsection(W*W); }, "#gamma");
+    // p1.add_dashed(HE, exc_primakoff_1E3);
+    p1.add_curve( HE, [&](double W){ return inc_mesons->integrated_xsection(W*W); }, "#rho / #omega");
+    p1.add_dashed(HE, [&](double W){ return exc_mesons->integrated_xsection(W*W); });
 
     p1.save("regge_X.pdf");
 };

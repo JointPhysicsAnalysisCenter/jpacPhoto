@@ -9,11 +9,11 @@
 //               dwinney@scnu.edu.cn
 // ------------------------------------------------------------------------------
 
-#ifndef VECTOR_EXCHANGE_HPP       
-#define VECTOR_EXCHANGE_HPP
+#ifndef INCLUSIVE_VECTOR_EXCHANGE_HPP       
+#define INCLUSIVE_VECTOR_EXCHANGE_HPP
 
 #include "constants.hpp"
-#include "inclusive_process.hpp"
+#include "semi_inclusive.hpp"
 #include "cgamma.hpp"
 #include "sigma_tots/combined_F.hpp"
 
@@ -21,45 +21,16 @@ namespace jpacPhoto
 {
     namespace inclusive
     {
-        class vector_exchange : public raw_inclusive_process
+        class vector_exchange : public raw_semi_inclusive
         {
             public: 
 
-            vector_exchange(key k, double mX, std::string id = "")
-            : raw_inclusive_process(k, mX, id),
-              _photon(true), _mEx2(0),
-              F1(new_inclusive_function<combined_F>(1, kProton)),
-              F2(new_inclusive_function<combined_F>(2, kProton))
-            {
-                set_N_pars(3);
-            };
-            
-            vector_exchange(key k, double mX, int pn, std::string id = "")
-            : raw_inclusive_process(k, mX, id), 
-              _photon(true), _mEx2(0),
-              F1(new_inclusive_function<combined_F>(1, pn)),
-              F2(new_inclusive_function<combined_F>(2, pn))
-            {
-                set_N_pars(3);
-            };
-
-            vector_exchange(key k, double mX, double mE, std::string id = "")
-            : raw_inclusive_process(k, mX, id),
+            vector_exchange(key k, kinematics kin, double mE, std::string id = "")
+            : raw_semi_inclusive(k, kin, id), 
               _photon(is_zero(mE)), _mEx2(mE*mE),
               F1(new_inclusive_function<combined_F>(1, kProton)),
               F2(new_inclusive_function<combined_F>(2, kProton))
-            {
-                set_N_pars(3);
-            };
-
-            vector_exchange(key k, double mX, double mE, int pn, std::string id = "")
-            : raw_inclusive_process(k, mX, id), 
-              _photon(is_zero(mE)), _mEx2(mE*mE),
-              F1(new_inclusive_function<combined_F>(1, pn)),
-              F2(new_inclusive_function<combined_F>(2, pn))
-            {
-                set_N_pars(3);
-            };
+            { set_N_pars(3); };
 
             // Minimum mass is the proton 
             inline double minimum_M2(){ return pow(M_PROTON + M_PION, 2); };
@@ -80,7 +51,8 @@ namespace jpacPhoto
             {
                 if (_regge && -t > _cutoff) return 0;
 
-                update(s, t, M2);
+                store( s, t, M2);  // Sync kinematics
+                update(s, t, M2);  // Recalculate form factors
 
                 double PTdotW = 0;
                 for (int i = 0; i < _gammas.size(); i++)
@@ -103,10 +75,10 @@ namespace jpacPhoto
                 };
 
                 // Flux factor
-                double flux = 1/(2*sqrt(s)*qGamma());
+                double flux = 1/(2*sqrt(s)*qGamma(s));
 
                 // Form factor in the case of massive vectors
-                double tprime  = t - TMINfromM2( M2_PROTON );
+                double tprime  = t - TMINfromM2(s, M2_PROTON);
                 double beta_ex = (_photon || is_zero(_lam2)) ? 1. : exp(tprime/_lam2)/pow(1-tprime/0.71,-2);
 
                 // in nanobarn!!!!!
@@ -119,13 +91,11 @@ namespace jpacPhoto
             {
                 if (_photon && _regge)
                 {
-                    F1 = new_inclusive_function<DL_F>(1);
-                    F2 = new_inclusive_function<DL_F>(2);  
+                    F1 = new_inclusive_function<DL_F>(1); F2 = new_inclusive_function<DL_F>(2);
                     return;
                 };
 
-                F1 = new_inclusive_function<combined_F>(1, opt);
-                F2 = new_inclusive_function<combined_F>(2, opt);
+                F1 = new_inclusive_function<combined_F>(1, opt); F2 = new_inclusive_function<combined_F>(2, opt);
                 return;
             };
 
@@ -138,11 +108,9 @@ namespace jpacPhoto
                 _regge = x; 
                 if (_photon)
                 {
-                    F1 = new_inclusive_function<DL_F>(1);
-                    F2 = new_inclusive_function<DL_F>(2);   
+                    F1 = new_inclusive_function<DL_F>(1); F2 = new_inclusive_function<DL_F>(2);                      
                 };
             };
-
 
             protected:
 
