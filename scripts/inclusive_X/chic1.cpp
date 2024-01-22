@@ -11,7 +11,6 @@
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"
-#include "inclusive/vector_exchange.hpp"
 #include "analytic/vector_exchange.hpp"
 #include "covariant/photon_exchange.hpp"
 #include "analytic/vector_exchange.hpp"
@@ -20,49 +19,25 @@ void chic1()
 {
     using namespace jpacPhoto;
 
-    const int p = inclusive::vector_exchange::kProton;
-    const int n = inclusive::vector_exchange::kNeutron;
-
     double Wth = M_CHIC1 + M_PROTON;
     
     //----------------------------------------------------------------------------
     // INPUTS
 
     // Couplings
-    double gRho    = 1.140E-3;
-    double gOmega  = 0.190E-3;
-    double gPhi    = 0.110E-3;
-    double gPsi    = 34.64E-3;
+    double gRho    = 1.140E-3, gOmega  = 0.190E-3, gPhi    = 0.110E-3, gPsi    = 34.64E-3;
 
     // VMD factors
-    double etaRho   = 16.37;
-    double etaOmega = 56.34;
-    double etaPhi   = 44.37;
-    double etaPsi   = 36.85;
+    double etaRho   = 16.37, etaOmega = 56.34, etaPhi   = 44.37, etaPsi   = 36.85;
 
     // Form factor cutoffs
-    double lamRho   = 1.4;
-    double lamOmega = 1.2;
+    double lamRho   = 1.4, lamOmega = 1.2;
 
     std::vector<double> parsRho, parsOmega, parsPhi, parsPsi;
     parsRho   = {gRho,   etaRho,   lamRho  };
     parsOmega = {gOmega, etaOmega, lamOmega};
     parsPhi   = {gPhi,   etaPhi,   lamOmega};
     parsPsi   = {gPsi,   etaPsi,   0.};
-
-    //----------------------------------------------------------------------------
-    // Set up inclusive amplitudes
-
-    semi_inclusive inc_omega = new_semi_inclusive<inclusive::vector_exchange>(M_CHIC1, M_OMEGA, "#omega");
-    inc_omega->set_parameters(parsOmega);
-
-    semi_inclusive inc_rho   = new_semi_inclusive<inclusive::vector_exchange>(M_CHIC1, M_RHO, "#rho");
-    inc_rho->set_parameters(parsRho);
-
-    semi_inclusive inc_phi   = new_semi_inclusive<inclusive::vector_exchange>(M_CHIC1, M_PHI, "#phi");
-    inc_phi->set_parameters(parsPhi);
-
-    std::vector<semi_inclusive> exchanges = {inc_rho, inc_omega, inc_phi};
 
     //----------------------------------------------------------------------------
     // Set up exclusives amplitudes
@@ -133,66 +108,21 @@ void chic1()
     // Bounds to plot
     std::array<double,2> NT = {Wth + EPS, 7};
     
-    // For meson exchanges we include both rho and omega contributions
-    auto inc_mesons = [&]  (double W)
-    {
-        double sig = 0;
-        for (auto ex : exchanges)
-        {
-            sig += ex->integrated_xsection(W*W);
-        };
-        print(W, sig);
-        return sig;
-    };   
-
-    int ex = 0;
-    auto inc_single = [&] (double W)
-    {
-        return exchanges[ex]->integrated_xsection(W*W);
-    };
-
-    // --------------------------------------------------------------------------
-    // Plot results
-
     plotter plotter;
-
-    //---------------------------------------------------
-    // 
-    // plot p1 = plotter.new_plot();
+    plot p1 = plotter.new_plot();
     
-    // p1.set_curve_points(100);
-    // p1.set_logscale(false, true);
-    // p1.set_ranges({4.35, 7}, {1E-4, 300});
-    // p1.set_legend(0.22, 0.7);
-    // p1.add_header("Exclusive");
-    // p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi#it{p})  [nb]");
+    p1.set_curve_points(100);
+    p1.set_logscale(false, true);
+    p1.set_ranges({4.35, 7}, {1E-4, 300});
+    p1.set_legend(0.22, 0.7);
+    p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi_{c1}#it{p})  [nb]");
 
-    // std::vector<amplitude> exc_exchanges = extract_subamplitudes(exc_mesons_p);
-    // std::vector<amplitude> hadron_exc    = extract_subamplitudes(ChiC1_L);
-    // for (int i = 0; i < exc_exchanges.size(); i++)
-    // {
-    //     p1.add_curve( NT,  sigma_w, exc_exchanges[i]);
-    //     p1.add_dashed(NT, sigma_w,  hadron_exc[i]);
-    // };
-
-    // Plot of vector meson exchange in nb
-    plot p2 = plotter.new_plot();
-
-    p2.set_curve_points(40);
-    p2.set_logscale(false, true);
-    p2.set_ranges({4.3, 7}, {1E-3, 4E1});
-    p2.set_legend(0.22, 0.70);
-    p2.add_header("Semi-inclusive");
-    p2.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi#it{p})  [nb]");
-
-    for (int i = 0; i < exchanges.size(); i++)
+    std::vector<amplitude> exc_exchanges = extract_subamplitudes(exc_mesons_p);
+    std::vector<amplitude> hadron_exc    = extract_subamplitudes(ChiC1_L);
+    for (int i = 0; i < exc_exchanges.size(); i++)
     {
-        ex = i;
-        p2.add_curve( NT, inc_single, exchanges[ex]->id());
-    }
-    p2.color_offset(1);
-    p2.add_curve( NT, inc_mesons, "Sum");
-
-    p2.save("chic1.pdf");
-    // plotter.combine({2,1}, {p1, p2}, "chic1.pdf");
+        p1.add_curve( NT, sigma_w, exc_exchanges[i]);
+        p1.add_dashed(NT, sigma_w,  hadron_exc[i]);
+    };
+    p1.save("chic1.pdf");
 };

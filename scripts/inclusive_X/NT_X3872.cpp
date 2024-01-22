@@ -29,8 +29,8 @@ void NT_X3872()
 
     // Couplings
     double gGamma  = 3.20E-3;
-    double gRho    = 5.38E-3;
-    double gOmega  = 3.54E-3;
+    double gRho    = 3.20E-3;
+    double gOmega  = 3.20E-3;
 
     // VMD factors
     double etaRho   = 16.37;

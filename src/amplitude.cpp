@@ -209,14 +209,19 @@ namespace jpacPhoto
         requested_meson  = kinem->get_meson(); requested_baryon = kinem->get_baryon();
 
         // Check if they are allowed
-        bool meson_fails, baryon_fails;
+        bool meson_fails, baryon_fails, not_any_meson, not_any_baryon;
+
+        // If ANY is contained in the allowed, we dont care about this check
+        not_any_meson    = std::find(allowed_mesons.begin(),  allowed_mesons.end(),  ANY) == allowed_mesons.end();
+        not_any_baryon   = std::find(allowed_baryons.begin(), allowed_baryons.end(), ANY) == allowed_baryons.end();
+
+        // Else we look for the specific requrested
         meson_fails  = std::find(allowed_mesons.begin(),  allowed_mesons.end(),  requested_meson)  == allowed_mesons.end();
         baryon_fails = std::find(allowed_baryons.begin(), allowed_baryons.end(), requested_baryon) == allowed_baryons.end();
     
         auto requested_meson_JP = kinem->get_meson_JP(); auto requested_baryon_JP = kinem->get_meson_JP();
-
-        if (meson_fails)  warning(id()+"::check_QNs", "Requested meson quantum numbers (J=" + std::to_string(requested_meson_JP[0]) + ", P=" + std::to_string(requested_meson_JP[1])+") not available!");
-        if (baryon_fails) warning(id()+"::check_QNs", "Requested baryon quantum numbers (J=" + std::to_string(requested_baryon_JP[0]) + "/2, P=" + std::to_string(requested_baryon_JP[1])+") not available!");
+        if (meson_fails  && not_any_meson)  warning(id()+"::check_QNs", "Requested meson quantum numbers (J=" + std::to_string(requested_meson_JP[0]) + ", P=" + std::to_string(requested_meson_JP[1])+") not available!");
+        if (baryon_fails && not_any_baryon) warning(id()+"::check_QNs", "Requested baryon quantum numbers (J=" + std::to_string(requested_baryon_JP[0]) + "/2, P=" + std::to_string(requested_baryon_JP[1])+") not available!");
     };
 
     // ------------------------------------------------------------------------------
@@ -241,12 +246,12 @@ namespace jpacPhoto
         if (s < _kinematics->sth()) return 0.;
 
         double sum = probability_distribution(s, t);
-        double norm = 64. * PI * s * pow(_kinematics->initial_momentum(s), 2.) * (2.56819E-6); // Convert from GeV^-2 -> nb
+        double norm = 64. * PI * s * pow(_kinematics->initial_momentum(s), 2.); // Convert from GeV^-2 -> nb
 
         // Average over initial helicities
         if (native_helicity_frame() !=  HELICITY_INDEPENDENT) norm *= 4*(_kinematics->is_photon()) + 6*(!_kinematics->is_photon());
 
-        return sum / norm;
+        return sum / norm * HBARC;
     };
 
     // Integrated total cross-section
