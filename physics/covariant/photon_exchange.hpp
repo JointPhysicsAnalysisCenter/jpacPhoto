@@ -134,7 +134,11 @@ namespace jpacPhoto { namespace covariant
             // Coupling function depends on
             // the quantum numbers of the produced meson
             lorentz_tensor<complex,1> T = (-_t)*levi_civita(k, eps, eps_p) - levi_civita(k, eps, q, eps_p) * q; 
-            return _eta*_gTop/_mX/_mX * T;
+
+            // As a test, allow the VMD coupling to be evaluated at t and not onshell mass _mEx^2
+            double x = (_debug == 1) ? (_t/_mEx/_mEx) : 1;
+
+            return x*_eta*_gTop/_mX/_mX* T;
         };
 
             // Bottom coupling refers to the gamma^* NNbar interation

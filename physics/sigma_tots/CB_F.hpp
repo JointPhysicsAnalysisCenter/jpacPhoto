@@ -94,7 +94,7 @@ namespace jpacPhoto
             for (int i = 0; i < 3; i++)
             {
                 // Check we are above threshold
-                if (W < sqrt(_decay_m2[i]) + M_PROTON) continue;
+                if (W <= sqrt(_decay_m2[i]) + M_PROTON) continue;
                 if ( is_zero(_beta[i]) ) continue;
 
                 // Meson momentum in CM frame
@@ -103,9 +103,11 @@ namespace jpacPhoto
                 // Energy dependent decay fraction
                 double betahat = _beta[i]*pow(p/_pR[i], 2*_ell+1+3*(i==1))*pow((_pR[i]*_pR[i]+_x*_x)/(p*p+_x*_x), _ell+2*(i==1));
                 if (i == 1) betahat *= (W/_m);
-                
                 _gamma_tot += betahat*_gamma;
             };
+
+            // Update cache point
+            _cachedW = W;
         };
 
         inline void check_Q2_cache(double Q2)
@@ -116,6 +118,9 @@ namespace jpacPhoto
             // Else recalcualte A_T and A_L
             _AT = _AT0/pow(1+Q2/0.91, _c)*(1+ _a*Q2/(1+_b*Q2));
             _AL = _AL0*Q2/(1+_d*Q2)*exp(-_e*Q2);
+
+            // Update cache point
+            _cachedQ2 = Q2;
         };
 
         // Cached values
@@ -275,8 +280,8 @@ namespace jpacPhoto
 
             double sigma;
             sigma  = sigma0 * pow(xp, d+e*tau);
-            sigma *= pow(1-xp, a*tau+b)/(1-x());
-            sigma *= pow(Q2, c) / pow(Q2 + Q20, 1+c);
+            sigma *= pow(1.-xp, a*tau+b)/(1.-x());
+            sigma *= pow(Q2, c) / pow(Q2 + Q20, 1.+c);
             
             return sigma;
         };
@@ -290,10 +295,7 @@ namespace jpacPhoto
                                                                   : _resonancesN;
 
             double result = 0;
-            for (auto res : resonances)
-            {
-                result += W * res.BW(W)*res.A_T(Q2)*res.A_T(Q2);
-            }
+            for (auto res : resonances) result += W * res.BW(W)*res.A_T(Q2)*res.A_T(Q2);
             return result;
         };
 
@@ -303,10 +305,7 @@ namespace jpacPhoto
                                                                   : _resonancesN;
 
             double result = 0;
-            for (auto res : resonances)
-            {
-                result += W * res.BW(W)*res.A_L(Q2)*res.A_L(Q2);
-            }
+            for (auto res : resonances) result += W * res.BW(W)*res.A_L(Q2)*res.A_L(Q2);
             return result;
         };
 
@@ -339,6 +338,8 @@ namespace jpacPhoto
         //-----------------------------------------------------------------------
         // BW parameters for all resonances
         // These are assumed the same for both proton and neutron 
+        // In order these are:
+        // { mass, width, beta_pi, beta_pipi, beta_eta, X0 }
 
         std::array<double,6> P33_BW = {1.230, 0.136, 1.00, 0.00, 0.00, 0.1446};
         std::array<double,6> S11_BW = {1.530, 0.220, 0.45, 0.10, 0.45, 0.215};
@@ -350,10 +351,11 @@ namespace jpacPhoto
 
         //-----------------------------------------------------------------------
         // Photo coupling parameters will depend on the isospin of the nucleon
+        // These are:
+        // { A_T(0), a, b, cT, A_L(0), d, e }
 
-        // Photocoupling parameters for all resonances
         std::array<double,7> P33_Ap  = {7.780,  4.229,  1.260,   2.124, 29.4140, 19.910, 0.226};
-        std::array<double,7> S11_Ap  = {6.335,  6823.2, 33521.0, 2.669, 0.0,     0.0,    0.0};
+        std::array<double,7> S11_Ap  = {6.335,  6823.2, 33521.0, 2.569, 0.0,     0.0,    0.0};
         std::array<double,7> D13_Ap  = {0.603,  21.240, 0.056,   2.489, 157.92,  97.046, 0.310};
         std::array<double,7> F15_Ap  = {2.330, -0.288,  0.186,   0.064, 4.216,   0.038,  1.218};
         std::array<double,7> S15_Ap  = {1.979, -0.562,  0.390,   0.549, 13.764,  0.314,  3.0};

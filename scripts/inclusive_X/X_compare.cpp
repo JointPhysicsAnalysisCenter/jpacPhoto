@@ -62,35 +62,6 @@ void X_compare()
     // --------------------------------------------------------------------------
     // Plot results
 
-    // double W = 6;
-    // double costheta = 0.9;
-    // double s = W*W;
-    // double t = kX->t_man(s, acos(costheta));
-    // amplitude amp = rho_VMD;
-
-    // print("Inputs");
-    // divider(2);
-    // print("W", W);
-    // print("cosTheta", costheta);
-    // print("mX3872", M_X3872);
-    // print("mProton", M_PROTON);
-    // print("gXGamGam", 3.2E-3);
-    // print("Lambda_omega", 1.2);
-    // print("mOmega", M_OMEGA);
-    // print("eta_omega", 56.34);
-    // print("mRho", M_RHO);
-    // print("Lambda_rho", 1.4);
-    // print("eta_rho", 16.37);
-    // line();
-    // print("Outputs");
-    // divider(2);
-    // print("s ", s);
-    // print("t ", t);
-    // print("t'", t - kX->t_min(s));
-    // print("dsig/dt", amp->differential_xsection(s,t));
-    // print("sig",     amp->integrated_xsection(s));
-    // exit(1);
-
     plotter plotter;
     
     // Plot of pure primakoff in fb
@@ -112,7 +83,7 @@ void X_compare()
     p2.set_curve_points(100);
     p2.set_logscale(false, true);
     p2.set_ranges({4.6, 7}, {6E-2, 4E2});
-    p2.set_legend(0.7, 0.22);
+    p2.set_legend(0.4, 0.22);
     p2.set_labels( "#it{W}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [nb]");
     p2.add_header("#rho /#omega exchange");
 
