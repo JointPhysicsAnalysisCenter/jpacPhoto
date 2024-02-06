@@ -106,27 +106,12 @@ namespace jpacPhoto
 
     void plot::add_data(data_set data)
     {
-        double *x, *y, *xl, *xh, *yl, *yh;
-        switch (data._type)
-        {
-            case integrated_data: 
-            {
-                x  = &(data._w[0]);        y  = &(data._obs[0]);
-                xl = &(data._werr[0][0]);  xh = &(data._werr[1][0]);
-                yl = &(data._obserr[0]);   yh = &(data._obserr[0]);
-                break;
-            };
-            case differential_data: 
-            {
-                x  = &(data._t[0]);        y  = &(data._obs[0]);
-                xl = &(data._terr[0][0]);  xh = &(data._terr[1][0]);
-                yl = &(data._obserr[0]);   yh = &(data._obserr[0]);
-                break;
-            };
-            default: return;
-        };
+        double *x, *z, *xl, *xh, *zl, *zh;
+        x  = &(data._x[0]);        z  = &(data._z[0]);
+        xl = &(data._xerr[0][0]);  xh = &(data._xerr[1][0]);
+        zl = &(data._zerr[0][0]);  zh = &(data._zerr[1][0]);
 
-        TGraph *graph = new TGraphAsymmErrors(data._N, x, y, xl, xh, yl, yh);
+        TGraph *graph = new TGraphAsymmErrors(data._N, x, z, xl, xh, zl, zh);
 
         entry_style style;
         style._label = data._id;
@@ -252,204 +237,6 @@ namespace jpacPhoto
     };
 
     // -----------------------------------------------------------------------
-    // Add curve methods which take in an amplitude directly
-    void plot::add_curve(curve_type opt, amplitude to_plot, std::array<double,2> bounds)
-    {
-        switch (opt)
-        {
-            case sigma_s: 
-            {
-                auto G = [&](double s)
-                {  
-                    return to_plot->integrated_xsection(s);
-                };
-
-                add_curve(bounds, G, to_plot->id());
-                return;
-            }
-            case sigma_w: 
-            {
-                auto G = [&](double w)
-                {  
-                    return to_plot->integrated_xsection(w*w);
-                };
-
-                add_curve(bounds, G, to_plot->id());
-                return;
-            };
-            case sigma_Egam: 
-            {
-                auto G = [&](double E)
-                {  
-                    double w = W_cm(E);
-                    return to_plot->integrated_xsection(w*w);
-                };
-
-                add_curve(bounds, G, to_plot->id());
-                return;
-            };
-            default:
-            {
-                warning("plot::add_curve", "Invalid curve_type passed as argument!");
-                return;
-            }
-        };
-        return;
-    };
-
-    void plot::add_curve(curve_type opt, amplitude to_plot, double fixed, std::array<double,2> bounds)
-    {
-        switch (opt)
-        {
-            case dsigmadt_s: 
-            {
-                // Fixed variable is an s value
-                // Bounds are (-t)-values
-                auto G = [&](double mt)
-                {  
-                    double s = fixed;
-                    return to_plot->differential_xsection(s, -mt);
-                };
-
-                add_curve(bounds, G, to_plot->id());
-                return;
-            }
-            case dsigmadt_w: 
-            {
-                // Fixed variable is an w value
-                // Bounds are (-t)-values
-                auto G = [&](double mt)
-                {  
-                    double s = fixed*fixed;
-                    return to_plot->differential_xsection(s, -mt);
-                };
-
-                add_curve(bounds, G, to_plot->id());
-                return;
-            };
-            case dsigmadt_Egam: 
-            {
-                // Fixed variable is an Egam value
-                // Bounds are (-t)-values
-                auto G = [&](double mt)
-                {  
-                    double w = W_cm(fixed);
-                    double s = w*w;
-                    return to_plot->differential_xsection(s, -mt);
-                };
-
-                add_curve(bounds, G, to_plot->id());
-                return;
-            };
-            default:
-            {
-                warning("plot::add_curve", "Invalid curve_type passed as argument!");
-                return;
-            }
-        };
-        return;
-    };
-
-    // -----------------------------------------------------------------------
-    // same as the add curve methods above but for dashed entries
-    void plot::add_dashed(curve_type opt, amplitude to_plot, std::array<double,2> bounds)
-    {
-        switch (opt)
-        {
-            case sigma_s: 
-            {
-                auto G = [&](double s)
-                {  
-                    return to_plot->integrated_xsection(s);
-                };
-
-                add_dashed(bounds, G);
-                return;
-            }
-            case sigma_w: 
-            {
-                auto G = [&](double w)
-                {  
-                    return to_plot->integrated_xsection(w*w);
-                };
-
-                add_dashed(bounds, G);
-                return;
-            };
-            case sigma_Egam: 
-            {
-                auto G = [&](double E)
-                {  
-                    double w = W_cm(E);
-                    return to_plot->integrated_xsection(w*w);
-                };
-
-                add_dashed(bounds, G);
-                return;
-            };
-            default:
-            {
-                warning("plot::add_dashed", "Invalid curve_type passed as argument!");
-                return;
-            }
-        };
-        return;
-    };
-
-    void plot::add_dashed(curve_type opt, amplitude to_plot, double fixed, std::array<double,2> bounds)
-    {
-        switch (opt)
-        {
-            case dsigmadt_s: 
-            {
-                // Fixed variable is an s value
-                // Bounds are (-t)-values
-                auto G = [&](double mt)
-                {  
-                    double s = fixed;
-                    return to_plot->differential_xsection(s, -mt);
-                };
-
-                add_dashed(bounds, G);
-                return;
-            }
-            case dsigmadt_w: 
-            {
-                // Fixed variable is an w value
-                // Bounds are (-t)-values
-                auto G = [&](double mt)
-                {  
-                    double s = fixed*fixed;
-                    return to_plot->differential_xsection(s, -mt);
-                };
-
-                add_dashed(bounds, G);
-                return;
-            };
-            case dsigmadt_Egam: 
-            {
-                // Fixed variable is an Egam value
-                // Bounds are (-t)-values
-                auto G = [&](double mt)
-                {  
-                    double w = W_cm(fixed);
-                    double s = w*w;
-                    return to_plot->differential_xsection(s, -mt);
-                };
-
-                add_dashed(bounds, G);
-                return;
-            };
-            default:
-            {
-                warning("plot::add_curve", "Invalid curve_type passed as argument!");
-                return;
-            }
-        };
-        return;
-    };
-
-    // -----------------------------------------------------------------------
     // Add an error band
 
     void plot::add_band(std::vector<double> x, std::array<std::vector<double>,2> band, int fill)
@@ -473,7 +260,4 @@ namespace jpacPhoto
         style._add_to_legend = false;
         _entries.push_front(plot_entry(graph, style, false));
     };
-
-    // -----------------------------------------------------------------------
-    // Draw other things such as a vertical line at a certain x value
 };

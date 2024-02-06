@@ -13,8 +13,6 @@
 #include "kinematics.hpp"
 #include "plotter.hpp"
 #include "analytic/K_matrix.hpp"
-#include "gluex/data.hpp"
-#include "gluex/plots.hpp"
 
 #include <cstring>
 #include <iostream>

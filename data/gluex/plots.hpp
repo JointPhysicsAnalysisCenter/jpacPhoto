@@ -41,9 +41,17 @@ namespace jpacPhoto
         {
             data_set slice = gluex::slice(i); 
             slice._id = "GlueX (2023)";
+
+            double avg_E;
+            switch (i)
+            {
+                case 0: avg_E = 8.93;  break;
+                case 1: avg_E = 9.85;  break;
+                case 2: avg_E = 10.82; break;
+            };
             
             // Grab the position of upper edge of last t-bin
-            double tmax = slice._t.back() + slice._terr[1].back();
+            double tmax = slice._x.back() + slice._xerr[1].back();
 
             plot pdif = p.new_plot();
             pdif.add_data(slice);
@@ -52,27 +60,7 @@ namespace jpacPhoto
             pdif.set_ranges({0, 10}, {3E-4, 6});
             if (i == 0) pdif.set_ranges({0, 10}, {7E-3, 1});
             if (i == 1) pdif.set_ranges({0, 10}, {2E-3, 3});
-            pdif.add_header("#it{E}_{#gamma} =", slice._avg_w, "GeV");
-            pdif.set_labels("#minus#it{t}  [GeV^{2}]", "#it{d}#sigma/#it{dt}  [nb / GeV^{2}]");
-
-            return pdif;
-        };
-
-        // Plot the differential 
-        inline plot plot_forward_slice(plotter& p, int i)
-        {
-            data_set slice = gluex::forward_slice(i); 
-            slice._id = "GlueX"; 
-
-            // Grab the position of upper edge of last t-bin
-            double tmax = slice._t.back() + slice._terr[1].back();
-
-            plot pdif = p.new_plot();
-            pdif.add_data(slice);
-            pdif.set_logscale(false, true);
-            pdif.set_legend(0.55, 0.65);
-            pdif.set_ranges({0, tmax + 0.2}, {1E-3, 6});
-            pdif.add_header("#it{E}_{#gamma} =", slice._avg_w, "GeV");
+            pdif.add_header("#it{E}_{#gamma} =", avg_E, "GeV");
             pdif.set_labels("#minus#it{t}  [GeV^{2}]", "#it{d}#sigma/#it{dt}  [nb / GeV^{2}]");
 
             return pdif;

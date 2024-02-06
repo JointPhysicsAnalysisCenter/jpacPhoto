@@ -121,8 +121,8 @@ void chic1()
     std::vector<amplitude> hadron_exc    = extract_subamplitudes(ChiC1_L);
     for (int i = 0; i < exc_exchanges.size(); i++)
     {
-        p1.add_curve( NT, sigma_w, exc_exchanges[i]);
-        p1.add_dashed(NT, sigma_w,  hadron_exc[i]);
+        p1.add_curve(  NT, [&](double W){ return exc_exchanges[i]->integrated_xsection(W*W); }, exc_exchanges[i]->id());
+        p1.add_dashed( NT, [&](double W){ return hadron_exc[i]->integrated_xsection(W*W); });
     };
     p1.save("chic1.pdf");
 };

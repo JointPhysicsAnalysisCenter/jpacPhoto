@@ -134,11 +134,11 @@ void results()
 
     // Plot best-fit curve
     sum_1C->set_parameters(pars_1C);
-    pint1.add_curve(sigma_Egam, sum_1C, {8,12});
+    pint1.add_curve({8, 12}, [&](double Eg){ return sum_1C->integrated_xsection(s_cm(Eg)); }, sum_1C->id());
     pint1.add_band( bs_int_1C[0], {bs_int_1C[4], bs_int_1C[5]});
 
     sum_2C->set_parameters(pars_2C);
-    pint1.add_curve(sigma_Egam, sum_2C, {8,12});
+    pint1.add_curve({8, 12}, [&](double Eg){ return sum_2C->integrated_xsection(s_cm(Eg)); }, sum_2C->id());
     pint1.add_band( bs_int_2C[0], {bs_int_2C[4], bs_int_2C[5]});
 
     // Plot all three curves with 95% confidence level in single plot
@@ -149,11 +149,11 @@ void results()
 
     // Plot best-fit curve
     sum_3CNR->set_parameters(pars_3CNR);
-    pint2.add_curve(sigma_Egam, sum_3CNR, {8,12});
+    pint2.add_curve({8, 12}, [&](double Eg){ return sum_3CNR->integrated_xsection(s_cm(Eg)); }, sum_3CNR->id());
     pint2.add_band( bs_int_3CNR[0], {bs_int_3CNR[4], bs_int_3CNR[5]});
 
     sum_3CR->set_parameters(pars_3CR);
-    pint2.add_curve(sigma_Egam, sum_3CR, {8,12});
+    pint2.add_curve({8, 12}, [&](double Eg){ return sum_3CR->integrated_xsection(s_cm(Eg)); }, sum_3CR->id());
     pint2.add_band( bs_int_3CR[0], {bs_int_3CR[4], bs_int_3CR[5]});
 
     plotter.combine({2,1}, {pint1, pint2}, "gluex_int.pdf");
@@ -176,7 +176,7 @@ void results()
         plot pdif3 = gluex::plot_slice(plotter, slice);
         pdif3.color_offset(2);
         
-        double E_avg = gluex_data[slice]._avg_w;
+        double E_avg = gluex_data[slice]._extras[0];
         double W_avg = W_cm(E_avg);
         std::array<double,2> bounds = {-kJpsi->t_min(W_avg*W_avg), -kJpsi->t_max(W_avg*W_avg)};
 
@@ -186,19 +186,19 @@ void results()
         auto bs_dif_3CR  = import_transposed<8>(path + "3C-R/plot_dsdt_gluex_" +std::to_string(slice)+".txt");
 
         sum_1C->set_parameters(pars_1C);
-        pdif12.add_curve(dsigmadt_Egam, sum_1C, E_avg, bounds);
+        pdif12.add_curve(bounds, [&](double mt){ return sum_1C->differential_xsection(s_cm(E_avg), -mt); }, sum_1C->id());
         pdif12.add_band( -bs_dif_1C[2], {bs_dif_1C[4], bs_dif_1C[5]});
 
         sum_2C->set_parameters(pars_2C);
-        pdif12.add_curve(dsigmadt_Egam, sum_2C, E_avg, bounds);
+        pdif12.add_curve(bounds, [&](double mt){ return sum_2C->differential_xsection(s_cm(E_avg), -mt); }, sum_2C->id());
         pdif12.add_band( -bs_dif_2C[2], {bs_dif_2C[4], bs_dif_2C[5]});
 
         sum_3CNR->set_parameters(pars_3CNR);
-        pdif3.add_curve(dsigmadt_Egam, sum_3CNR, E_avg, bounds);
+        pdif3.add_curve(bounds, [&](double mt){ return sum_3CNR->differential_xsection(s_cm(E_avg), -mt); }, sum_3CNR->id());
         pdif3.add_band( -bs_dif_3CNR[2], {bs_dif_3CNR[4], bs_dif_3CNR[5]});
 
         sum_3CR->set_parameters(pars_3CR);
-        pdif3.add_curve(dsigmadt_Egam, sum_3CR, E_avg, bounds);
+        pdif3.add_curve(bounds, [&](double mt){ return sum_3CR->differential_xsection(s_cm(E_avg), -mt); }, sum_3CR->id());
         pdif3.add_band( -bs_dif_3CR[2], {bs_dif_3CR[4], bs_dif_3CR[5]});
         
         if (slice != 0)
@@ -219,7 +219,7 @@ void results()
     for (int slice = 1; slice <= 12; slice++)
     {
         if (slice != 3 && slice != 5 && slice != 9) continue;
-        double Eavg = jpsi007_data[slice-1]._avg_w;
+        double Eavg = jpsi007_data[slice-1]._extras[0];
         double Wavg = W_cm(Eavg);
         double tmin = -kJpsi->t_min(Wavg*Wavg);
         double tmax = -kJpsi->t_max(Wavg*Wavg);

@@ -90,27 +90,23 @@ void partial_waves()
     // Grab each pre-set plot but add the theory curve with add_curve
     plot pint = gluex::plot_integrated(plotter);
 
-    for (int i = 0; i < 5; i++)
-    {
-        pint.add_curve(jpacPhoto::sigma_Egam, amps[i], {8, 11.8});
-    }
+    for (auto amp : amps) pint.add_curve({8, 11.8}, [&](double Eg){ return amp->integrated_xsection(s_cm(Eg)); }, amp->id());
     gluex_plots.push_back(pint);
 
     // Do the same with the differential sets
     for (int i = 0; i <= 2; i++)
     {
-        double Eavg = gluex[i]._avg_w;
-        double Wavg = W_cm(Eavg);
-        double tmin = -kJpsi->t_min(Wavg*Wavg);
-        double tmax = -kJpsi->t_max(Wavg*Wavg); 
+        double savg = s_cm(gluex[i]._extras[0]);
+        double tmin = -kJpsi->t_min(savg);
+        double tmax = -kJpsi->t_max(savg); 
 
         plot dif = gluex::plot_slice(plotter, i);
 
         for (int j = 0; j < 5; j++)
         {
-            dif.add_curve(jpacPhoto::dsigmadt_Egam, amps[j], Eavg, {tmin, tmax});
+            dif.add_curve({tmin, tmax}, [&](double t){ return amps[j]->differential_xsection(savg, -t); }, amps[j]->id());
         }
-        if (i == 0) dif.set_ranges({0,6}, {4E-3, 1});
+        if (i == 0) dif.set_ranges({0,6},   {4E-3, 1});
         if (i == 1) dif.set_ranges({0,8.2}, {4E-3, 3});
         dif.set_legend(0.5, 0.6);
         gluex_plots.push_back(dif);
@@ -118,6 +114,7 @@ void partial_waves()
     // // Print to file as a 2x2 grid
     plotter.combine({2,2}, gluex_plots, "gluex_results.pdf");
     plotter.combine({2,1}, {gluex_plots[0], gluex_plots[2]}, "paper_figure.pdf");
+   
     // -----------------------------------------
     // J/psi-007
     
@@ -125,7 +122,7 @@ void partial_waves()
 
     for (int i = 1; i <= 12; i++)
     {
-        double Eavg = jpsi007[i-1]._avg_w;
+        double Eavg = jpsi007[i-1]._extras[0];
         double Wavg = W_cm(Eavg);
         double tmin = -kJpsi->t_min(Wavg*Wavg);
         double tmax = -kJpsi->t_max(Wavg*Wavg);
@@ -143,6 +140,5 @@ void partial_waves()
         }
         jpsi007_plots.push_back(dif);
     };
-
     plotter.combine({4,3}, jpsi007_plots, "jpsi007_results.pdf");
 };

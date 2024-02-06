@@ -63,7 +63,7 @@ void OmegaPhoton()
 
     // Plot both the cross section with resonances 
     b1p->set_option(inclusive::pion_exchange::kJPAC);
-    p1.add_curve( bounds, [&](double x){ return b1p->dsigma_dx(s, x) * 1E-3; }, "Inclusive #it{b}_{1}(1235)^{#plus}");new_kinematics(M_B1)
+    p1.add_curve( bounds, [&](double x){ return b1p->dsigma_dx(s, x) * 1E-3; }, "Inclusive #it{b}_{1}(1235)^{#plus}");
     // and without
     b1p->set_option(inclusive::pion_exchange::kPDG);
     p1.add_dashed(bounds, [&](double x){ return b1p->dsigma_dx(s, x) * 1E-3; });

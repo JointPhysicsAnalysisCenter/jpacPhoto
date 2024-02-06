@@ -29,10 +29,89 @@
 #include <iostream>
 #include <iomanip>
 
+using namespace jpacPhoto;
+
+struct unpolarized
+{
+    static std::string data_type(int i)
+    {
+        switch (i)
+        {
+            case 0: return "integrated (Eg)";
+            case 1: return "differential (Eg vs -t)";
+            case 2: return "differential (Eg vs -t')";
+            default: return "ERROR";
+        };
+        return "ERROR";
+    };  
+
+    static double fcn(const std::vector<data_set> &data_sets, amplitude amp)
+    {
+        double chi2 = 0;
+        for (auto data : data_sets)
+        {
+            switch (data._type)
+            {
+                case 0:  { chi2 += chi2_int( data, amp); break; }
+                case 1:  { chi2 += chi2_dif( data, amp); break; }
+                case 2:  { chi2 += chi2_difp(data, amp); break; }
+                default: { chi2 += NaN<double>(); };
+            };
+        };
+        return chi2;
+    };
+
+    static double chi2_int(data_set &data, amplitude amp)
+    {
+        double chi2 = 0;
+        for (int i = 0; i < data._N; i++)
+        {
+            double s = s_cm(data._x[i]);
+            double sig_th = amp->integrated_xsection(s);
+            double sig_ex = data._z[i];
+            double error  = data._zerr[0][i];
+            chi2 += pow((sig_th - sig_ex) / error, 2);
+        };
+        return chi2;
+    };
+
+    static double chi2_dif(data_set &data, amplitude amp)
+    {
+        double chi2 = 0;
+        for (int i = 0; i < data._N; i++)
+        {
+            double s  = s_cm(data._y[i]);
+            double t  = - data._x[i];
+
+            double sig_th = amp->differential_xsection(s, t);
+            double sig_ex = data._z[i];
+            double error  = data._zerr[0][i];
+            chi2 += pow((sig_th - sig_ex) / error, 2);
+        };
+        return chi2;
+    };
+
+    static double chi2_difp(data_set &data, amplitude amp)
+    {
+        double chi2 = 0.;
+        for (int i = 0; i < data._N; i++)
+        {
+            double s  =   s_cm(data._y[i]);
+            double t  = - data._x[i] + amp->get_kinematics()->t_min(s);
+
+            double sig_th = amp->differential_xsection(s, t);
+            double sig_ex = data._z[i];
+            double error  = data._zerr[0][i];
+            chi2 += pow((sig_th - sig_ex) / error, 2);
+        };
+        return chi2;
+    };
+};
+
 void fit()
 {
     using namespace jpacPhoto;
-    using K_matrix         = analytic::K_matrix;
+    using K_matrix = analytic::K_matrix;
 
     // ---------------------------------------------------------------------------
     // Amplitude setup
@@ -49,17 +128,17 @@ void fit()
 
     // // CHOOSE AN S-WAVE MODEL
 
-    // // Single-channel S-wave
-    // amplitude s = new_amplitude<K_matrix>(kJpsi, 0, "1-channel S-wave");
+    // Single-channel S-wave
+    amplitude s = new_amplitude<K_matrix>(kJpsi, 0, "1-channel S-wave");
 
     // // Two-channel S-wave 
     // amplitude s = new_amplitude<K_matrix>(kJpsi, 0, higher, "2-channel S-wave");
     
-    // Three-channel S-wave
-    amplitude s = new_amplitude<K_matrix>(kJpsi, 0, open_channels, "3-channel S-wave");
+    // // Three-channel S-wave
+    // amplitude s = new_amplitude<K_matrix>(kJpsi, 0, open_channels, "3-channel S-wave");
 
-    // // EFFECTIVE RANGE?
-    // s->set_option(K_matrixx::kEffectiveRange);
+    // EFFECTIVE RANGE?
+    s->set_option(K_matrix::kEffectiveRange);
 
     // The rest of the waves are single channel and 
     amplitude p = new_amplitude<K_matrix>(kJpsi, 1, "P-wave");
@@ -73,7 +152,7 @@ void fit()
     // //  Fitter setup
     // // ---------------------------------------------------------------------------
 
-    fitter fitter(to_fit, "Migrad", 1.E-4);
+    fitter<unpolarized> fitter(to_fit, "Migrad", 1.E-4);
 
     // -----------------------------------------
     // Choose which data we want to fit against
@@ -87,7 +166,7 @@ void fit()
     fitter.add_data(jpsi007);
     
     // Fit N times with randomly sampled inital parameters
-    fitter.do_fit(10);
+    fitter.do_fit(2);
 
     // ---------------------------------------------------------------------------
     // Plot the results
@@ -114,7 +193,7 @@ void fit()
     // Do the same with the differential sets
     for (int i = 0; i <= 2; i++)
     {
-        double Eavg = gluex[i]._avg_w;
+        double Eavg = gluex[i]._extras[0];
         double Wavg = W_cm(Eavg);
         double tmin = -kJpsi->t_min(Wavg*Wavg);
         double tmax = -kJpsi->t_max(Wavg*Wavg); 
@@ -140,7 +219,7 @@ void fit()
 
     for (int i = 1; i <= 12; i++)
     {
-        double Eavg = jpsi007[i-1]._avg_w;
+        double Eavg = jpsi007[i-1]._extras[0];
         double Wavg = W_cm(Eavg);
         double tmin = -kJpsi->t_min(Wavg*Wavg);
         double tmax = -kJpsi->t_max(Wavg*Wavg);

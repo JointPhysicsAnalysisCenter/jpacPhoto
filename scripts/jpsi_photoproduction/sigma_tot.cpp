@@ -17,13 +17,7 @@
 #include "constants.hpp"
 #include "plotter.hpp"
 #include "analytic/K_matrix.hpp"
-
-#include "gluex/data.hpp"
-#include "gluex/plots.hpp"
-#include "jpsi007/data.hpp"
-#include "jpsi007/plots.hpp"
-#include "elementwise.hpp"
-
+#include "data_set.hpp"
 #include <cstring>
 #include <iostream>
 #include <iomanip>

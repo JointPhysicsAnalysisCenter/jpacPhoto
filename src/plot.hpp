@@ -31,7 +31,6 @@
 
 #include "data_set.hpp"
 #include "elementwise.hpp"
-#include "amplitude.hpp"
 #include "colors.hpp"
 
 namespace jpacPhoto
@@ -145,6 +144,8 @@ namespace jpacPhoto
         // -----------------------------------------------------------------------
         // Methods to add curves to your plot
 
+        inline void set_curve_points(int N){ _Npoints = N; };
+
         // Basic function which uses the raw vectors and a string id
         void add_curve(std::vector<double> x, std::vector<double> fx, entry_style style);
         void add_curve(std::vector<double> x, std::vector<double> fx, std::string id = "");
@@ -157,54 +158,6 @@ namespace jpacPhoto
         // colors of the "full" curves
         void add_dashed(std::vector<double> x, std::vector<double> fx);
         void add_dashed(std::array<double,2> bounds, std::function<double(double)> F);
-
-        // -----------------------------------------------------------------------
-        // Add curve directly from an amplitude
-
-        inline void set_curve_points(int N){ _Npoints = N; };
-
-        // Amplitudes which require only bounds of dependent variable (e.g. integrated cross-section)
-        void add_curve(curve_type opt, amplitude to_plot, std::array<double,2> bounds);
-        inline void add_curve(curve_type opt, std::vector<amplitude> to_plot, std::array<double,2> bounds)
-        {
-            for (auto amp : to_plot)
-            {
-                add_curve(opt, amp, bounds);
-            }
-        };
-        inline void add_curve(std::array<double,2> bounds, curve_type opt, amplitude to_plot)
-        {
-            add_curve(opt, to_plot, bounds);
-        };
-
-
-        // Plot differential observable which requires one fixed variable
-        void add_curve(curve_type opt, amplitude to_plot, double fixed_val, std::array<double,2> bounds);
-        inline void add_curve(curve_type opt, std::vector<amplitude> to_plot, double fixed_val, std::array<double,2> bounds)
-        {
-            for (auto amp : to_plot)
-            {
-                add_curve(opt, amp, fixed_val, bounds);
-            }
-        };
-        inline void add_curve(std::array<double,2> bounds, curve_type opt, amplitude to_plot, double fixed_val)
-        {
-            add_curve(opt, to_plot, fixed_val, bounds);
-        };
-
-        // Amplitudes which require only bounds of dependent variable (e.g. integrated cross-section)
-        void add_dashed(curve_type opt, amplitude to_plot, std::array<double,2> bounds);
-        inline void add_dashed(std::array<double,2> bounds, curve_type opt, amplitude to_plot)
-        {
-            add_dashed(opt, to_plot, bounds);
-        };
-
-        // Plot differential observable which requires one fixed variable
-        void add_dashed(curve_type opt, amplitude to_plot, double fixed_val, std::array<double,2> bounds);
-        inline void add_dashed(std::array<double,2> bounds, curve_type opt, amplitude to_plot, double fixed_val)
-        {
-            add_dashed(opt, to_plot, fixed_val, bounds);
-        };
 
         // -----------------------------------------------------------------------
         // Add an error band
