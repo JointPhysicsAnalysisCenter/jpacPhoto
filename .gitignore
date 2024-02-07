@@ -8,3 +8,5 @@
 /lib/
 /temp/
 *.pdf
+
+/data/piDelta/*.txt
