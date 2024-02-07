@@ -64,7 +64,7 @@ void X_compare()
     p1.set_logscale(false, true);
     p1.set_ranges({4.6, 7}, {5E-4, 4E1});
     p1.set_legend(0.27, 0.72);
-    p1.set_labels( "#it{W}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [fb]");
+    p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [fb]");
     p1.add_header("#gamma^{*} exchange");
 
     p1.add_curve({kX->Wth(), 7}, [&](double W){ return primakoff->integrated_xsection(W*W) * 1E6; }, "#it{p}");
@@ -78,7 +78,7 @@ void X_compare()
     p2.set_logscale(false, true);
     p2.set_ranges({4.6, 7}, {6E-2, 4E2});
     p2.set_legend(0.4, 0.22);
-    p2.set_labels( "#it{W}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [nb]");
+    p2.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [nb]");
     p2.add_header("#rho /#omega exchange");
 
     sum_VMD->set_id("#it{p}");

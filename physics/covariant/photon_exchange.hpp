@@ -176,8 +176,8 @@ namespace jpacPhoto { namespace covariant
             return (x - y) / (x + y);
         };
 
-        static constexpr double _mup =  2.79*0.161; // Proton  magnetic moment in GeV-1
-        static constexpr double _mun = -1.92*0.161; // Nucleon magnetic moment in GeV-1
+        static constexpr double _mup =  1.79; // Proton anamolous magnetic moment in units of bohr magneton
+        static constexpr double _mun = -1.92; // Nucleon anomalous magnetic moment in units of bohr magneton
 
         // Polynomial coefficients
         std::array<double,13> _GEp_pars = 
