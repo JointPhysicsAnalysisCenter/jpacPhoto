@@ -17,7 +17,6 @@
 #include "constants.hpp"
 #include "plotter.hpp"
 #include "analytic/K_matrix.hpp"
-#include "data_set.hpp"
 #include <cstring>
 #include <iostream>
 #include <iomanip>

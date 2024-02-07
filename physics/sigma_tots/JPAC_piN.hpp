@@ -163,7 +163,7 @@ namespace jpacPhoto
 
             inline void import()
             {
-                std::string filepath = "/data/said/SAID_PiN_";
+                std::string filepath = "/data/piN/said/SAID_PiN_";
                 
                 auto pw_1p = import_data<9>(filepath + std::to_string(_L) + std::to_string(1) + std::to_string(2*_L+1) + ".txt");
                 auto pw_3p = import_data<9>(filepath + std::to_string(_L) + std::to_string(3) + std::to_string(2*_L+1) + ".txt");

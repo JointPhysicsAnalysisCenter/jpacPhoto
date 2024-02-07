@@ -20,10 +20,10 @@
 #include "plotter.hpp"
 
 #include "analytic/K_matrix.hpp"
-#include "gluex/data.hpp"
-#include "gluex/plots.hpp"
-#include "jpsi007/data.hpp"
-#include "jpsi007/plots.hpp"
+#include "jpsip/gluex/data.hpp"
+#include "jpsip/gluex/plots.hpp"
+#include "jpsip/jpsi007/data.hpp"
+#include "jpsip/jpsi007/plots.hpp"
 
 #include <cstring>
 #include <iostream>
@@ -166,7 +166,7 @@ void fit()
     fitter.add_data(jpsi007);
     
     // Fit N times with randomly sampled inital parameters
-    fitter.do_fit(2);
+    fitter.do_fit(1);
 
     // ---------------------------------------------------------------------------
     // Plot the results

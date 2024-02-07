@@ -20,10 +20,10 @@
 #include "plotter.hpp"
 #include "analytic/K_matrix.hpp"
 
-#include "gluex/data.hpp"
-#include "gluex/plots.hpp"
-#include "jpsi007/data.hpp"
-#include "jpsi007/plots.hpp"
+#include "jpsip/gluex/data.hpp"
+#include "jpsip/gluex/plots.hpp"
+#include "jpsip/jpsi007/data.hpp"
+#include "jpsip/jpsi007/plots.hpp"
 #include "elementwise.hpp"
 
 #include <cstring>

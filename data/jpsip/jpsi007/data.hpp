@@ -22,7 +22,7 @@ namespace jpacPhoto
         inline data_set slice(int Eidx)
         {
             // Import data and check theres no missing entries
-            auto raw  = import_data<15>("data/jpsi007/jpsi007_electron.tsv");
+            auto raw  = import_data<15>("data/jpsip/jpsi007/jpsi007_electron.tsv");
             int  Ntot = check<15>(raw, "J/psi-007 all"); 
 
             // Destination for the reduced data set after filtering
