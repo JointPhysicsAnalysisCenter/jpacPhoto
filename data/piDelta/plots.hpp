@@ -25,10 +25,10 @@ namespace jpacPhoto
 
             p.add_data(piDelta::differential());
             p.set_labels("#minus#it{t} [GeV]", "d#sigma/d#it{t}  [#mub]");
-            p.set_logscale(true, true);
+            p.set_logscale(false, true);
             p.add_header("#it{E}_{#gamma} = 8 GeV");
-            p.set_legend(0.3, 0.4);
-            p.set_ranges({1E-3, 2}, {5E-2, 7});
+            p.set_legend(0.6, 0.5);
+            p.set_ranges({1E-3, 1.08}, {5E-2, 7});
             return p;
         };
 
@@ -38,17 +38,23 @@ namespace jpacPhoto
             p.add_data(piDelta::SDME(a, m, mp));
             p.add_header("#it{E}_{#gamma} = 8.5 GeV");
             p.set_legend(0.7, 0.2);
-            p.set_ranges({0, 1.2}, {-0.5, 0.5});
-            p.set_labels("#minus #it{t}  [GeV^{2}]", 
-                         "#rho^{" + std::to_string(a) + "}_{ " + std::to_string(m) + std::to_string(mp) + "}");
+            p.set_ranges({0, 1}, {-0.5, 0.5});
+
+            std::string label = "#rho^{" + std::to_string(a) + "}_{ " + std::to_string(m) + std::to_string(mp) + "}";
+            if (a == 2) label = "Im " + label;
+            p.set_labels("#minus #it{t}  [GeV^{2}]", label);
             return p;
         };
 
         inline std::vector<plot> plot_SDMEs(plotter & plotr)
         {
-            return { plot_SDME(plotr, 0, 1, 1), plot_SDME(plotr, 0, 3,  1), plot_SDME(plotr, 0, 3, -1),
-                     plot_SDME(plotr, 1, 1, 1), plot_SDME(plotr, 1, 3,  3), plot_SDME(plotr, 1, 3,  1), plot_SDME(plotr, 1, 3, -1),
-                     plot_SDME(plotr, 2, 3, 1), plot_SDME(plotr, 2, 3, -1) };
+            std::vector<plot> ps;
+            for (int i = 1; i <= 9; i++) 
+            {
+                std::array<int,3> ids = SDME_indices(i);
+                ps.push_back(plot_SDME(plotr, ids[0], ids[1], ids[2]));
+            };
+            return ps;
         };
 
         inline plot plot_beam_asymmetry(plotter& plotr)

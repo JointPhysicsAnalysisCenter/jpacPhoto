@@ -21,7 +21,7 @@
 #include "regge/unnatural_exchange.hpp"
 #include "plotter.hpp"
 
-void piDelta()
+void frames()
 {
     using namespace jpacPhoto;
 
@@ -77,7 +77,7 @@ void piDelta()
     // Unnatural exchanges
 
     amplitude pi  = new_amplitude<regge::unnatural_exchange>(kpi, +1, "#pi");
-    amplitude b1  = new_amplitude<regge::unnatural_exchange>(kpi,  -1, "b_{1}");
+    amplitude b1  = new_amplitude<regge::unnatural_exchange>(kpi, -1, "b_{1}");
     amplitude U = pi + b1;
     U->set_id("Unnatural");
 
@@ -133,110 +133,104 @@ void piDelta()
     //--------------------------------------------------------------------------
     // Plots
     
-    // Print differential cross section vs sqrt -t'
-    // in mub!
-    auto dsig = [kpi](double Egam, amplitude amp)
+    // Print  SDMEs section vs sqrt -t
+    auto SDME_GJ = [](int alpha, int m, int mp, double Egam, amplitude amp)
     {
         double s = W_cm(Egam)*W_cm(Egam);
-        return [amp, kpi, s](double sqrtmt)
-        {
-            double tmin = kpi->t_min(s);
-            double t = - sqrtmt*sqrtmt + tmin;
-            return amp->differential_xsection(s, t) * 1E-3;
-        };
-    };
-
-    auto dsigPol = [kpi](double Egam, int x, amplitude amp)
-    {
-        double s = W_cm(Egam)*W_cm(Egam);
-        return [amp, kpi, x, s](double sqrtmt)
-        {
-            double tmin = kpi->t_min(s);
-            double t = - sqrtmt*sqrtmt + tmin;
-            return amp->polarized_differential_xsection(x, s, t) * 1E-3;
-        };
-    };
-
-    // Beam asymmetry vs sqrt -t'
-    auto BeamAsym = [kpi](double Egam, amplitude amp)
-    {
-        double s = W_cm(Egam)*W_cm(Egam);
-        return [amp, kpi, s](double sqrtmt)
-        {
-            double tmin = kpi->t_min(s);
-            double t = - sqrtmt*sqrtmt + tmin;
-            return amp->beam_asymmetry_4pi(s, t);
+        return [amp, alpha, m, mp, s](double mt)
+        { 
+            double x = (alpha == 2) ? std::imag(amp->bSDME_GJ(alpha, m, mp, s, -mt)) : std::real(amp->bSDME_GJ(alpha, m, mp, s, -mt)); 
+            return /* amp->differential_xsection(s, -mt) * */ x /* * 1E-3 */; 
         };
     };
     
+    auto SDME_H = [](int alpha, int m, int mp, double Egam, amplitude amp)
+    {
+        double s = W_cm(Egam)*W_cm(Egam);
+        return [amp, alpha, m, mp, s](double mt)
+        { 
+            double x = (alpha == 2) ? std::imag(amp->bSDME_H(alpha, m, mp, s, -mt)) : std::real(amp->bSDME_H(alpha, m, mp, s, -mt)); 
+            return /* amp->differential_xsection(s, -mt) * */ x /* * 1E-3 */; 
+        };
+    };
+    
+
+    std::array<double,2> ybounds = {-0.5, 0.5};
+
     plotter plotter;
     plot p1 = plotter.new_plot();
-    p1.set_logscale(false, true);
-    p1.set_ranges({0., 1.4}, {1E-3, 1E2});
+    p1.set_ranges({0,1}, ybounds);
     p1.set_legend(0.2, 0.2);
     p1.add_header("#pi^{#minus} #Delta^{#plus#plus}");
-    p1.set_labels("#sqrt{ #minus (#it{t} - #it{t}_{min})}    [GeV]", "d#sigma/d#it{t}   [#mub / GeV^{2}]");
-    pimDpp(kCut);  p1.add_curve( {0, 1.4}, dsig(5,  total),  "5 GeV");
-    pimDpp(kPole); p1.add_dashed({0, 1.4}, dsig(5,  total));
-    pimDpp(kCut);  p1.add_curve( {0, 1.4}, dsig(8,  total),  "8 GeV");
-    pimDpp(kPole); p1.add_dashed({0, 1.4}, dsig(8,  total));
-    pimDpp(kCut);  p1.add_curve( {0, 1.4}, dsig(11, total), "11 GeV");
-    pimDpp(kPole); p1.add_dashed({0, 1.4}, dsig(11, total));
-    pimDpp(kCut);  p1.add_curve( {0, 1.4}, dsig(16, total), "16 GeV");
-    pimDpp(kPole); p1.add_dashed({0, 1.4}, dsig(16,  total));
+    p1.set_labels("-t  [GeV^{2}]", "#rho_{11}^{0}");
+    pimDpp(kPole);  p1.add_curve(  {0.01, 1.0}, SDME_H(0, 1, 1, 8, total),  "H");
+    pimDpp(kPole);  p1.add_curve(  {0.01, 1.0}, SDME_GJ(0, 1, 1, 8, total), "GJ");
 
     plot p2 = plotter.new_plot();
-    p2.set_logscale(false, true);
-    p2.set_ranges({0., 1.4}, {1E-2, 10});
     p2.set_legend(0.2, 0.2);
-    p2.add_header("#pi^{#plus} #Delta^{0}");
-    p2.set_labels("#sqrt{ #minus (#it{t} - #it{t}_{min})}    [GeV]", "d#sigma/d#it{t}   [#mub / GeV^{2}]");
-    pipD0(kCut);  p2.add_curve( {0, 1.4}, dsig(9,  total),  "9 GeV");
-    pipD0(kPole); p2.add_dashed({0, 1.4}, dsig(9,  total));
+    p2.set_ranges({0,1},ybounds);
+    p2.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p2.set_labels("-t  [GeV^{2}]", "Re #rho_{31}^{0}");
+    pimDpp(kPole);  p2.add_curve(  {0.01, 1.0}, SDME_H(0, 3, 1, 8, total),  "H");
+    pimDpp(kPole);  p2.add_curve(  {0.01, 1.0}, SDME_GJ(0, 3, 1, 8, total), "GJ");
 
     plot p3 = plotter.new_plot();
-    p3.set_ranges({0, 1}, {-1, 1});
-    p3.set_legend(0.2, 0.8);
-    p3.add_header("16 GeV");
-    p3.set_labels("#sqrt{ #minus (#it{t} - #it{t}_{min})}    [GeV]", "#Sigma_{4#pi}");
-    pipD0(kCut);   p3.add_curve( {0, 1.0}, BeamAsym(16,  total),  "#pi^{#plus} #Delta^{0}");
-    pipD0(kPole);  p3.add_dashed({0, 1.0}, BeamAsym(16,  total));
-    pimDpp(kCut);  p3.add_curve( {0, 1.0}, BeamAsym(16,  total),  "#pi^{#minus} #Delta^{#plus#plus}");
-    pimDpp(kPole); p3.add_dashed({0, 1.0}, BeamAsym(16,  total));
-
+    p3.set_legend(0.2, 0.2);
+    p3.set_ranges({0,1}, ybounds);
+    p3.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p3.set_labels("-t  [GeV^{2}]", "Re #rho_{3-1}^{0}");
+    pimDpp(kPole);  p3.add_curve(  {0.01, 1.0}, SDME_H(0, 3, -1, 8, total),  "H");
+    pimDpp(kPole);  p3.add_curve(  {0.01, 1.0}, SDME_GJ(0, 3, -1, 8, total), "GJ");
 
     plot p4 = plotter.new_plot();
-    p4.set_ranges({0, 1}, {-1, 1});
-    p4.set_legend(0.2, 0.8);
-    p4.add_header("9 GeV");
-    p4.set_labels("#sqrt{ #minus (#it{t} - #it{t}_{min})}    [GeV]", "#Sigma_{4#pi}");
-    pipD0(kCut);   p4.add_curve( {0, 1.0}, BeamAsym(9,  total),  "#pi^{#plus} #Delta^{0}");
-    pipD0(kPole);  p4.add_dashed({0, 1.0}, BeamAsym(9,  total));
-    pimDpp(kCut);  p4.add_curve( {0, 1.0}, BeamAsym(9,  total),  "#pi^{#minus} #Delta^{#plus#plus}");
-    pimDpp(kPole); p4.add_dashed({0, 1.0}, BeamAsym(9,  total));
+    p4.set_legend(0.2, 0.2);
+    p4.set_ranges({0,1}, ybounds);
+    p4.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p4.set_labels("-t  [GeV^{2}]", "#rho_{11}^{1}");
+    pimDpp(kPole);  p4.add_curve(  {0.01, 1.0}, SDME_H(1, 1, 1, 8, total),  "H");
+    pimDpp(kPole);  p4.add_curve(  {0.01, 1.0}, SDME_GJ(1, 1, 1, 8, total), "GJ");
 
     plot p5 = plotter.new_plot();
-    p5.set_logscale(false, true);
-    p5.set_legend(0.2, 0.8);
-    p5.add_header("16 GeV");
-    p5.set_ranges({0, 1}, {4E-3, 10});
-    p5.set_labels("#sqrt{ #minus (#it{t} - #it{t}_{min})}    [GeV]", "d#sigma/d#it{t}   [#mub / GeV^{2}]");
-    pipD0(kCut);   p5.add_curve( {0, 1}, dsigPol(16, +1, total), "#pi^{#plus} #Delta^{0}");
-    pipD0(kPole);  p5.add_dashed({0, 1}, dsigPol(16, +1, total));
-    pimDpp(kCut);  p5.add_curve( {0, 1}, dsigPol(16, +1, total), "#pi^{#minus} #Delta^{#plus#plus}");
-    pimDpp(kPole); p5.add_dashed({0, 1}, dsigPol(16, +1, total));
+    p5.set_legend(0.2, 0.2);
+    p5.set_ranges({0,1}, ybounds);
+    p5.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p5.set_labels("-t  [GeV^{2}]", "#rho_{33}^{1}");
+    pimDpp(kPole);  p5.add_curve(  {0.01, 1.0}, SDME_H(1, 3, 3, 8, total),  "H");
+    pimDpp(kPole);  p5.add_curve(  {0.01, 1.0}, SDME_GJ(1, 3, 3, 8, total), "GJ");
 
     plot p6 = plotter.new_plot();
-    p6.set_logscale(false, true);
-    p6.set_legend(0.2, 0.8);
-    p6.add_header("16 GeV");
-    p6.set_ranges({0, 1}, {4E-3, 10});
-    p6.set_labels("#sqrt{ #minus (#it{t} - #it{t}_{min})}    [GeV]", "d#sigma/d#it{t}   [#mub / GeV^{2}]");
-    pipD0(kCut);   p6.add_curve( {0, 1}, dsigPol(16, -1, total), "#pi^{#plus} #Delta^{0}");
-    pipD0(kPole);  p6.add_dashed({0, 1}, dsigPol(16, -1, total));
-    pimDpp(kCut);  p6.add_curve( {0, 1}, dsigPol(16, -1, total), "#pi^{#minus} #Delta^{#plus#plus}");
-    pimDpp(kPole); p6.add_dashed({0, 1}, dsigPol(16, -1, total));
+    p6.set_legend(0.2, 0.2);
+    p6.set_ranges({0,1}, ybounds);
+    p6.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p6.set_labels("-t  [GeV^{2}]", "Re #rho_{31}^{1}");
+    pimDpp(kPole);  p6.add_curve(  {0.01, 1.0}, SDME_H(1, 3, 1, 8, total),  "H");
+    pimDpp(kPole);  p6.add_curve(  {0.01, 1.0}, SDME_GJ(1, 3, 1, 8, total), "GJ");
 
-    plotter.combine({3, 2}, {p1, p6, p3, p2, p5, p4}, "piDelta.pdf");
+    plot p7 = plotter.new_plot();
+    p7.set_legend(0.2, 0.2);
+    p7.set_ranges({0,1}, ybounds);
+    p7.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p7.set_labels("-t  [GeV^{2}]", "Re #rho_{3-1}^{1}");
+    pimDpp(kPole);  p7.add_curve(  {0.01, 1.0}, SDME_H(1, 3, -1, 8, total),  "H");
+    pimDpp(kPole);  p7.add_curve(  {0.01, 1.0}, SDME_GJ(1, 3, -1, 8, total), "GJ");
+
+    plot p8 = plotter.new_plot();
+    p8.set_legend(0.2, 0.2);
+    p8.set_ranges({0,1}, ybounds);
+    p8.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p8.set_labels("-t  [GeV^{2}]", "Im #rho_{31}^{2}");
+    pimDpp(kPole);  p8.add_curve(  {0.01, 1.0}, SDME_H(2, 3, 1, 8, total),  "H");
+    pimDpp(kPole);  p8.add_curve(  {0.01, 1.0}, SDME_GJ(2, 3, 1, 8, total), "GJ");
+
+    plot p9 = plotter.new_plot();
+    p9.set_legend(0.2, 0.2);
+    p9.set_ranges({0,1}, ybounds);
+    p9.add_header("#pi^{#minus} #Delta^{#plus#plus}");
+    p9.set_labels("-t  [GeV^{2}]", "Im #rho_{3-1}^{2}");
+    pimDpp(kPole);  p9.add_curve(  {0.01, 1.0}, SDME_H(2, 3, -1, 8, total),  "H");
+    pimDpp(kPole);  p9.add_curve(  {0.01, 1.0}, SDME_GJ(2, 3, -1, 8, total), "GJ");
+    
+    plotter.combine({3,3}, {p1, p2, p3, p4, p5, p6, p7, p8, p9}, "sdmes_old.pdf");
+
     return;
 };

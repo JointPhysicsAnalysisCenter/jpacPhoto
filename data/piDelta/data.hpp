@@ -61,6 +61,24 @@ namespace jpacPhoto
             };
         };
 
+        // translate back
+        inline std::array<int,3> SDME_indices(int i)
+        {
+            switch (i)
+            {
+                case  1: return {0, 1,  1};
+                case  2: return {0, 3,  1};
+                case  3: return {0, 3, -1};
+                case  4: return {1, 1,  1};
+                case  5: return {1, 3,  3};
+                case  6: return {1, 3,  1};
+                case  7: return {1, 3, -1};
+                case  8: return {2, 3,  1};
+                case  9: return {2, 3, -1};
+                default: return {-1, -1, -1};
+            };
+        };
+
         // New SDME data
         inline data_set SDME(int a, int m, int mp)
         {
@@ -72,8 +90,7 @@ namespace jpacPhoto
             int index = SDME_index(a, m, mp);
             if (index < 0) 
             {
-                error("piDelta::SDME", "Invalid SDME indices passed!");
-                return data_set();
+                return error("piDelta::SDME", "Invalid SDME indices passed!", data_set());
             };
 
             data_set wrapped;
@@ -95,9 +112,13 @@ namespace jpacPhoto
 
         inline std::vector<data_set> SDMEs()
         {
-            return { SDME(0, 1, 1), SDME(0, 3, 1), SDME(0, 3, -1),
-                     SDME(1, 1, 1), SDME(1, 3, 3), SDME(1, 3, 1), SDME(1, 3, -1),
-                     SDME(2, 3, 1), SDME(2, 3, -1) };
+            std::vector<data_set> ds;
+            for (int i = 1; i <= 9; i++) 
+            {
+                std::array<int,3> ids = SDME_indices(i);
+                ds.push_back(SDME(ids[0], ids[1], ids[2]));
+            };
+            return ds;
         };
 
         inline data_set beam_asymmetry()
@@ -118,8 +139,6 @@ namespace jpacPhoto
             wrapped._z = raw[2];       // Sigma_4pi
             wrapped._zerr[0] = raw[3];
             wrapped._zerr[1] = raw[3];
-
-            print(wrapped._xerr[1]);
 
             // save Egam in extras
             wrapped._extras.push_back(8.5);
