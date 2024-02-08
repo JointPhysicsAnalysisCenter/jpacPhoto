@@ -49,12 +49,17 @@ namespace jpacPhoto
 
         int         _i;
         std::string _label;
+        std::string _message;
         bool   _fixed         = false;
         double _value         = 0;
         bool   _custom_limits = false;
         double _upper         = 0;
         double _lower         = 0;
         double _step          = 0.1;
+
+        // If this parameter is synced to be equal to another
+        bool   _synced        = false;
+        int    _sync_to       = -1; // Which param its synced to
 
         static inline std::string default_label(int i)
         {
@@ -169,6 +174,20 @@ namespace jpacPhoto
             free_parameter(_pars[index]);
         };
 
+        inline void sync_parameter(std::string par, std::string synced_to)
+        {
+            int i            = find_parameter(par);
+            int i_sync_to    = find_parameter(synced_to);
+            _pars[i]._synced  = true;
+            _pars[i]._sync_to = i_sync_to;
+
+            // Also save present value in case there is one
+            _pars[i]._value = _pars[i_sync_to]._value;
+            if (!_pars[i_sync_to]._fixed)_Nfree--;
+        };
+
+        inline void unsync_parameter(std::string par){ _pars[ find_parameter(par) ]._synced = false; };
+
         // -----------------------------------------------------------------------
         // Methods related to fit options
 
@@ -224,13 +243,24 @@ namespace jpacPhoto
             std::vector<double> guess;  
 
             // Initialize the guess for each parameter
+            std::vector<int> synced_pars;
             for (auto par : _pars)
             {
                 if (par._fixed) continue;
+                if (par._synced){ synced_pars.push_back(par._i); continue; } // Flag any synced parameters, we'll come back to them
 
                 if (par._custom_limits) guess.push_back(_guesser->Uniform(par._lower, par._upper)); 
                 else                    guess.push_back(_guesser->Uniform(_guess_range[0], _guess_range[1]));
+                par._value = guess.back();
             };  
+
+            // After all randomized parameters have been set, rego through the synced ones
+            for (int i : synced_pars)
+            {
+                int j = _pars[i]._sync_to;
+                _pars[i]._value = _pars[j]._value;
+            };
+
             do_fit(guess);
         };
 
@@ -249,16 +279,29 @@ namespace jpacPhoto
                 // Whether this is the first iteration
                 bool first_fit =  !(i-1);
                 // Initialize the guess for each parameter
+                
+                std::vector<int> synced_pars;
                 for (auto par : _pars)
                 {
                     if (par._fixed) continue;
+                    if (par._synced){ synced_pars.push_back(par._i); continue; } // Flag any synced parameters, we'll come back to them
+
                     if (par._custom_limits) guess.push_back(_guesser->Uniform(par._lower, par._upper)); 
                     else                    guess.push_back(_guesser->Uniform(_guess_range[0], _guess_range[1]));
+                    par._value = guess.back();
+                };
+
+                // After all randomized parameters have been set, rego through the synced ones
+                for (int i : synced_pars)
+                {
+                    int j = _pars[i]._sync_to;
+                    _pars[i]._value = _pars[j]._value;
                 };
 
                 // Do out fit with this random guess
                 if (!first_fit) std::cout << std::left << "Fit (" + std::to_string(i) + "/" + std::to_string(N) + ")" << std::endl;
                 do_fit(guess, first_fit);
+
 
                 // Compare with previous best and update
                 if ( first_fit || fcn() < _best_fcn)
@@ -330,7 +373,7 @@ namespace jpacPhoto
             int i = 0;
             for (auto par : _pars)
             {   
-                if (par._fixed) continue;
+                if (par._fixed || par._synced) continue;
                 _minuit->SetVariable(i, par._label, starting_guess[i], par._step);
                 if (par._custom_limits) _minuit->SetVariableLimits(i, par._lower, par._upper);
                 i++; // move index up
@@ -393,10 +436,19 @@ namespace jpacPhoto
 
             // Move along the pars index when a parameter is not fixed
             int i = 0;
+
+            std::vector<int> synced_pars;
             for (auto par : _pars)
             {
-                if (par._fixed) result.push_back(par._value);
+                if (par._synced) synced_pars.push_back(par._i); 
+                if (par._fixed || par._synced) result.push_back(par._value);
                 else { result.push_back(cpars[i]); i++; };
+            };
+
+            for (int j : synced_pars)
+            {
+                _pars[j]._value = _pars[_pars[j]._sync_to]._value;
+                result[j] = result[_pars[j]._sync_to];
             };
 
             if (i != _Nfree) warning("fitter::convert", "Something went wrong in converting parameter vector.");
@@ -450,33 +502,50 @@ namespace jpacPhoto
 
             // Moving index from the guess vector
             int i = 0;
-            for (auto par : _pars)
+            
+            std::vector<int> synced_pars;
+            std::vector<double> vals;
+            for (auto &par : _pars)
             {
-                // Parse whether a parameter has extra options 
-                // such as custom limits
-                std::string extra = "";
+                if (par._synced)
+                {
+                    vals.push_back(0);
+                    synced_pars.push_back(par._i);
+                    par._message = "[= " + std::to_string(par._sync_to) + "]";
+                    continue;
+                };
+
+                // Or is fixed
+                if (par._fixed)
+                {
+                    vals.push_back(par._value);
+                    par._message  =  "[FIXED]";
+                    continue;
+                }
+
+                par._value = starting_guess[i];
+                vals.push_back(par._value);
                 if (par._custom_limits)
                 {   
                     std::stringstream ss;
                     ss << std::setprecision(5) << "[" << par._lower << ", " << par._upper << "]";
-                    extra = ss.str();
+                    par._message = ss.str();
                 };
-
-                // Or is fixed
-                double par_val;
-                if (par._fixed)
-                {
-                    par_val = par._value;
-                    extra   = "[FIXED]";
-                }
-                else
-                {
-                    par_val = starting_guess[i];
-                    i++;
-                }
-
-                cout << left << setw(10) << par._i << setw(17) << par._label << setw(20) << par_val << setw(20) << extra << endl;
+                i++;
             };
+
+            for (int j : synced_pars)
+            {
+                int k = _pars[j]._sync_to;
+                _pars[j]._value = _pars[k]._value;
+                vals[j] = _pars[k]._value;
+            };
+
+            for (auto par : _pars)
+            {
+                cout << left << setw(10) << par._i << setw(17) << par._label << setw(20) << vals[par._i] << setw(20) << par._message << endl;
+            };
+
             line(); divider(); line();
         };
 
@@ -507,26 +576,17 @@ namespace jpacPhoto
             cout << left << setw(10) << "i"     << setw(16) << "PARAMETER"  << setw(18) << "FIT VALUE"    << setw(18) << "ERROR"        << endl;
             cout << left << setw(10) << "-----" << setw(16) << "----------" << setw(18) << "------------" << setw(18) << "------------" << endl;
 
+            for (int i = 0; i < pars.size(); i++) _pars[i]._value = pars[i];
+
             for (auto par : _pars)
             {
                 double val;
-                std::string err;
+
                 std::stringstream ss;
-                ss << std::setprecision(8);
+                ss << std::setprecision(8) << errs[par._i];
+                std::string err = !(par._fixed || par._synced) ? ss.str() : par._message;
 
-                if (par._fixed)
-                {
-                    val = par._value;
-                    err = "[FIXED]";
-                }
-                else
-                {
-                    val = pars[par._i];
-                    ss << errs[par._i];
-                    err = ss.str();
-                }
-
-                cout << left << setw(10) << par._i << setw(16) << par._label << setw(18) << val << setw(18) << err << endl;
+                cout << left << setw(10) << par._i << setw(16) << par._label << setw(18) << par._value << setw(18) << err << endl;
             };
             line(); divider(); line();
             
