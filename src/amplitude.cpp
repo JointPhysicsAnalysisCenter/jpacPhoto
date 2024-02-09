@@ -233,6 +233,8 @@ namespace jpacPhoto
     // Square of the spin averaged amplitude squared
     double raw_amplitude::probability_distribution(double s, double t)
     {
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+
         // Check we have the right amplitudes cached
         double sum = 0.; auto cache = get_cache(s, t);
         for (auto amp : cache) sum += std::norm(amp);
@@ -274,6 +276,7 @@ namespace jpacPhoto
     double raw_amplitude::polarized_differential_xsection(int perp_or_para, double s, double t)
     {
         if (s < _kinematics->sth()) return 0.;
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
         if (abs(perp_or_para) != 1) return std::nan("");
         
         // Sum first half of amplitudes which are lam_gamma = +1
@@ -295,6 +298,8 @@ namespace jpacPhoto
     // Polarization asymmetry between beam and recoil baryon
     double raw_amplitude::K_LL(double s, double t)
     {
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+
         double sum = 0; 
         auto cache = get_cache(s, t); int n = cache.size();
         for (int i = 0; i < n; i++)
@@ -309,6 +314,8 @@ namespace jpacPhoto
     // Polarization asymmetry between beam and target proton
     double raw_amplitude::A_LL(double s, double t)
     {
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+
         double sum = 0; 
         auto cache = get_cache(s, t); int n = cache.size();
         for (int i = 0; i < n; i++)
@@ -323,6 +330,8 @@ namespace jpacPhoto
     // Integrated beam asymmetry sigma_4pi
     double raw_amplitude::beam_asymmetry_4pi(double s, double t)
     {
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+
         double sum = 0;
         auto cache = get_cache(s, t); int n = cache.size()/2;
         for (int i = 0; i < n; i++) sum += 2.*std::real(cache[i]*conj(cache[i + n]));
@@ -336,6 +345,7 @@ namespace jpacPhoto
     complex raw_amplitude::bSDME(unsigned int alpha, int lam, int lamp, double s, double t)
     {
         if (alpha > 2) return error("amplitude::bSDME", "Invalid SDME (alpha = " + std::to_string(alpha) + ") requested!", std::nan(""));
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
 
         int J = _kinematics->get_baryon_JP()[0];
         if (std::abs(lam)  > J) return error("amplitude::bSDME", "Invalid SDME (lam = "  + std::to_string(lam)  + ") requested!", std::nan(""));
@@ -434,7 +444,8 @@ namespace jpacPhoto
     complex raw_amplitude::mSDME(unsigned int alpha, int lam, int lamp, double s, double t)
     {
         if (alpha > 2) return error("amplitude::mSDME", "Invalid SDME (alpha = " + std::to_string(alpha) + ") requested!", std::nan(""));
-
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+        
         int J = _kinematics->get_meson_JP()[0];
         if (std::abs(lam)  > J) return error("amplitude::mSDME", "Invalid SDME (lam = "  + std::to_string(lam)  + ") requested!", std::nan(""));
         if (std::abs(lamp) > J) return error("amplitude::mSDME", "Invalid SDME (lam' = " + std::to_string(lamp) + ") requested!", std::nan(""));
