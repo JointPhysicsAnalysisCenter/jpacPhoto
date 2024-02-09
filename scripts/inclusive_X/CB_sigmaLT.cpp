@@ -12,7 +12,7 @@
 // [1] - https://arxiv.org/abs/0712.3731
 // ------------------------------------------------------------------------------
 
-#include "sigma_tots/CB_F.hpp"
+#include "semi_inclusive/CB_F.hpp"
 #include "plotter.hpp"
 
 void CB_sigmaLT()

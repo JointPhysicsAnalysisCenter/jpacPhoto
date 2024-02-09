@@ -13,7 +13,7 @@
 // ------------------------------------------------------------------------------
 
 #include "semi_inclusive.hpp"
-#include "inclusive/phase_space.hpp"
+#include "semi_inclusive/phase_space.hpp"
 #include "plotter.hpp"
 #include "print.hpp"
 

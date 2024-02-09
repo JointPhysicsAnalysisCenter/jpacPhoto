@@ -15,8 +15,8 @@
 
 #include "semi_inclusive.hpp"
 #include "kinematics.hpp"
-#include "inclusive/pion_exchange.hpp"
-#include "inclusive/phase_space.hpp"
+#include "semi_inclusive/pion_exchange.hpp"
+#include "semi_inclusive/phase_space.hpp"
 #include "plotter.hpp"
 
 void chew_low()

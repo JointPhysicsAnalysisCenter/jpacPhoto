@@ -11,7 +11,7 @@
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"
-#include "inclusive/vector_exchange.hpp"
+#include "semi_inclusive/vector_exchange.hpp"
 #include "analytic/vector_exchange.hpp"
 #include "covariant/photon_exchange.hpp"
 

@@ -20,8 +20,8 @@
 #include "constants.hpp"
 #include "data_set.hpp"
 #include "inclusive_function.hpp"
-#include "sigma_tots/CB_F.hpp"
-#include "sigma_tots/DL_F.hpp"
+#include "semi_inclusive/CB_F.hpp"
+#include "semi_inclusive/DL_F.hpp"
 
 #include <Math/Interpolator.h>
 

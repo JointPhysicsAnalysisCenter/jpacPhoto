@@ -13,7 +13,7 @@
 // ------------------------------------------------------------------------------
 
 #include "semi_inclusive.hpp"
-#include "inclusive/pion_exchange.hpp"
+#include "semi_inclusive/pion_exchange.hpp"
 #include "analytic/pseudoscalar_exchange.hpp"
 
 #include "Math/GSLIntegrator.h"

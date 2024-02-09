@@ -27,9 +27,9 @@ setenv JPACPHOTO /path/to/jpacPhoto # for csh
 
 ##  USAGE
 
-The primary use case is to reproduce results from recent [[1-4]](#references) and older analyses [[5]](#references) from the JPAC collaboration to have a unified framework for amplitude analysis in photorproduction. The compiled library contains the framework of amplitudes and observables as abstract classes with specific amplitude models imported at run-time as a header-only library. The compiled jpacPhoto executable pipes an analysis script, relevent amplitude files, and compiled library into the cling interpeter to run. 
+The primary use case is to reproduce results from recent [[1-4]](#references) and older analyses [[5]](#references) from the JPAC collaboration to have a unified framework for amplitude analysis in photoproduction. The compiled library contains the framework of amplitudes and observables as abstract classes with specific amplitude models imported at run-time as a header-only library. The compiled jpacPhoto executable pipes an analysis script, relevent amplitude files, and compiled library into the cling interpeter to run. 
 
-This set up mimics a Python-like environment without requiring recompilation when changes are made to amplitude files. Amplitudes and scripts relevant for JPAC papers are located in [`/amplitudes/`](./amplitudes/) and [`/scripts/`](./scripts) respectively.  To run a script located in the bin directory simply run 
+This set up mimics a Python-like environment without requiring recompilation when changes are made to amplitude files. Amplitudes and scripts relevant for JPAC papers are located in [`/physics`](./physics) and [`/scripts`](./scripts) respectively.  To run a script located in the bin directory simply run 
 ```bash
 jpacPhoto my_script.cpp
 ```
@@ -42,8 +42,8 @@ find_library(JPACPHOTO NAMES JPACPHOTO libJPACPHOTO
 target_link_libraries( myTarget JPACPHOTO)
 ```
 
-##  AMPLITUDES
-The main object of interest in the core library is the abstract [`amplitude`](./src/amplitude.hpp) and implementations defined by the user. Amplitudes implemented so may be found in [/amplitudes/](./amplitudes/) as well as a [template file](./amplitudes/template.hpp) with which to add new classes. Models are implemented and calculated on a per-helicity-amplitude basis which allows one to compute an array of observables:
+###  AMPLITUDES
+The main object of interest in the core library is the abstract [`amplitude`](./src/amplitude.hpp) and implementations defined by the user. Amplitudes available so far may be found in [/amplitudes](./amplitudes) as well as a [template file](./physics/template.hpp) with which to add new classes. These are calculated on a per-helicity-amplitude basis which allows one to compute an array of observables:
 
 | Observable                           |                                                 | Callable `amplitude` function                                                                                                  |
 |--------------------------------------|-------------------------------------------------|--------------------------------------------------------------------------------------------------------------------|
@@ -95,7 +95,7 @@ sum->integrated_xsection(s);   // Interfering sum
 pwave->integrated_xsection(s); // Only P-wave contribution of sum
 ```
 
-## SEMI-INCLUSIVE DISTRIBUTIONS
+### SEMI-INCLUSIVE DISTRIBUTIONS
 Methods to add models for inclusive processes can be added via the [`semi_inclusive`](./src/semi_inclusive.hpp) class. These are used for example in [[3]](#references) to investigate inclusive XYZ production. 
 Since semi-inclusive models are implemented at the cross section level, they lose helicity dependence only unpolarized observables are currently available: (Units of GeV and nb assumed where appropriate):
 | Observable                                       |   | Callable `semi_inclusive` function |
@@ -121,8 +121,56 @@ Z += Z_exc; // Add to the purely inclusive distribution
 // Get observables
 Z->integrated_xsection(s);
 ```
+### ANALYSIS TOOLS
+Tools to fit amplitudes to experimental data are available through the [`fitter`](./src/fitter.hpp) and [`plotter`](./src/plotter.hpp) classes. Data may be imported using the [`data_set`](./src/data_set.hpp) class as interface. Arbitrary many data sets may be imported into a fitter where one must specify the minimazition function per data type. An end-to-end example used in [[4]](#references) may be found in the appropriate [scripts directory](./scripts/jpsi_photoproduction/fit.cpp).
 
-##  REFERENCES
+A schematic analysis may look like:
+```c++
+struct my_analysis
+{
+    static std::string data_type(int i)
+    {
+        if (i == 0) "Allowed type";
+        else        "Not allowed type";
+    };
+
+    static double fcn(const std::vector<data_set> &data, amplitude amp)
+    {
+        double chi2 = 0;
+        for (auto datum : data) if (data._type == 0) chi2 += /* calculate chi2*/;
+        return chi2;
+    };
+};
+
+int main()
+{
+  // Set up amplitude
+  amplitude my_amplitude;
+
+  // Do fit
+  fitter fitter<my_analysis>(my_amplitude);
+  fitter.add_data(my_data);
+  fitter.set_parameter_limits("first parameter", {0., 1});
+  fitter.fix_parameter("fixed parameter", 0.5);
+  fitter.sync_parameter("parameter 1", "parameter 2"); // enforce 1 == 2 with 2 free
+  fitter.do_fit();
+
+  // Plot results
+  plotter plotter;
+  plot p = plotter.new_plot();
+  p.add_data(my_data);
+  p.add_curve({min, max}, [&](double x){ return my_amplitude->observable(x); }, "label");
+  p.save("outfile.pdf");
+};
+
+```
+
+### AmpTools
+In addition to the built-in analysis tools, the aim of this project is to be usable with existing analysis and simulation tools. An relatively simple interface with [AmpTools](https://github.com/mashephe/AmpTools) is provided in [/AmpTools](./AmpTools) as well as scripts in the analogous [/scripts](./scripts/AmpTools/) directory. 
+
+To run these scripts with the `jpacPhoto` executable requires having AmpTools to be built and the `AMPTOOLS` environment variable set to the top level install directory. Since the cling interpreter can only load _dynamic_ libraries (which is not the default installation mode of AmpTools), the optional cmake flag `-DDYNAMIC_AMPTOOLS=TRUE` is provided to repackage an existing static library to a local dynamic version. 
+
+###  REFERENCES
 + [1] [Double Polarization Observables in Pentaquark Photoproduction](https://arxiv.org/abs/1907.09393)
 + [2] [XYZ spectroscopy at electron-hadron facilities: Exclusive processes](https://arxiv.org/abs/2008.01001)
 + [3] [XYZ spectroscopy at electron-hadron facilities II: Semi-inclusive processes with pion exchange](https://arxiv.org/abs/2209.05882)

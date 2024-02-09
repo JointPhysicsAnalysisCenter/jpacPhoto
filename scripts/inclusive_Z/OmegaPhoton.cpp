@@ -15,7 +15,7 @@
 
 #include "semi_inclusive.hpp"
 #include "kinematics.hpp"
-#include "inclusive/pion_exchange.hpp"
+#include "semi_inclusive/pion_exchange.hpp"
 #include "plotter.hpp"
 
 void OmegaPhoton()

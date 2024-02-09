@@ -18,7 +18,8 @@
 void sachs_FFs()
 {
     using namespace jpacPhoto;
-    
+    using covariant::photon_exchange;
+
     kinematics kX = new_kinematics(M_X3872);
     kX->set_meson_JP(AXIALVECTOR);
 
@@ -35,9 +36,10 @@ void sachs_FFs()
         return primakoff->G_E(Q2) / GD(Q2);
     };
 
+    double mu = 1;
     auto GM_over_GD = [&] (double Q2)
     {
-        return primakoff->G_M(Q2) / GD(Q2);
+        return primakoff->G_M(Q2) / GD(Q2) / mu;
     };
 
     plotter plotter;
@@ -62,8 +64,10 @@ void sachs_FFs()
     pM.set_labels("#it{Q}^{2}  [GeV^{2}]", "G_{#it{M}} / #mu_{#it{p}}G_{#it{D}}");
 
     primakoff->set_option( photon_exchange::kProton );
+    mu = 1.79;
     pM.add_curve({1E-2, 1E2}, GM_over_GD , "#it{p}");
     primakoff->set_option( photon_exchange::kNeutron );
+    mu = -1.92;
     pM.add_curve({1E-2, 1E2}, GM_over_GD , "#it{n}");
 
     plotter.combine({2,1}, {pE, pM}, "GEp.pdf");

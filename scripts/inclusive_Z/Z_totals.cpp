@@ -17,8 +17,8 @@
 #include "kinematics.hpp"
 #include "plotter.hpp"
 #include "semi_inclusive.hpp"
-#include "inclusive/pion_exchange.hpp"
-#include "inclusive/phase_space.hpp"
+#include "semi_inclusive/pion_exchange.hpp"
+#include "semi_inclusive/phase_space.hpp"
 #include "analytic/pseudoscalar_exchange.hpp"
 
 void Z_totals()

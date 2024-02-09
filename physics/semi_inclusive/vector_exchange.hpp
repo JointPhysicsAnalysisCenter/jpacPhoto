@@ -15,7 +15,7 @@
 #include "constants.hpp"
 #include "semi_inclusive.hpp"
 #include "cgamma.hpp"
-#include "sigma_tots/combined_F.hpp"
+#include "semi_inclusive/combined_F.hpp"
 
 namespace jpacPhoto
 {
