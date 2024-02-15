@@ -31,8 +31,7 @@ namespace jpacPhoto
             : raw_amplitude(k, xkinem, id), _naturality(naturality)
             {  
                 if (abs(naturality) > 1) warning("reggeon_exchange", "Invalid naturality passed to constructor!");
-                if (naturality == -1) initialize(4); 
-                else                  initialize(7);
+                initialize(8);
             };
 
             // ---------------------------------------------------------------------------
@@ -42,7 +41,8 @@ namespace jpacPhoto
             {
                 // Save inputs
                 store(helicities, s, t);
-                return _beta*exp(_b*t)*top()*propagator()*bottom();
+                auto result = exp(_b*t)*top()*propagator()*bottom();
+                return result;
             };
 
             // Explicitly require t-channel helicities
@@ -60,16 +60,9 @@ namespace jpacPhoto
             {
                 _alpha0 = x[0];
                 _alphaP = x[1];
-                _beta   = x[2]; 
-                _b      = x[3];
-                if (_naturality == -1)
-                {
-                    _gT[0] = 0.;   _gT[1] = 0.;   _kappa = 0.;
-                }
-                else
-                {
-                    _gT[0] = x[4]; _gT[1] = x[5]; _kappa = x[6];         
-                };
+                _b      = x[2];
+                _gT[0]  = x[3]; _gT[1] = x[4]; _gT[2] = x[5];        
+                _gB[0]  = x[6]; _gB[1] = x[7];         
             };
 
             //----------------------------------------------------
@@ -78,11 +71,13 @@ namespace jpacPhoto
             double _s0 = 1;
 
             // Couplings
-            double _beta = 0, _b = 0., _kappa = 0;
-            std::array<double,2> _gT;
+            double _b = 0.;           // Form factor cutoff
+            std::array<double,3> _gT; // non-flip, single flip, double flip
+            std::array<double,2> _gB; // non-flip and flip
 
             // Linear trajectory
             double _alpha0 = 0, _alphaP = 0;
+
             //----------------------------------------------------
 
             inline double trajectory(){ return _alpha0 + _alphaP * _t; };
@@ -90,28 +85,31 @@ namespace jpacPhoto
             // Regge propagator 
             inline complex propagator()
             {
-                double alpha = trajectory();
-                double gf = (_naturality == -1) ? 1. : alpha / _alpha0; // includes ghost killing factor for natural
-                return _alphaP*M_PI*(_signature + exp(-I*PI*alpha))/2.*gf/sin(PI*alpha)*pow(_s/_s0, alpha);
+                double alpha = _alpha0 + _alphaP * _t;
+
+                // Ghost killing factor for natural exchanges
+                double gf = (_naturality == +1) ? alpha / _alpha0 : 1.; 
+                if (is_zero(gf)) gf = 1/_alpha0/PI;
+                else gf /= sin(PI*alpha);
+
+                // signature factor
+                complex sigf = (_signature + exp(-I*PI*alpha))/2.;
+
+                return -_alphaP*sigf*gf*PI*pow(_s/_s0, alpha);
             };
 
             double top()
             { 
-                double sqt = sqrt(-_t)/_mX;
-                int g = _lamB, V = _lamX;
-
-                if (_naturality == -1) return g*(g == V) - sqrt(2.)*sqt*(V == 0) + g*sqt*sqt*(g == -V);
-
-                return ((g == V) + _gT[0]*sqt*g/sqrt(2)*(V == 0) + _gT[1]*sqt*sqt*(g == -V));
+                int li = abs(_lamB - _lamX);
+                int phase = pow(-_lamB, li + (_naturality < 0));
+                return phase*_gT[li]*pow( sqrt(-_t)/_mX, li);
             };
 
             double bottom()
             {
-                double sqt = sqrt(-_t)/(_mT+_mR);
-                int l = _lamT, lp = _lamR;
-
-                if (_naturality == -1) return - sqt*(l == -lp);
-                return ((l == lp) + 2.*_kappa*sqt*(l == -lp));
+                int lf = abs(_lamT - _lamR)/2;
+                int phase = pow(-_lamT, lf + (_naturality < 0));
+                return phase*_gB[lf] * pow( sqrt(-_t) / (_mT + _mR), lf);
             };
         };
     };

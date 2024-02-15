@@ -366,7 +366,7 @@ namespace jpacPhoto
             phase = pow(-1, (lam - lamp)/ 2 + (alpha == 2)); // Add phase at end
         };
 
-        auto cache = get_cache(s, t); int n = cache.size()/2;
+        auto cache = get_cache(s, t); int n = cache.size();
         complex sum = 0;
         for (int i = 0; i < n; i++)
         {
@@ -377,14 +377,12 @@ namespace jpacPhoto
             {
                 // First n amplitudes have lg = +1 second half have lg = -1
                 auto hj = _kinematics->helicities(j); 
-                if (hj[3] != lamp || hi[1] != hj[1]) continue;
+                if (hi[1] != hj[1] || hj[3] != lamp || hi[2] != hj[2] ) continue;
+                bool gam_fails = (alpha == 0) ? hi[0] != hj[0] : hi[0] == hj[0];
+                if (gam_fails) continue;
 
-                switch (alpha)
-                {
-                    case 0: sum += cache[i] * conj(cache[j])   + cache[i+n]*conj(cache[j+n]); break;
-                    case 1: sum += cache[i] * conj(cache[j+n]) + cache[i+n]*conj(cache[j]);   break;
-                    case 2: sum += cache[i] * conj(cache[j+n]) - cache[i+n]*conj(cache[j]);   break;
-                };
+                auto x = (alpha == 2) ? hi[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
+                sum += x;
             };
         };
         
@@ -395,6 +393,8 @@ namespace jpacPhoto
 
     complex raw_amplitude::rotated_bSDME(unsigned int alpha, int lam, int lamp, double s, double t, double theta)
     {
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+
         // First get the spin of the particle we're rotating
         int J = _kinematics->get_baryon_JP()[0];
 
@@ -465,7 +465,7 @@ namespace jpacPhoto
             phase = pow(-1, (lam - lamp) + (alpha == 2)); // Add phase at end
         };
 
-        auto cache = get_cache(s, t); int n = cache.size()/2;
+        auto cache = get_cache(s, t); int n = cache.size();
         complex sum = 0;
         for (int i = 0; i < n; i++)
         {
@@ -476,14 +476,12 @@ namespace jpacPhoto
             {
                 // First n amplitudes have lg = +1 second half have lg = -1
                 auto hj = _kinematics->helicities(j); 
-                if (hj[2] != lamp || hi[1] != hj[1]) continue;
-
-                switch (alpha)
-                {
-                    case 0: sum += cache[i] * conj(cache[j])   + cache[i+n]*conj(cache[j+n]); break;
-                    case 1: sum += cache[i] * conj(cache[j+n]) + cache[i+n]*conj(cache[j]);   break;
-                    case 2: sum += cache[i] * conj(cache[j+n]) - cache[i+n]*conj(cache[j]);   break;
-                };
+                bool gam_fails = (alpha == 0) ? hi[0] != hj[0] : hi[0] != -hj[0];
+                if (gam_fails) continue;
+                if (hi[1] != hj[1] || hj[2] != lamp || hi[3] != hj[3]) continue;
+                
+                auto x = (alpha == 2) ? hi[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
+                sum += x;
             };
         };
         
@@ -494,6 +492,8 @@ namespace jpacPhoto
 
     complex raw_amplitude::rotated_mSDME(unsigned int alpha, int lam, int lamp, double s, double t, double theta)
     {
+        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+
         // First get the spin of the particle we're rotating
         int J = _kinematics->get_meson_JP()[0];
 
