@@ -13,6 +13,7 @@
 // ------------------------------------------------------------------------------
 
 #include "semi_inclusive.hpp"
+#include "kinematics.cpp"
 #include "semi_inclusive/phase_space.hpp"
 #include "plotter.hpp"
 #include "print.hpp"
@@ -24,7 +25,8 @@ void chew_low()
     using namespace jpacPhoto;
     using complex = std::complex<double>;
 
-    semi_inclusive X = new_semi_inclusive<inclusive::phase_space>(M_X3872, M_PROTON + M_PION, "X(3872) Phase space");
+    kinematics kX    = new_kinematics(M_X3872);
+    semi_inclusive X = new_semi_inclusive<inclusive::phase_space>(kX, M_PROTON + M_PION, "X(3872) Phase space");
 
     double Wth = M_PROTON + M_PION;
     std::array<double,2> bounds;
@@ -33,19 +35,18 @@ void chew_low()
     plot p = plotter.new_plot();
     p.set_ranges({-0.1, 35}, {0.8, 3.5});
 
-    auto M2max = [&](double mt)
-    {
-        return sqrt(X->M2MAXfromT(-mt));
-    };
-    auto M2min = [&](double mt)
-    {
-        return sqrt(X->M2MINfromT(-mt));
-    };
-    
     auto add_curve = [&](double W)
     {
-        X->set_total_energy(W*W);
-        bounds = {-X->TMINfromM2(Wth*Wth) , -X->TMAXfromM2(Wth*Wth)};
+        auto M2max = [&](double mt)
+        {
+            return sqrt(X->M2MAXfromT(W*W, -mt));
+        };
+        auto M2min = [&](double mt)
+        {
+            return sqrt(X->M2MINfromT(W*W, -mt));
+        };
+        
+        bounds = {-X->TMINfromM2(W*W, Wth*Wth) , -X->TMAXfromM2(W*W, Wth*Wth)};
 
         p.add_curve(bounds, M2max, var_def("#sqrt{#it{s}}", W, "GeV"));
         p.color_offset(-1);

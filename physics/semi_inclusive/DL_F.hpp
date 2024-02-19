@@ -36,11 +36,7 @@ namespace jpacPhoto
             }
 
             // If F_1 requested, import R values
-            if (x == 1)
-            {
-                _RBS.SetData(_interpQs, _interpRs);
-            };
-
+            if (x == 1) _RBS.SetData(_interpQs, _interpRs);
             _mode = x;
         };
 
@@ -61,8 +57,9 @@ namespace jpacPhoto
             double F = 0;
             for (int i = 0; i < 3; i++)
             {
+                int del = (i == 3) ? 1 : 5;
                 double exponent = (_mode == 2) ? -_eps[i] : -(1+_eps[i]);
-                F += _f[i] * pow(_x, exponent);
+                F += _f[i] * pow(_x, exponent) * pow(1-_x, del);
             };
 
             if (_mode == 1) F /= 2*(1+R());

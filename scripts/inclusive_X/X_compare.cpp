@@ -60,6 +60,7 @@ void X_compare()
     
     // Plot of pure primakoff in fb
     plot p1 = plotter.new_plot();
+    p1.print_to_terminal(true);
     p1.set_curve_points(100);
     p1.set_logscale(false, true);
     p1.set_ranges({4.6, 7}, {5E-4, 4E1});
@@ -67,12 +68,15 @@ void X_compare()
     p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [fb]");
     p1.add_header("#gamma^{*} exchange");
 
+    print("Photon exchange (p)"); divider(2);   
     p1.add_curve({kX->Wth(), 7}, [&](double W){ return primakoff->integrated_xsection(W*W) * 1E6; }, "#it{p}");
+    print("Photon exchange (n)"); divider(2);
     primakoff->set_option(  photon_exchange::kNeutron);
     p1.add_curve({kX->Wth(), 7}, [&](double W){ return primakoff->integrated_xsection(W*W) * 1E6; }, "#it{n}");
 
     // Plot of vector meson exchanges in nb 
     plot p2 = plotter.new_plot();
+    p2.print_to_terminal(true);
     p2.color_offset(2);
     p2.set_curve_points(100);
     p2.set_logscale(false, true);
@@ -81,10 +85,13 @@ void X_compare()
     p2.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{N} #rightarrow #it{X}#it{N})  [nb]");
     p2.add_header("#rho /#omega exchange");
 
+    print("VMD Meson exchange (p)"); divider(2);   
     sum_VMD->set_id("#it{p}");
     p2.add_curve( {kX->Wth(), 7}, [&](double W){ return sum_VMD->integrated_xsection(W*W); }, sum_VMD->id());
+    print("Explicit Meson exchange (p)"); divider(2);   
     p2.add_dashed({kX->Wth(), 7}, [&](double W){ return sum->integrated_xsection(W*W);     });
 
+    print("VMD Meson exchange (n)"); divider(2);   
     sum_VMD->set_option(  photon_exchange::kNeutron);
     sum_VMD->set_id("#it{n}");
     omega_VMD->set_parameters({-3.2E-3, 56.34, 1.2}); // For the neutron, the omega term gains an overall minus sign

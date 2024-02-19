@@ -44,7 +44,7 @@ namespace jpacPhoto { namespace covariant
 
             complex result = contract( top_coupling(), bottom_coupling() ); // Contract indices
             result /= (t - _mEx*_mEx); // Divide by photon propagator 
-            if (!is_zero(_mEx) && !is_zero(_lam))  result *= beta(t - _kinematics->t_min(s));   
+            if (!is_zero(_mEx) && !is_zero(_lam))  result *= beta();   
             return result;
         };
 
@@ -105,7 +105,11 @@ namespace jpacPhoto { namespace covariant
         inline double G_D(double Q2){ return 1. / pow(1+Q2/0.71, 2); };
 
         // Ratio of form factors for a massive vector exchange
-        inline double beta(double t){ return exp(t/_lam/_lam) / G_D(-t); };
+        inline double beta()
+        {
+            double tp =  _t - _kinematics->t_min(_s);
+            return exp(tp/_lam/_lam) / G_D(-tp); 
+        };
 
         // -----------------------------------------------------------------------
         // Internal data members 
@@ -135,10 +139,7 @@ namespace jpacPhoto { namespace covariant
             // the quantum numbers of the produced meson
             lorentz_tensor<complex,1> T = (-_t)*levi_civita(k, eps, eps_p) - levi_civita(k, eps, q, eps_p) * q; 
 
-            // As a test, allow the VMD coupling to be evaluated at t and not onshell mass _mEx^2
-            double x = (_debug == 1) ? (_t/_mEx/_mEx) : 1;
-
-            return x*_eta*_gTop/_mX/_mX* T;
+            return _eta*_gTop/_mX/_mX* T;
         };
 
             // Bottom coupling refers to the gamma^* NNbar interation

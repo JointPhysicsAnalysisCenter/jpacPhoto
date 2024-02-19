@@ -189,9 +189,11 @@ namespace jpacPhoto
             double xs  = bounds[0] + double(n) * (bounds[1] - bounds[0]) / double(_Npoints-1);
             double fxs = F(xs);
 
+            if (_print) print(xs, fxs);
             x.push_back(xs);
             fx.push_back(fxs);
         };
+        if (_print) line();
 
         add_curve(x, fx, style);
     };
@@ -229,9 +231,11 @@ namespace jpacPhoto
             double xs  = bounds[0] + double(n) * (bounds[1] - bounds[0]) / double(_Npoints-1);
             double fxs = F(xs);
 
+            if (_print) print(xs, fxs);
             x.push_back(xs);
             fx.push_back(fxs);
         };
+        if (_print) line();
 
         add_dashed(x, fx);
     };

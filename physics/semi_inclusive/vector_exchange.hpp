@@ -15,7 +15,8 @@
 #include "constants.hpp"
 #include "semi_inclusive.hpp"
 #include "cgamma.hpp"
-#include "semi_inclusive/combined_F.hpp"
+#include "semi_inclusive/CB_F.hpp"
+#include "semi_inclusive/DL_F.hpp"
 
 namespace jpacPhoto
 {
@@ -28,8 +29,8 @@ namespace jpacPhoto
             vector_exchange(key k, kinematics kin, double mE, std::string id = "")
             : raw_semi_inclusive(k, kin, id), 
               _photon(is_zero(mE)), _mEx2(mE*mE),
-              F1(new_inclusive_function<combined_F>(1, kProton)),
-              F2(new_inclusive_function<combined_F>(2, kProton))
+              F1(new_inclusive_function<CB_F>(1, kProton)),
+              F2(new_inclusive_function<CB_F>(2, kProton))
             { set_N_pars(3); };
 
             // Minimum mass is the proton 
@@ -43,13 +44,13 @@ namespace jpacPhoto
                 _lam2  = pars[2]*pars[2];
 
                 // Cutoff for regge amplitude
-                _cutoff = exp(1./_lam2/_alphaP) / _alphaP;
+                if (!is_zero(_lam2)) _cutoff = exp(1./_lam2/_alphaP) / _alphaP;
             };
 
             // The invariant cross section used S T and M2 as independent vareiables
             inline double invariant_xsection(double s, double t, double M2)
             {
-                if (_regge && -t > _cutoff) return 0;
+                if (!_photon && _regge && -t > _cutoff) return 0;
 
                 store( s, t, M2);  // Sync kinematics
                 update(s, t, M2);  // Recalculate form factors
@@ -70,7 +71,7 @@ namespace jpacPhoto
                         tpiece = std::norm(_alphaP * cgamma(1. - alpha) * (1.-exp(-I*PI*alpha))/2);
                         spiece = s / M2;
                     };
-
+                    
                     PTdotW += _gammas[i] * tpiece * pow(spiece, 2*alpha - i);
                 };
 
@@ -79,7 +80,7 @@ namespace jpacPhoto
 
                 // Form factor in the case of massive vectors
                 double tprime  = t - TMINfromM2(s, M2_PROTON);
-                double beta_ex = (_photon || is_zero(_lam2)) ? 1. : exp(tprime/_lam2)/pow(1-tprime/0.71,-2);
+                double beta_ex = (is_zero(_lam2)) ? 1. : exp(t/_lam2)/pow(1-t/0.71,-2);
 
                 // in nanobarn!!!!!
                 return flux * pow(beta_ex * _eta*_eta * E, 2) * PTdotW / (8*PI*PI) / (2.56819E-6); 
@@ -89,13 +90,13 @@ namespace jpacPhoto
             static const int kProton = 0, kNeutron = 1;
             inline void set_option (int opt)
             {
-                if (_photon && _regge)
+                if (_regge)
                 {
                     F1 = new_inclusive_function<DL_F>(1); F2 = new_inclusive_function<DL_F>(2);
                     return;
                 };
 
-                F1 = new_inclusive_function<combined_F>(1, opt); F2 = new_inclusive_function<combined_F>(2, opt);
+                F1 = new_inclusive_function<CB_F>(1, opt); F2 = new_inclusive_function<CB_F>(2, opt);
                 return;
             };
 
@@ -106,10 +107,7 @@ namespace jpacPhoto
             virtual inline void reggeized(bool x)
             { 
                 _regge = x; 
-                if (_photon)
-                {
-                    F1 = new_inclusive_function<DL_F>(1); F2 = new_inclusive_function<DL_F>(2);                      
-                };
+                set_option(_option);
             };
 
             protected:

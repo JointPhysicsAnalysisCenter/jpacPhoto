@@ -204,20 +204,11 @@ namespace jpacPhoto
         {
             _add_logo = x; _logo_coords = coords; _logo_scale = scale;
         };
-        inline void reset_logo()
-        {
-            _add_logo = true; _logo_coords =  {0.93, 0.885}; _logo_scale = 1;
-        };
+        inline void reset_logo(){ _add_logo = true; _logo_coords =  {0.93, 0.885}; _logo_scale = 1; };
+        inline void set_legend_spacing(double x){ _legendyscale = x; };
+        inline void preliminary(bool x){ _prelim = x; };
 
-        inline void set_legend_spacing(double x)
-        {
-            _legendyscale = x;
-        };
-
-        inline void preliminary(bool x)
-        {
-            _prelim = x;
-        };
+        inline void print_to_terminal(bool x){ _print  = x; };
 
         // -----------------------------------------------------------------------
         
@@ -229,6 +220,10 @@ namespace jpacPhoto
         {};
 
         friend class plotter;
+
+        // When add_curve/dashed is called if these are true
+        // print entries to terminal 
+        bool _print  = false;
 
         // Change linewidth and propagate it to all the curves in the plot
         inline void scale_linewidth(double x)
