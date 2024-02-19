@@ -54,9 +54,6 @@ namespace jpacPhoto
                 // Save inputs
                 store(helicities, s, t);
                 auto result = exp(_b*t)*top()*propagator()*bottom();
-                // print("T", top());
-                // print("P", propagator());
-                // print("B", bottom());
                 return result;
             };
 
@@ -68,11 +65,13 @@ namespace jpacPhoto
             static const int k2018_Model   = 0;
             static const int k2020_Minimal = 1;
             static const int k2020_TMD     = 2;
+            static const int kRemoveZero   = 3;
             static const int kDefault = k2018_Model;
 
             inline void set_option(int x)
             {
-                if (x > 2) option_error();
+                if (x > 3) option_error();
+                if (x == kRemoveZero) { _remove_zero = true; return; };
                 _option = x;
             };
 
@@ -81,6 +80,8 @@ namespace jpacPhoto
 
             protected:
             
+            // Whether or not to remove the zero in the regge propagator at alpha = 0
+            bool _remove_zero = false;
 
             // Set parameters
             inline void allocate_parameters(std::vector<double> x)
@@ -127,8 +128,10 @@ namespace jpacPhoto
                     else gf /= sin(PI*alpha);
                     return -_alphaP*sigf*gf*PI*pow(_s/_s0, alpha);
                 };
-;
-                return -_naturality*_signature*sigf*cgamma(1-alpha)*pow(_alphaP*_s, alpha);               
+
+                bool if_remove_zero = (_remove_zero && _lamT == -_lamR);
+                int ell = (_naturality < 0 || if_remove_zero) ?  0 : 1;
+                return pow(-1, 1+ell)*_naturality*sigf*cgamma(ell-alpha)*pow(_alphaP*_s, alpha);               
             };
 
             inline double top()

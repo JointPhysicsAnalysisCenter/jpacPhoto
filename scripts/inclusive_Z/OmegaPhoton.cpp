@@ -59,7 +59,7 @@ void OmegaPhoton()
     p1.set_labels("#it{W}_{#gamma#it{p}}  [GeV]", "d#sigma / d#it{x} [#mub]");
 
     // Add data
-    p1.add_data(x, sig, {dx, dsig}, "Omega Photon");
+    p1.add_data({x, sig}, {dx, dsig}, "Omega Photon");
 
     // Plot both the cross section with resonances 
     b1p->set_option(inclusive::pion_exchange::kJPAC);

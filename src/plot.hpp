@@ -133,7 +133,10 @@ namespace jpacPhoto
         };
 
         // Add data by simply feeding it vectors 
-        void add_data(std::vector<double> x, std::vector<double> y, std::array<std::vector<double>,2> errs, std::string id = "");
+        void add_data(std::array<std::vector<double>,2> dat, std::array<std::vector<double>,2> errs, std::string id = "");
+
+        // Add data by simply feeding it vectors 
+        void add_data(std::array<std::vector<double>,2> dat, std::array<std::vector<double>,2> errs, jpacColor col);
 
         // Add a small offset to change the running color index
         inline void color_offset(unsigned n)

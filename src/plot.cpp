@@ -127,16 +127,16 @@ namespace jpacPhoto
     };
 
     // Add data by simply feeding it vectors 
-    void plot::add_data(std::vector<double> xin, std::vector<double> yin, std::array<std::vector<double>,2> errsin, std::string id)
+    void plot::add_data(std::array<std::vector<double>,2> dat, std::array<std::vector<double>,2> errsin, std::string id)
     {
         // Check size of arrays
-        int N = xin.size();
-        if ((yin.size() != N) || (errsin[0].size() != N) || (errsin[1].size() != N))
+        int N = dat[0].size();
+        if ((dat[1].size() != N) || (errsin[0].size() != N) || (errsin[1].size() != N))
             error("add_data", "Input vectors dont match! Returning...");
 
         double *x, *y, *ex, *ey;
 
-        x  = &(xin[0]);        y  = &(yin[0]);
+        x  = &(dat[0][0]);        y  = &(dat[1][0]);
         ex = &(errsin[0][0]);  ey = &(errsin[1][0]);
          
         TGraph *graph = new TGraphErrors(N, x, y, ex, ey);
@@ -147,6 +147,33 @@ namespace jpacPhoto
         style._draw_opt = "P";
         style._label = id;
         style._add_to_legend = !(id == "");
+
+        _Ndata++;
+        _Nlegend++;
+
+        _entries.push_back(plot_entry(graph, style, true));
+    };
+
+    // Add data by simply feeding it vectors 
+    void plot::add_data(std::array<std::vector<double>,2> dat, std::array<std::vector<double>,2> errsin, jpacColor col)
+    {
+        // Check size of arrays
+        int N = dat[0].size();
+        if ((dat[1].size() != N) || (errsin[0].size() != N) || (errsin[1].size() != N))
+            error("add_data", "Input vectors dont match! Returning...");
+
+        double *x, *y, *ex, *ey;
+
+        x  = &(dat[0][0]);        y  = &(dat[1][0]);
+        ex = &(errsin[0][0]);  ey = &(errsin[1][0]);
+         
+        TGraph *graph = new TGraphErrors(N, x, y, ex, ey);
+
+        entry_style style;
+        style._style = 20;
+        style._color = col;
+        style._draw_opt = "P";
+        style._add_to_legend = false;
 
         _Ndata++;
         _Nlegend++;
