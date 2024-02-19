@@ -114,6 +114,7 @@ namespace jpacPhoto
     const double M_OMEGA     = 0.78265;
     const double M_PHI       = 1.01956;
     const double M_A2        = 1.3186;
+    const double M_F2        = 1.2754;
     const double M_B1        = 1.229;
     const double M_JPSI      = 3.0969160;
     const double M_PSI2S     = 3.686;
@@ -158,7 +159,7 @@ namespace jpacPhoto
     // ------------------------------------------------------------------------------
     // Quantum number combinations
 
-    enum quantum_numbers { PARTICLE_ERROR, ANY, SCALAR, PSEUDOSCALAR, VECTOR, AXIALVECTOR,
+    enum quantum_numbers { PARTICLE_ERROR, ANY, SCALAR, PSEUDOSCALAR, VECTOR, AXIALVECTOR, TENSOR, AXIALTENSOR,
                                                 HALFPLUS, HALFMINUS, THREEPLUS, THREEMINUS };
 
     // ------------------------------------------------------------------------------
