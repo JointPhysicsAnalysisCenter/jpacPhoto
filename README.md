@@ -120,7 +120,7 @@ Z += Z_exc; // Add to the purely inclusive distribution
 Z->integrated_xsection(s);
 ```
 ### ANALYSIS TOOLS
-Tools to fit amplitudes to experimental data are available through the [`fitter`](./src/fitter.hpp) and [`plotter`](./src/plotter.hpp) classes. Data may be imported using the [`data_set`](./src/data_set.hpp) class as interface. Arbitrarily many data sets may be imported into a fitter where one must specify the minimazition function per data type. An end-to-end example used in [[4]](#references) may be found in the appropriate [scripts directory](./scripts/jpsi_photoproduction/fit.cpp).
+Tools to fit amplitudes to experimental data are available through the [`fitter`](./src/fitter.hpp) and [`plotter`](./src/plotter.hpp) classes. Data may be imported using the [`data_set`](./src/data_set.hpp) class as interface. Arbitrarily many data sets may be imported into a fitter where one must specify the minimazition function per data type. An end-to-end example used in [[4]](#references) may be found in the appropriate [scripts directory](./scripts/jpsi_p/fit.cpp).
 
 A schematic analysis may look like:
 ```c++
@@ -170,10 +170,10 @@ To run these scripts with the `jpacPhoto` executable requires having AmpTools to
 
 ###  REFERENCES
 + [1] [Double Polarization Observables in Pentaquark Photoproduction](https://arxiv.org/abs/1907.09393)
-+ [2] [$XYZ$ spectroscopy at electron-hadron facilities: Exclusive processes](https://arxiv.org/abs/2008.01001)
-+ [3] [$XYZ$ spectroscopy at electron-hadron facilities II: Semi-inclusive processes with pion exchange](https://arxiv.org/abs/2209.05882)
-+ [4] [Dynamics in near-threshold $J/\psi$ photoproduction](https://arxiv.org/abs/2305.01449)
-+ [5] [Features of $\pi\Delta$ Photoproduction at High Energies](https://arxiv.org/abs/1710.09394)
++ [2] [XYZ spectroscopy at electron-hadron facilities: Exclusive processes](https://arxiv.org/abs/2008.01001)
++ [3] [XYZ spectroscopy at electron-hadron facilities II: Semi-inclusive processes with pion exchange](https://arxiv.org/abs/2209.05882)
++ [4] [Dynamics in near-threshold J/ψ photoproduction](https://arxiv.org/abs/2305.01449)
++ [5] [Features of πΔ Photoproduction at High Energies](https://arxiv.org/abs/1710.09394)
 + [6] [Vector Meson Photoproduction with a Linearly Polarized Beam](https://arxiv.org/abs/1802.09403)
 + [7] [JPAC Website](http://cgl.soic.indiana.edu/jpac/index.php)
 
