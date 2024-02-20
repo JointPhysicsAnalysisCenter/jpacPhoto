@@ -226,7 +226,7 @@ namespace jpacPhoto
         double integrated_xsection(double s);
 
         // Perp or parallel polarized photon differential cross sections
-        double polarized_differential_xsection(int perp_or_parallel, double s, double t);
+        double polarized_dxsection(int perp_or_parallel, double s, double t);
 
         // Spin asymmetries
         double A_LL(double s, double t); // Beam and target

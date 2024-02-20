@@ -153,7 +153,7 @@ void piDelta_2017()
         {
             double tmin = kpi->t_min(s);
             double t = - sqrtmt*sqrtmt + tmin;
-            return amp->polarized_differential_xsection(x, s, t) * 1E-3;
+            return amp->polarized_dxsection(x, s, t) * 1E-3;
         };
     };
 

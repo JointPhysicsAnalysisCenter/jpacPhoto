@@ -273,7 +273,7 @@ namespace jpacPhoto
 
     // Differential cross section dsigma_perp/para / dt
     // in NANOBARN
-    double raw_amplitude::polarized_differential_xsection(int perp_or_para, double s, double t)
+    double raw_amplitude::polarized_dxsection(int perp_or_para, double s, double t)
     {
         if (s < _kinematics->sth()) return 0.;
         if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
