@@ -41,7 +41,7 @@ void HE_X3872()
     double lamOmega = 1.2;
 
     std::vector<double> parsGamma, parsRho, parsOmega;
-    parsGamma = {gGamma, 1,        0       };
+    parsGamma = {gGamma, 1,        0.      };
     parsRho   = {gRho,   etaRho,   lamRho  };
     parsOmega = {gOmega, etaOmega, lamOmega};
 
@@ -95,6 +95,9 @@ void HE_X3872()
     amplitude exc_mesons = exc_omega + exc_rho;
     exc_mesons->set_id("Exclusive");
 
+    // Add exclusive to inclusive
+    inc_mesons += exc_mesons;
+    
     // --------------------------------------------------------------------------
     // Plot results
 
@@ -103,15 +106,14 @@ void HE_X3872()
 
     plotter plotter;
     plot p1 = plotter.new_plot();
+    p1.set_curve_points(20);
 
     p1.set_curve_points(40);
     p1.set_logscale(false, true);
-    p1.set_ranges(HE, {1E-3, 5});
-    p1.set_legend(0.22, 0.75);
+    p1.set_ranges(HE, {1.E-3, 0.5});
     p1.set_labels( "#it{W}_{#gamma#it{N}}  [GeV]", "#sigma  [nb]");
-
-    p1.add_curve( HE, [&](double W){ return inc_gamma->integrated_xsection(W*W); }, "#gamma");
-    // p1.add_dashed(HE, exc_primakoff_1E3);
+    p1.set_legend(0.22, 0.75);
+    // p1.add_curve( HE, [&](double W){ return inc_gamma->integrated_xsection(W*W, 0.9)/ pow(log(W*W), 10); }, "#gamma");
     p1.add_curve( HE, [&](double W){ return inc_mesons->integrated_xsection(W*W); }, "#rho / #omega");
     p1.add_dashed(HE, [&](double W){ return exc_mesons->integrated_xsection(W*W); });
 

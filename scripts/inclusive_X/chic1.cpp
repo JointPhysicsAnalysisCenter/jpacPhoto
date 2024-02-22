@@ -114,8 +114,8 @@ void chic1()
     p1.set_curve_points(100);
     p1.set_logscale(false, true);
     p1.set_ranges({4.35, 7}, {1E-4, 300});
-    p1.set_legend(0.22, 0.7);
-    p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi_{c1}#it{p})  [nb]");
+    p1.set_legend(0.22, 0.75);
+    p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi_{c1} #it{p})  [nb]");
 
     std::vector<amplitude> exc_exchanges = extract_subamplitudes(exc_mesons_p);
     std::vector<amplitude> hadron_exc    = extract_subamplitudes(ChiC1_L);

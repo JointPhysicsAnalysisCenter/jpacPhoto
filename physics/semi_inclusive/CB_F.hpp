@@ -16,7 +16,6 @@
 #define CB_HPP
 
 #include "constants.hpp"
-#include "data_set.hpp"
 #include "inclusive_function.hpp"
 #include <Math/Interpolator.h>
 

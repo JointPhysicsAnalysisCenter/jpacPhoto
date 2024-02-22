@@ -66,15 +66,19 @@ namespace jpacPhoto { namespace covariant
         inline std::vector<std::string> parameter_labels(){ return {"gTop", "etaEx", "mEx"}; };
 
         // Options choose either proton or neutron target
-        static const int kProton  = 0;
-        static const int kNeutron = 1;
+        static const int kProton    = 0;
+        static const int kNeutron   = 1;
+        static const int kUseT      = 2;
+        static const int kUseTprime = 3;
         static const int kDefault = kProton;
         inline void set_option (int opt)
         {
             switch (opt)
             {
-                case kProton:   _option = kProton;  break;
-                case kNeutron:  _option = kNeutron; break;
+                case kProton:    _option = kProton;  break;
+                case kNeutron:   _option = kNeutron; break;
+                case kUseT:      _useT   = true;  break;
+                case kUseTprime: _useT   = false; break;
                 default: return;
             };
         }
@@ -107,7 +111,7 @@ namespace jpacPhoto { namespace covariant
         // Ratio of form factors for a massive vector exchange
         inline double beta()
         {
-            double tp =  _t - _kinematics->t_min(_s);
+            double tp = (_useT) ? _t : _t - _kinematics->t_min(_s);
             return exp(tp/_lam/_lam) / G_D(-tp); 
         };
 
@@ -121,6 +125,7 @@ namespace jpacPhoto { namespace covariant
         double _eta  = 1;
         double _mEx  = 0;
         double _lam  = 1;
+        bool   _useT = false;
 
             // Top coupling refers to the beam-gamma-meson interaction
         inline lorentz_tensor<complex,1> top_coupling()
