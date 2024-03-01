@@ -97,5 +97,5 @@ void X_compare()
     omega_VMD->set_parameters({-3.2E-3, 56.34, 1.2}); // For the neutron, the omega term gains an overall minus sign
     p2.add_curve( {kX->Wth(), 7}, [&](double W){ return sum_VMD->integrated_xsection(W*W); }, sum_VMD->id());
 
-    plotter.combine({2,1}, {p1, p2}, "primakoff_compare.pdf");
+    plotter.combine({2,1}, {p1, p2}, "X_compare.pdf");
 };

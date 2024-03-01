@@ -144,7 +144,10 @@ namespace jpacPhoto { namespace covariant
             // the quantum numbers of the produced meson
             lorentz_tensor<complex,1> T = (-_t)*levi_civita(k, eps, eps_p) - levi_civita(k, eps, q, eps_p) * q; 
 
-            return _eta*_gTop/_mX/_mX* T;
+            // Form factor 
+            double FF = _mX*_mX/(_mX*_mX - _t);
+
+            return _eta*_gTop/_mX/_mX*FF* T;
         };
 
             // Bottom coupling refers to the gamma^* NNbar interation

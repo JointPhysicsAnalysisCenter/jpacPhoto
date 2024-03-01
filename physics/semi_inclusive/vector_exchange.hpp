@@ -82,6 +82,10 @@ namespace jpacPhoto
                 double tprime  = t - TMINfromM2(s, M2_PROTON);
                 double beta_ex = (is_zero(_lam2)) ? 1. : exp(t/_lam2)/pow(1-t/0.71,-2);
 
+                // The form factor of the top vertex
+                double mX2 = pow(_kinematics->get_meson_mass(), 2);
+                if (_photon) beta_ex = pow(mX2 / (mX2 - t), 2.);
+
                 // in nanobarn!!!!!
                 return flux * pow(beta_ex * _eta*_eta * E, 2) * PTdotW / (8*PI*PI) / (2.56819E-6); 
             };
@@ -104,11 +108,7 @@ namespace jpacPhoto
             // except when a photon exchange is evaluated at high energies
             // even through photon doesnt reggeize we have to treat this 
             // case special to avoid probing Q2 > 300 GeV^2!
-            virtual inline void reggeized(bool x)
-            { 
-                _regge = x; 
-                set_option(_option);
-            };
+            virtual inline void reggeized(bool x) { _regge = x; set_option(_option); };
 
             protected:
 

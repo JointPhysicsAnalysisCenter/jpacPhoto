@@ -187,7 +187,10 @@ namespace jpacPhoto
                     default: break;
                 };
 
-                return _gTop*_qi*result;
+                // Form factor
+                double FF = _mX*_mX/(_mX*_mX - _t);
+
+                return _gTop*_qi*FF*result;
             };
 
             // Bottom coupling refers to the target-exchange-recoil interation

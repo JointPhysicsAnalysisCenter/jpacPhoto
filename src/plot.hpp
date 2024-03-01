@@ -179,6 +179,16 @@ namespace jpacPhoto
             _lines.push_back(new_vert);
         };
 
+        inline void shade_region(std::array<double,2> xs, std::array<int,2> style = {+jpacColor::Grey, 1001})
+        {
+            shaded new_shaded;
+            new_shaded._xmin = xs[0];
+            new_shaded._xmax = xs[1];
+            new_shaded._color = style[0];
+            new_shaded._style = style[1];
+            _shaded.push_back(new_shaded);
+        };
+
         // -----------------------------------------------------------------------
         // OPTION SETTERS
 
@@ -339,6 +349,20 @@ namespace jpacPhoto
         };
 
         std::vector<vertical> _lines;
+
+        // ------------------------------------------------------------------------
+        // Shaded regions
+
+        struct shaded 
+        {
+            double _xmin = 0, _xmax = 0.;
+            double _opacity = 0.3;
+            int _color   = kBlack;
+            int _style   = 3004;
+        };
+
+        std::vector<shaded> _shaded;
+
     };
 };
 

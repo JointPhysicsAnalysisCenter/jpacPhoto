@@ -31,26 +31,26 @@ void CB_Fs()
     plot p1 = plotter.new_plot();
     p1.set_curve_points(1000);
     p1.set_ranges({1, 3}, {0, 4});
-    p1.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{1}(#it{M}_{#it{X}}^{2}, #it{t})");
+    p1.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{1}(#it{x}_{B}, #it{t})");
     p1.set_legend(0.25,0.75);
 
     p1.add_curve( range, [&](double w){ return pF1->evaluate(w*w, -0.1);}, "#it{t} = #minus 0.1 GeV^{2}");
     p1.add_dashed(range, [&](double w){ return nF1->evaluate(w*w, -0.1);});
-    p1.add_curve( range, [&](double w){ return pF1->evaluate(w*w, -1.0);}, "#it{t} = #minus 1.0 GeV^{2}");
-    p1.add_dashed(range, [&](double w){ return nF1->evaluate(w*w, -1.0);});
+    p1.add_curve( range, [&](double w){ return pF1->evaluate(w*w, -2.0);}, "#it{t} = #minus 2 GeV^{2}");
+    p1.add_dashed(range, [&](double w){ return nF1->evaluate(w*w, -2.0);});
     p1.add_curve( range, [&](double w){ return pF1->evaluate(w*w, -10);}, "#it{t} = #minus 10 GeV^{2}");
     p1.add_dashed(range, [&](double w){ return nF1->evaluate(w*w, -10);});
 
     plot p2 = plotter.new_plot();
     p2.set_curve_points(1000);
     p2.set_ranges({1, 3}, {0, 0.5});
-    p2.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{2}(#it{M}_{#it{X}}^{2}, #it{t})");
+    p2.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{2}(#it{x}_{B}, #it{t})");
     p2.set_legend(0.25,0.75);
 
     p2.add_curve( range, [&](double w){ return pF2->evaluate(w*w, -0.1);}, "#it{t} = #minus 0.1 GeV^{2}");
     p2.add_dashed(range, [&](double w){ return nF2->evaluate(w*w, -0.1);});
-    p2.add_curve( range, [&](double w){ return pF2->evaluate(w*w, -1.0);}, "#it{t} = #minus 1.0 GeV^{2}");
-    p2.add_dashed(range, [&](double w){ return nF2->evaluate(w*w, -1.0);});
+    p2.add_curve( range, [&](double w){ return pF2->evaluate(w*w, -2.0);}, "#it{t} = #minus 2 GeV^{2}");
+    p2.add_dashed(range, [&](double w){ return nF2->evaluate(w*w, -2.0);});
     p2.add_curve( range, [&](double w){ return pF2->evaluate(w*w, -10);}, "#it{t} = #minus 10 GeV^{2}");
     p2.add_dashed(range, [&](double w){ return nF2->evaluate(w*w, -10);});
 

@@ -18,93 +18,120 @@
 void NT_X3872()
 {
     using namespace jpacPhoto;
-
+    using inclusive::vector_exchange;
+    using covariant::photon_exchange;
     const int p = inclusive::vector_exchange::kProton;
     const int n = inclusive::vector_exchange::kNeutron;
 
-    double Wth = M_X3872 + M_PROTON;
-    
     //----------------------------------------------------------------------------
     // INPUTS
 
     // Couplings
-    double gGamma  = 3.20E-3;
-    double gRho    = 3.20E-3;
-    double gOmega  = 3.20E-3;
+    double gXGG  = 3.20E-3;
+    double gRho    = 1.140E-3, gOmega  = 0.190E-3, gPhi    = 0.110E-3;
 
     // VMD factors
-    double etaRho   = 16.37;
-    double etaOmega = 56.34;
-
+    double etaRho   = 16.37, etaOmega = 56.34, etaPhi = 44.37;
+    
     // Form factor cutoffs
-    double lamRho   = 1.4;
-    double lamOmega = 1.2;
+    double lamRho   = 1.4, lamOmega = 1.2;
 
-    std::vector<double> parsGamma, parsRho, parsOmega;
-    parsGamma = {gGamma, 1,        0       };
-    parsRho   = {gRho,   etaRho,   lamRho  };
-    parsOmega = {gOmega, etaOmega, lamOmega};
+    //----------------------------------------------------------------------------
+    // chi_c1
+
+    kinematics kC = new_kinematics(M_CHIC1);
+    kC->set_meson_JP(AXIALVECTOR);
+
+    amplitude eC_omega = new_amplitude<photon_exchange>(kC, M_OMEGA, "Omega Exchange");
+    eC_omega->set_parameters({gOmega, etaOmega, lamOmega});
+
+    amplitude eC_rho   = new_amplitude<photon_exchange>(kC, M_RHO, "Rho Exchange");
+    eC_rho->set_parameters({gRho, etaRho, lamRho});
+
+    amplitude eC_phi   = new_amplitude<photon_exchange>(kC, M_PHI, "Phi Exchange");
+    eC_phi->set_parameters({gPhi, etaPhi, 0.});
+
+    semi_inclusive iC_omega = new_semi_inclusive<vector_exchange>(kC, M_OMEGA, "Inclusive");
+    iC_omega->set_parameters({gOmega, etaOmega, lamOmega});
+
+    semi_inclusive iC_rho   = new_semi_inclusive<vector_exchange>(kC, M_RHO, "Inclusive");
+    iC_rho->set_parameters({gRho, etaRho, lamRho});
+    
+    semi_inclusive iC_phi   = new_semi_inclusive<vector_exchange>(kC, M_PHI, "Inclusive");
+    iC_phi->set_parameters({gPhi, etaPhi, 0});
+
+    amplitude      eC = eC_omega + eC_rho + eC_phi;
+    semi_inclusive iC = iC_omega + iC_rho + iC_phi + eC;
+
+    //----------------------------------------------------------------------------
+    // X(3872)
 
     kinematics kX = new_kinematics(M_X3872);
     kX->set_meson_JP(AXIALVECTOR);
 
-    //----------------------------------------------------------------------------
-    // Set up inclusive amplitudes
+    amplitude eX_omega = new_amplitude<photon_exchange>(kX, M_OMEGA, "Omega Exchange");
+    eX_omega->set_parameters({gXGG, etaOmega, lamOmega});
 
-    semi_inclusive inc_omega = new_semi_inclusive<inclusive::vector_exchange>(kX, M_OMEGA, "Inclusive");
-    inc_omega->set_parameters(parsOmega);
+    amplitude eX_rho   = new_amplitude<photon_exchange>(kX, M_RHO, "Rho Exchange");
+    eX_rho->set_parameters({gXGG, etaRho, lamRho});
 
-    semi_inclusive inc_rho   = new_semi_inclusive<inclusive::vector_exchange>(kX, M_RHO, "Inclusive");
-    inc_rho->set_parameters(parsRho);
+    semi_inclusive iX_omega = new_semi_inclusive<vector_exchange>(kX, M_OMEGA, "Inclusive");
+    iX_omega->set_parameters({gXGG, etaOmega, lamOmega});
 
-    //----------------------------------------------------------------------------
-    // Set up exclusives amplitudes
+    semi_inclusive iX_rho   = new_semi_inclusive<vector_exchange>(kX, M_RHO, "Inclusive");
+    iX_rho->set_parameters({gXGG, etaRho, lamRho});
 
-    amplitude exc_omega = new_amplitude<covariant::photon_exchange>(kX, M_OMEGA, "Omega Exchange");
-    exc_omega->set_parameters(parsOmega);
-
-    amplitude exc_rho   = new_amplitude<covariant::photon_exchange>(kX, M_RHO, "Rho Exchange");
-    exc_rho->set_parameters(parsRho);
-
-    // For the neutron target we need to flip the sign of the coupling for the rho
-    amplitude exc_omega_n = new_amplitude<covariant::photon_exchange>(kX, M_OMEGA, "Omega Exchange");
-    exc_omega_n->set_parameters(parsOmega);
-    exc_omega_n->set_option(n);
-    amplitude exc_rho_n = new_amplitude<covariant::photon_exchange>(kX, M_RHO, "#minus Rho Exhange");
-    exc_rho_n->set_parameters({-gRho,   etaRho,   lamRho  });
-    exc_rho_n->set_option(n);
-
-    amplitude exc_mesons_p = exc_omega + exc_rho;
-    exc_mesons_p->set_id("Exclusive");
-
-    amplitude exc_mesons_n = exc_omega_n + exc_rho_n;
-    exc_mesons_n->set_id("Exclusive");
-
-    semi_inclusive inc_p = inc_omega + inc_rho + exc_mesons_p;
-    semi_inclusive inc_n = inc_omega + inc_rho + exc_mesons_n;
+    amplitude      eX = eX_omega + eX_rho;
+    semi_inclusive iX = iX_omega + iX_rho + eX;
 
     // --------------------------------------------------------------------------
     // Plot results
 
     // Bounds to plot
-    std::array<double,2> NT = {Wth, 7.0};
+    std::array<double,2> X_NT = {kX->Wth() + EPS, 7.0};
+    std::array<double,2> C_NT = {kC->Wth() + EPS, 7.0};
 
     plotter plotter;
     plot p1 = plotter.new_plot();
 
     p1.set_curve_points(30);
     p1.set_logscale(false, true);
-    p1.set_ranges({4.6, 7}, {10E-2, 2E3});
+    p1.set_ranges({4.6, 7}, {1E-2, 2E3});
     p1.set_legend(0.27, 0.72);
     p1.set_labels( "#it{W}_{#gamma#it{N}}  [GeV]", "#sigma  [nb]");
+    p1.print_to_terminal(true);
     
-    inc_rho->set_option(p); inc_omega->set_option(p); 
-    p1.add_curve( NT, [&](double W){ return inc_p->integrated_xsection(W*W, 0.8); }, "#it{p}");
-    p1.add_dashed(NT, [&](double W){ return exc_mesons_p->integrated_xsection(W*W); });
+    iX_rho->set_option(p); iX_omega->set_option(p); 
+    iC_rho->set_option(p); iC_omega->set_option(p); iC_phi->set_option(p); 
+    print("chic1 (p inc)"); divider(2);
+    p1.add_curve( C_NT, [&](double W){ return iC->integrated_xsection(W*W, 0.8); }, "#chi_{#it{c}1} (#it{p})");
+    print("chic1 (p exc)"); divider(2);
+    p1.add_dashed(C_NT, [&](double W){ return eC->integrated_xsection(W*W); });
 
-    inc_rho->set_option(n); inc_omega->set_option(n);
-    p1.add_curve( NT, [&](double W){ return inc_n->integrated_xsection(W*W, 0.8); }, "#it{n}");
-    p1.add_dashed(NT, [&](double W){ return exc_mesons_n->integrated_xsection(W*W); });
+    iC_rho->set_option(n); iC_omega->set_option(n); iC_phi->set_option(n); 
+    eC_rho->set_option(n); eC_omega->set_option(n); eC_phi->set_option(n);
+    eC_rho->set_parameters({-gRho,   etaRho,   lamRho});
+
+    print("chic1 (n inc)"); divider(2);
+    p1.add_curve( C_NT, [&](double W){ return iC->integrated_xsection(W*W, 0.8); }, "#chi_{#it{c}1} (#it{n})");
+    print("chic1 (n exc)"); divider(2);
+    p1.add_dashed(C_NT, [&](double W){ return eC->integrated_xsection(W*W); });
+
+    print("X (p inc)"); divider(2);
+    p1.add_curve( X_NT, [&](double W){ return iX->integrated_xsection(W*W, 0.8); }, "#it{X}(3872) (#it{p})");
+    print("X (p exc)"); divider(2);
+    p1.add_dashed(X_NT, [&](double W){ return eX->integrated_xsection(W*W); });
+
+    iX_rho->set_option(n); iX_omega->set_option(n);
+    eX_rho->set_option(n); eX_omega->set_option(n);
+    eX_rho->set_parameters({-gXGG,   etaRho,   lamRho});
+
+    print("X (n inc)"); divider(2);
+    p1.add_curve( X_NT, [&](double W){ return iX->integrated_xsection(W*W, 0.8); }, "#it{X}(3872) (#it{n})");
+    print("X (n exc)"); divider(2);
+    p1.add_dashed(X_NT, [&](double W){ return eX->integrated_xsection(W*W); });
+
+    p1.shade_region({W_cm(22), 10}, {kBlack, 1001});
 
     p1.save("NT_X.pdf");
 };
