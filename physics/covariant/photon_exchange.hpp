@@ -57,9 +57,9 @@ namespace jpacPhoto { namespace covariant
 
         inline void allocate_parameters(std::vector<double> pars)
         {
-            _gTop = pars[0];
-            _eta  = pars[1];
-            _lam  = pars[2];
+            _gTop  = pars[0];
+            _eta   = pars[1];
+            _lam   = pars[2];
         };
 
         // Assign each parameter a name, useful for fitting utlities
@@ -121,10 +121,10 @@ namespace jpacPhoto { namespace covariant
         protected:
 
         // A -- gamma -- gamma* coupling
-        double _gTop = 0;
-        double _eta  = 1;
-        double _mEx  = 0;
-        double _lam  = 1;
+        double _gTop  = 0;
+        double _eta   = 1;
+        double _mEx   = 0;
+        double _lam   = 1;
         bool   _useT = false;
 
             // Top coupling refers to the beam-gamma-meson interaction
@@ -147,7 +147,7 @@ namespace jpacPhoto { namespace covariant
             // Form factor 
             double FF = _mX*_mX/(_mX*_mX - _t);
 
-            return _eta*_gTop/_mX/_mX*FF* T;
+            return _gTop/_mX/_mX*FF* T;
         };
 
             // Bottom coupling refers to the gamma^* NNbar interation
@@ -171,7 +171,7 @@ namespace jpacPhoto { namespace covariant
             vector = bilinear(ubar, vector_current, u); 
             tensor = bilinear(ubar, tensor_current, u);
 
-            return _eta * E*((GE+tau*GM)*vector + I*(GM-GE)/(2*M_PROTON)*tensor)/(1+tau);
+            return _eta*E*((GE+tau*GM)*vector + I*(GM-GE)/(2*M_PROTON)*tensor)/(1+tau);
         };
 
         //---------------------------------------------------------------------
@@ -186,7 +186,7 @@ namespace jpacPhoto { namespace covariant
         };
 
         static constexpr double _mup =  2.79; // Proton  magnetic moment in units of bohr magneton
-        static constexpr double _mun = -0.92; // Nucleon magnetic moment in units of bohr magneton
+        static constexpr double _mun = -1.92; // Nucleon magnetic moment in units of bohr magneton
 
         // Polynomial coefficients
         std::array<double,13> _GEp_pars = 
