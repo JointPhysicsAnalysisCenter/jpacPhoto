@@ -220,12 +220,11 @@ namespace jpacPhoto
     // Take in a lambda an evaluation range to get the vectors
     void plot::add_curve(std::array<double,2> bounds, std::function<double(double)> F, entry_style style)
     {
-        double step = (bounds[1] - bounds[0]) / double(_Npoints);
-
         std::vector<double> x, fx;
         for (int n = 0; n < _Npoints; n++)
         {
-            double xs  = bounds[0] + double(n) * (bounds[1] - bounds[0]) / double(_Npoints-1);
+            double xs  = (!_xlog) ? bounds[0] + double(n) * (bounds[1] - bounds[0]) / double(_Npoints-1)
+                                  : exp(log(bounds[0]) + double(n) * (log(bounds[1]) - log(bounds[0])) / double(_Npoints-1));
             double fxs = F(xs);
 
             if (_print) print(xs, fxs);
