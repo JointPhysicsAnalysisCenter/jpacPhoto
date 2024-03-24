@@ -76,6 +76,29 @@ namespace jpacPhoto
         if (_addlegend) legend->Draw();
         if (!_addlegend && _addheader) { legend->Clear(); legend->SetHeader(("  " + _header).c_str(), "L"); legend->Draw();}
 
+        if (_add_style_legend)
+        {
+            // Set up legend
+            auto slegend = new TLegend(_slegendx,  _slegendy, 
+                                       _slegendx + 0.35, 
+                                       _slegendy + 0.12);
+            slegend->SetFillStyle(0); // Make legend transparent
+
+            // For each of the three style make an empty histogram
+            double y[1] = {1};
+            std::string sopt = "L";
+            for (int i = 0; i < 3; i++)
+            {
+                TGraph * sentry = new TGraph(1, y);
+                sentry->SetLineColorAlpha(+jpacColor::DarkGrey, 0.9);
+                sentry->SetLineStyle(1+i);
+                sentry->SetLineWidth(2.0);
+                slegend->AddEntry(sentry, _style_labels[i].c_str(), sopt.c_str());
+            }
+
+            slegend->Draw();
+        };
+
         mg->GetXaxis()->CenterTitle(true);
         mg->GetYaxis()->CenterTitle(true);
         _canvas->Modified();
@@ -227,7 +250,7 @@ namespace jpacPhoto
                                   : exp(log(bounds[0]) + double(n) * (log(bounds[1]) - log(bounds[0])) / double(_Npoints-1));
             double fxs = F(xs);
 
-            if (_print) print(xs, fxs);
+            if (_print) print(n+1, xs, fxs);
             x.push_back(xs);
             fx.push_back(fxs);
         };
@@ -269,13 +292,43 @@ namespace jpacPhoto
             double xs  = bounds[0] + double(n) * (bounds[1] - bounds[0]) / double(_Npoints-1);
             double fxs = F(xs);
 
-            if (_print) print(xs, fxs);
+            if (_print) print(n+1, xs, fxs);
             x.push_back(xs);
             fx.push_back(fxs);
         };
         if (_print) line();
 
         add_dashed(x, fx);
+    };
+
+    void plot::add_dotted(std::vector<double> x, std::vector<double> fx)
+    {
+        entry_style style;
+        style._color = JPACCOLORS[_Ncurve];
+        style._style = kDotted;
+        style._add_to_legend = false;
+
+        TGraph *g = new TGraph(x.size(), &(x[0]), &(fx[0]));
+        _entries.push_back(plot_entry(g, style, false));
+    };
+
+    void plot::add_dotted(std::array<double,2> bounds, std::function<double(double)> F)
+    {
+        double step = (bounds[1] - bounds[0]) / double(_Npoints);
+
+        std::vector<double> x, fx;
+        for (int n = 0; n < _Npoints; n++)
+        {
+            double xs  = bounds[0] + double(n) * (bounds[1] - bounds[0]) / double(_Npoints-1);
+            double fxs = F(xs);
+
+            if (_print) print(n+1, xs, fxs);
+            x.push_back(xs);
+            fx.push_back(fxs);
+        };
+        if (_print) line();
+
+        add_dotted(x, fx);
     };
 
     // -----------------------------------------------------------------------

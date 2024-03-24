@@ -162,6 +162,11 @@ namespace jpacPhoto
         void add_dashed(std::vector<double> x, std::vector<double> fx);
         void add_dashed(std::array<double,2> bounds, std::function<double(double)> F);
 
+        // Curves added by these functions appear as dotted, not on the legend, and synced with the
+        // colors of the "full" curves
+        void add_dotted(std::vector<double> x, std::vector<double> fx);
+        void add_dotted(std::array<double,2> bounds, std::function<double(double)> F);
+
         // -----------------------------------------------------------------------
         // Add an error band
 
@@ -222,6 +227,9 @@ namespace jpacPhoto
         inline void preliminary(bool x){ _prelim = x; };
 
         inline void print_to_terminal(bool x){ _print  = x; };
+
+        inline void add_style_legend(std::array<std::string,3> labels){ _style_labels = labels; _add_style_legend = true; };
+        inline void set_style_legend(double x, double y){ _slegendx = x; _slegendy = y;};
 
         // -----------------------------------------------------------------------
         
@@ -324,6 +332,11 @@ namespace jpacPhoto
         
         bool _addheader = false;
         std::string _header = "";
+
+        // If we want a second legend to dictate the styles
+        bool _add_style_legend = false;
+        double _slegendx = 0.3, _slegendy = 0.4;
+        std::array<std::string,3> _style_labels;
 
         // ------------------------------------------------------------------------
         // ENTRY MANAGEMENT
