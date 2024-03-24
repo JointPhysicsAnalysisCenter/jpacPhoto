@@ -12,6 +12,7 @@
 
 #include "plotter.hpp"
 #include "semi_inclusive/vector_exchange.hpp"
+#include "semi_inclusive/photon_exchange.hpp"
 #include "regge/vector_exchange.hpp"
 #include "covariant/photon_exchange.hpp"
 
@@ -24,11 +25,11 @@ void inclusives()
     //----------------------------------------------------------------------------
     // INPUTS
 
-    // Couplings
-    double gXGG   = 3.20E-3;
-    double gRho   = 1.140E-3, gOmega   = 0.190E-3, gPhi   = 0.110E-3, gGam = (1.14+0.19+0.11+ 34.65)*1E-3;
-    double etaRho = 16.37,    etaOmega = 56.34,    etaPhi = 44.37;
-    
+    // VMD couplings
+    double gamma_omega = 56.34;
+    double gamma_rho   = 16.37;
+    double gamma_psi   = 36.85;
+   
     // Form factor cutoffs
     double lamRho   = 1.4, lamOmega = 1.2;
 
@@ -38,33 +39,31 @@ void inclusives()
     kinematics kC = new_kinematics(M_CHIC1);
     kC->set_meson_JP(AXIALVECTOR);
 
+    std::vector<double> C_omega_pars = {10.46E-3, gamma_omega/2., lamOmega};
+    std::vector<double> C_rho_pars   = {18.87E-3, gamma_rho/2.,   lamRho};
+    std::vector<double> C_gamma_pars = {3.6E-2, 1, 0.};
+
     amplitude eC_omega = new_amplitude<photon_exchange>(kC, M_OMEGA, "Omega Exchange");
-    eC_omega->set_parameters({gOmega, etaOmega, lamOmega});
+    eC_omega->set_parameters(C_omega_pars);
 
     amplitude eC_rho   = new_amplitude<photon_exchange>(kC, M_RHO, "Rho Exchange");
-    eC_rho->set_parameters({gRho, etaRho, lamRho});
-
-    amplitude eC_phi   = new_amplitude<photon_exchange>(kC, M_PHI, "Phi Exchange");
-    eC_phi->set_parameters({gPhi, etaPhi, 0.});
+    eC_rho->set_parameters(C_rho_pars);
 
     amplitude eC_gam = new_amplitude<photon_exchange>(kC, 0., "#gamma exchange");
-    eC_gam->set_parameters({gGam, 1, 0.});
+    eC_gam->set_parameters(C_gamma_pars);
 
-    semi_inclusive iC_omega = new_semi_inclusive<vector_exchange>(kC, M_OMEGA, "Inclusive");
-    iC_omega->set_parameters({gOmega, etaOmega, lamOmega});
+    semi_inclusive iC_omega = new_semi_inclusive<inclusive::photon_exchange>(kC, M_OMEGA, "Inclusive");
+    iC_omega->set_parameters(C_omega_pars);
 
-    semi_inclusive iC_rho   = new_semi_inclusive<vector_exchange>(kC, M_RHO, "Inclusive");
-    iC_rho->set_parameters({gRho, etaRho, lamRho});
-    
-    semi_inclusive iC_phi   = new_semi_inclusive<vector_exchange>(kC, M_PHI, "Inclusive");
-    iC_phi->set_parameters({-gPhi, etaPhi, lamOmega});
+    semi_inclusive iC_rho   = new_semi_inclusive<inclusive::photon_exchange>(kC, M_RHO, "Inclusive");
+    iC_rho->set_parameters(C_rho_pars);
 
-    semi_inclusive iC_gam   = new_semi_inclusive<vector_exchange>(kC, 0, "Inclusive");
+    semi_inclusive iC_gam   = new_semi_inclusive<inclusive::photon_exchange>(kC, 0, "Inclusive");
     iC_gam->reggeized(true);
-    iC_gam->set_parameters({gGam, 1, 0.});
+    iC_gam->set_parameters(C_gamma_pars);
 
-    amplitude      eC = eC_omega + eC_rho + eC_phi;
-    semi_inclusive iC = iC_omega + iC_rho + iC_phi + iC_gam + eC;
+    amplitude      eC = eC_omega + eC_rho;
+    semi_inclusive iC = iC_omega + iC_rho + iC_gam + eC;
 
     // Reggeized exclusive amplitude
     amplitude rC_omega = new_amplitude<regge::vector_exchange>(kC, "#omega exchange");
@@ -82,21 +81,28 @@ void inclusives()
     kinematics kX = new_kinematics(M_X3872);
     kX->set_meson_JP(AXIALVECTOR);
 
+    std::vector<double> X_omega_pars = {0.199228,  gamma_omega/2., lamOmega};
+    std::vector<double> X_rho_pars   = {0.0879857, gamma_rho/2.,   lamRho};
+    std::vector<double> X_gamma_pars = {3.2E-3, 1, 0.};
+
     amplitude eX_omega = new_amplitude<photon_exchange>(kX, M_OMEGA, "Omega Exchange");
-    eX_omega->set_parameters({gXGG, etaOmega, lamOmega});
+    eX_omega->set_parameters(X_omega_pars);
 
     amplitude eX_rho   = new_amplitude<photon_exchange>(kX, M_RHO, "Rho Exchange");
-    eX_rho->set_parameters({gXGG, etaRho, lamRho});
+    eX_rho->set_parameters(X_rho_pars);
 
-    semi_inclusive iX_omega = new_semi_inclusive<vector_exchange>(kX, M_OMEGA, "Inclusive");
-    iX_omega->set_parameters({gXGG, etaOmega, lamOmega});
+    amplitude eX_gam   = new_amplitude<photon_exchange>(kX, 0., "#gamma Exchange");
+    eX_gam->set_parameters(X_gamma_pars);
 
-    semi_inclusive iX_rho   = new_semi_inclusive<vector_exchange>(kX, M_RHO, "Inclusive");
-    iX_rho->set_parameters({gXGG, etaRho, lamRho});
+    semi_inclusive iX_omega = new_semi_inclusive<inclusive::photon_exchange>(kX, M_OMEGA, "Inclusive");
+    iX_omega->set_parameters(X_omega_pars);
 
-    semi_inclusive iX_gam = new_semi_inclusive<inclusive::vector_exchange>(kX, 0, "Inclusive");
+    semi_inclusive iX_rho   = new_semi_inclusive<inclusive::photon_exchange>(kX, M_RHO, "Inclusive");
+    iX_rho->set_parameters(X_rho_pars);
+
+    semi_inclusive iX_gam = new_semi_inclusive<inclusive::photon_exchange>(kX, 0, "Inclusive");
     iX_gam->reggeized(true);
-    iX_gam->set_parameters({gXGG, 1, 0});
+    iX_gam->set_parameters(X_gamma_pars);
 
     amplitude      eX = eX_omega + eX_rho;
     semi_inclusive iX = iX_omega + iX_rho + eX;
@@ -121,8 +127,9 @@ void inclusives()
 
     plotter plotter;
 
+    // Near threshold production plot
     plot p1 = plotter.new_plot();
-    p1.set_curve_points(30);
+    p1.set_curve_points(10);
     p1.set_logscale(false, true);
     p1.set_ranges({4.1, 7}, {1E-2, 2E3});
     p1.set_legend(0.27, 0.72);
@@ -139,31 +146,37 @@ void inclusives()
     p1.add_dashed(X_NT, [&](double W){ return eX->integrated_xsection(W*W); });
     p1.save("NT.pdf");
 
-    plot p2 = plotter.new_plot();
-    p2.set_curve_points(30);
-    p2.set_logscale(false, true);
-    p2.set_ranges(HE, {5E-5, 0.5});
-    p2.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma  [nb]");
-    p2.set_legend(0.22, 0.30);
-    iX_omega->reggeized(true); iX_rho->reggeized(true);
-    p2.add_curve( HE, [&](double W){ return irX->integrated_xsection(W*W); },                   "Total #it{X}(3872) production");
-    p2.add_curve( HE, [&](double W){ return (iX_omega+iX_rho)->integrated_xsection(W*W); },     "Inclusive #it{V} exchange");
-    p2.add_curve( HE, [&](double W){ return rX->integrated_xsection(W*W); },                    "Exclusive #it{V} exchange");
-    p2.add_curve( HE, [&](double W){ return iX_gam->integrated_xsection(W*W); },                "Inclusive #gamma exchange");
+    // // Plot the breakdown of contributions for the chic1
+    // plot p3 = plotter.new_plot();
+    // p3.set_curve_points(10);
+    // p3.set_logscale(false, true);
+    // p3.set_ranges(HE, {5E-4, 3E2});
+    // p3.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma  [pb]");
+    // p3.set_legend(0.20, 0.17);
+    // p3.add_header("#chi_{c1}(1#it{P})");
+    // iC_omega->reggeized(true); iC_rho->reggeized(true); 
+    // p3.print_to_terminal(true);
+    // p3.add_curve( HE, [&](double W){ return (irC->integrated_xsection(W*W)+eC_gam->integrated_xsection(W*W)) * 1E3; }, "Total");
+    // p3.add_curve(HE, [&](double W){  return (iC_rho+iC_omega)->integrated_xsection(W*W)  * 1E3; }, "Inclusive #it{V} exchange");
+    // p3.add_curve(HE, [&](double W){  return rC->integrated_xsection(W*W)  * 1E3; },                "Exclusive #it{V} exchange");
+    // p3.add_curve(HE, [&](double W){  return iC_gam->integrated_xsection(W*W)  * 1E3; },            "Inclusive #gamma exchange");
+    // p3.add_curve(HE, [&](double W){  return eC_gam->integrated_xsection(W*W)  * 1E3; },            "Exclusive #gamma exchange");
 
-    plot p3 = plotter.new_plot();
-    p3.set_curve_points(30);
-    p3.set_logscale(false, true);
-    p3.set_ranges(HE, {5E-4, 3E2});
-    p3.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma  [pb]");
-    p3.set_legend(0.20, 0.17);
-    iC_omega->reggeized(true); iC_rho->reggeized(true); 
-    p3.print_to_terminal(true);
-    p3.add_curve( HE, [&](double W){ return (irC->integrated_xsection(W*W)+eC_gam->integrated_xsection(W*W)) * 1E3; }, "Total #chi_{#it{c}1}(1P) production");
-    p3.add_curve(HE, [&](double W){  return (iC_rho+iC_omega)->integrated_xsection(W*W)  * 1E3; }, "Inclusive #it{V} exchange");
-    p3.add_curve(HE, [&](double W){  return rC->integrated_xsection(W*W)  * 1E3; },                "Exclusive #it{V} exchange");
-    p3.add_curve(HE, [&](double W){  return iC_gam->integrated_xsection(W*W)  * 1E3; },            "Inclusive #gamma exchange");
-    p3.add_curve(HE, [&](double W){  return eC_gam->integrated_xsection(W*W)  * 1E3; },            "Exclusive #gamma exchange");
-    plotter.combine({2,1}, {p3,p2}, "HE.pdf");
+    // // Plot the breakdown of contributions for the X(3872)
+    // plot p2 = plotter.new_plot();
+    // p2.set_curve_points(10);
+    // p2.set_logscale(false, true);
+    // p2.set_ranges(HE, {5E-4, 3E2});
+    // p2.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma  [pb]");
+    // p2.set_legend(0.80, 0.17);
+    // p2.add_header("#it{X}(3872)");
+    // p2.print_to_terminal(true);
+    // iX_omega->reggeized(true); iX_rho->reggeized(true);
+    // p2.add_curve( HE, [&](double W){ return irX->integrated_xsection(W*W) * 1E3; });
+    // p2.add_curve( HE, [&](double W){ return (iX_omega+iX_rho)->integrated_xsection(W*W) * 1E3; });
+    // p2.add_curve( HE, [&](double W){ return rX->integrated_xsection(W*W) * 1E3; });
+    // p2.add_curve( HE, [&](double W){ return iX_gam->integrated_xsection(W*W) * 1E3; });
+    // p2.add_curve( HE, [&](double W){ return eX_gam->integrated_xsection(W*W) * 1E3; });
 
+    // plotter.combine({2,1}, {p3,p2}, "HE.pdf");
 };

@@ -34,13 +34,13 @@ void structure_Fs()
     // C&B plot near threshold
     plotter plotter;
     plot p1 = plotter.new_plot();
-    p1.set_curve_points(1000);
+    p1.set_curve_points(100);
     p1.set_ranges({1, 3.0}, {0, 0.5});
     p1.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{2}(#it{x}_{B}, #it{t})");
     p1.set_legend(0.35,0.75);
     p1.add_curve( {Wth, 3}, [&](double w){ return F2_CnB->evaluate(w*w, -0.1);}, "#it{t} = #minus 0.1 GeV^{2}");
     p1.add_dashed({Wth, 3}, [&](double w){ return 2*xB(w, -0.1)*F1_CnB->evaluate(w*w, -0.1);});
-    p1.add_curve( {Wth, 3}, [&](double w){ return F2_CnB->evaluate(w*w, -2.0);}, "#it{t} = #minus 2 GeV^{2}");
+    p1.add_curve( {Wth, 3}, [&](double w){ return F2_CnB->evaluate(w*w, -2.0);}, "#it{t} = #minus 2.0 GeV^{2}");
     p1.add_dashed({Wth, 3}, [&](double w){ return 2*xB(w, -2.0)*F1_CnB->evaluate(w*w, -2.0);});
     p1.add_curve( {Wth, 3}, [&](double w){ return F2_CnB->evaluate(w*w, -10);}, "#it{t} = #minus 10 GeV^{2}");
     p1.add_dashed({Wth, 3}, [&](double w){ return 2*xB(w, -10 )*F1_CnB->evaluate(w*w, -10);});
@@ -58,17 +58,20 @@ void structure_Fs()
     p2.add_dashed( {Wth, 30}, [&](double w){ return F2_DnL->evaluate(w*w, -2);});
     p2.add_curve(  {Wth, 30}, [&](double w){ return F2_PDF->evaluate(w*w, -10);},  "#it{t} = #minus 10 GeV^{2}");
     p2.add_dashed( {Wth, 30}, [&](double w){ return F2_DnL->evaluate(w*w, -10);});
-    p2.save("DL_F.pdf");
 
     plot p3 = plotter.new_plot();
-    p3.set_labels("#it{M}^{2}_{#it{X}} [GeV]", "#it{F}_{2}(#it{x}_{B}, #it{t})");
-    p3.set_legend(0.25, 0.65);
-    p3.set_curve_points(1000);
-    p3.set_ranges({1, 4}, {0, 0.6});
-    p3.add_curve( {1,  3}, [&](double M){ return F2_CnB->evaluate(M*M, -2) ; },  "B&C");
-    p3.add_dashed({1,  3}, [&](double M){ return F2_CnB->evaluate(M*M, -0.1);});
-    p3.add_curve( {1, 7},  [&](double M){ return F2_DnL->evaluate(M*M, -2) ; },  "D&L");
-    p3.add_dashed({1, 7},  [&](double M){ return F2_DnL->evaluate(M*M, -0.1);});
-    p3.add_curve( {1, 7},  [&](double M){ return F2_PDF->evaluate(M*M, -2) ; },  "CTEQ-TEA");
-    p3.save("PDF_F.pdf");
+    p3.set_labels("#it{M}_{#it{X}} [GeV]", "#it{F}_{2}(#it{x}_{B}, #it{t})");
+    p3.add_style_legend({"D&L", "CTEQ-TEA", "B&C"});
+    p3.set_style_legend(0.25,0.75);
+    p3.set_curve_points(100);
+    p3.set_ranges({1, 3}, {0, 0.45});
+    p3.add_curve( {1, 3},  [&](double M){ return F2_DnL->evaluate(M*M, -0.1) ; });
+    p3.add_dotted( {1, 3},  [&](double M){ return F2_CnB->evaluate(M*M, -0.1) ; });
+    p3.add_curve( {1, 3},  [&](double M){ return F2_DnL->evaluate(M*M, -2) ; });
+    p3.add_dashed( {1, 3},  [&](double M){ return F2_PDF->evaluate(M*M, -2) ; });
+    p3.add_dotted( {1, 3},  [&](double M){ return F2_CnB->evaluate(M*M, -2) ; });
+    p3.add_curve( {1, 3},  [&](double M){ return F2_DnL->evaluate(M*M, -10) ; });
+    p3.add_dashed( {1, 3},  [&](double M){ return F2_PDF->evaluate(M*M, -10) ; });
+    p3.add_dotted( {1, 3},  [&](double M){ return F2_CnB->evaluate(M*M, -10) ; });
+    plotter.combine({2,1}, {p2,p3}, "Fs_compare.pdf");
 };
