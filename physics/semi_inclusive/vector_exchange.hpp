@@ -26,12 +26,11 @@ namespace jpacPhoto
         {
             public: 
 
-            vector_exchange(key k, kinematics kin, double mE, std::string id = "")
+            vector_exchange(key k, kinematics kin, std::string id = "")
             : raw_semi_inclusive(k, kin, id), 
-              _photon(is_zero(mE)), _mEx2(mE*mE),
               F1(new_inclusive_function<CB_F>(1, kProton)),
               F2(new_inclusive_function<CB_F>(2, kProton))
-            { set_N_pars(3); };
+            { set_N_pars(2); };
 
             // Minimum mass is the proton 
             inline double minimum_M2(){ return pow(M_PROTON + M_PION, 2); };
@@ -39,36 +38,36 @@ namespace jpacPhoto
             // Only free parameters are the top photocoupling and the form factor cutoff
             inline void allocate_parameters(std::vector<double> pars)
             {
-                _g     = pars[0];
-                _eta   = pars[1];
-                _lam2  = pars[2]*pars[2];
-
-                // Cutoff for regge amplitude
-                if (!is_zero(_lam2)) _cutoff = exp(1./_lam2/_alphaP) / _alphaP;
+                _g[0]     = pars[0]; _g[1]     = pars[1];
             };
 
             // The invariant cross section used S T and M2 as independent vareiables
             inline double invariant_xsection(double s, double t, double M2)
             {
-                if (!_photon && _regge && -t > _cutoff) return 0;
+                if (_regge && -t > _cutoff) return 0;
 
                 store( s, t, M2);  // Sync kinematics
                 update(s, t, M2);  // Recalculate form factors
 
                 double PTdotW = 0;
+
+                // Form factors for rho and omega
+                std::array<double,2> beta = {  exp(t/_lam2[0])/pow(1-t/0.71,-2), 
+                                               exp(t/_lam2[1])/pow(1-t/0.71,-2)} ;
+
                 for (int i = 0; i < _gammas.size(); i++)
                 {
                     double tpiece, spiece, alpha;
-                    if (_photon || !_regge)
+                    if (!_regge)
                     {
                         alpha  = 1;
-                        tpiece = pow(_mEx2 - t, -2);
+                        tpiece = pow(beta[0]*_g[0]*_eta[0]*E/2/(_mEx2[0] - t) + beta[1]*_g[1]*_eta[1]*E/2/(_mEx2[1] - t), 2);
                         spiece = 2*_pdotk / M2;
                     }
                     else
                     {
                         alpha = _alpha0 + _alphaP * t;
-                        tpiece = std::norm(_alphaP * cgamma(1. - alpha) * (1.-exp(-I*PI*alpha))/2);
+                        tpiece = pow(E*beta[0]*_g[0]*_eta[0]/2 + E*beta[1]*_g[1]*_eta[1]/2, 2) * std::norm(_alphaP * cgamma(1. - alpha) * (1.-exp(-I*PI*alpha))/2);
                         spiece = s / M2;
                     };
                     
@@ -80,14 +79,13 @@ namespace jpacPhoto
 
                 // Form factor in the case of massive vectors
                 double tprime  = t - TMINfromM2(s, M2_PROTON);
-                double beta_ex = (is_zero(_lam2)) ? 1. : exp(t/_lam2)/pow(1-t/0.71,-2);
 
                 // The form factor of the top vertex
                 double mX2 = pow(_kinematics->get_meson_mass(), 2);
-                if (_photon) beta_ex = pow(mX2 / (mX2 - t), 2.);
+                double beta_Qgg = pow(mX2 / (mX2 - t), 2.);
 
                 // in nanobarn!!!!!
-                return flux * pow(beta_ex * _eta*_eta * E, 2) * PTdotW / (8*PI*PI) / (2.56819E-6); 
+                return flux * beta_Qgg * PTdotW / (8*PI*PI) / (2.56819E-6); 
             };
 
             // Options select proton or neutron target
@@ -121,7 +119,7 @@ namespace jpacPhoto
                 _kdotq = (t - _mX2)           / 2;
 
                 // Production form factors
-                _prefactors = _g*_g/2*t*t/_mX2/_mX2/_mX2;
+                _prefactors = 1./2*t*t/_mX2/_mX2/_mX2;
                 _T1 = _prefactors * _kdotq*_kdotq;
                 _T2 = _prefactors * _kdotq*(_mX2 - 2*_kdotq);
 
@@ -140,14 +138,11 @@ namespace jpacPhoto
 
             private:
 
-            // Whether we consider a photon exchange
-            bool _photon = true;
-
             // Free parameters
-            double _g    = 0; // Top couplings
-            double _eta  = 1; // VMD coupling for exchange
-            double _mEx2 = 0; // Mass (squared) of exchange
-            double _lam2 = 1; // Form factor cutoff in GeV
+            std::array<double,2> _g;
+            std::array<double,2> _mEx2 = {M_RHO*M_RHO, M_OMEGA*M_OMEGA};
+            std::array<double,2> _eta  = {16.37,   56.34};
+            std::array<double,2> _lam2 = {1.4*1.4, 1.2*1.2  };
 
             // Internal variables
             double _pdotk, _pdotq, _kdotq;
@@ -160,8 +155,7 @@ namespace jpacPhoto
 
             // Regge trajectory parameters
             double _alpha0 = 0.5, _alphaP = 0.9;
-            double _cutoff;
-
+            double _cutoff = exp(1./_lam2[0]/_alphaP) / _alphaP;
         };
     };
 };
