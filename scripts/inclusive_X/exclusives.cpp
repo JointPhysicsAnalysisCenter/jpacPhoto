@@ -64,10 +64,10 @@ void exclusives()
     // chi_c1 amplitudes
 
     amplitude C_omega_VMD = new_amplitude<photon_exchange>(kC, M_OMEGA, "#omega exchange");
-    C_omega_VMD->set_parameters({10.46E-3, gamma_omega/2, 1.2});
+    C_omega_VMD->set_parameters({10.46E-3, gamma_omega/2, 0*1.2});
 
     amplitude C_rho_VMD   = new_amplitude<photon_exchange>(kC, M_RHO, "#rho exchange");
-    C_rho_VMD->set_parameters({18.87E-3, gamma_rho/2, 1.4});
+    C_rho_VMD->set_parameters({18.87E-3, gamma_rho/2, 0*1.4});
 
     amplitude C_sum_VMD = C_omega_VMD + C_rho_VMD;
 
@@ -84,6 +84,22 @@ void exclusives()
 
     plotter plotter;
     
+    // Compare FF choices 
+    plot p2 = plotter.new_plot();
+    p2.set_curve_points(100);
+    p2.set_logscale(false, true);
+    p2.set_ranges({4.35, 7}, {4E-3, 1});
+    p2.set_legend(0.22, 0.7);
+    p2.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi_{c1} #it{p})  [nb]");
+    amplitude VMD = C_sum_VMD, EXP = C_sum;
+    VMD->set_option(photon_exchange::kUseT);      EXP->set_option(vector_exchange::kUseT);   
+    p2.add_curve(  {kC->Wth() + EPS, 7}, [&](double W){ return VMD->integrated_xsection(W*W); }, "#beta(#it{t})");
+    p2.add_dashed( {kC->Wth() + EPS, 7}, [&](double W){ return EXP->integrated_xsection(W*W); });
+    VMD->set_option(photon_exchange::kUseTprime); EXP->set_option(vector_exchange::kUseTprime);   
+    p2.add_curve(  {kC->Wth() + EPS, 7}, [&](double W){ return VMD->integrated_xsection(W*W); }, "#beta(#it{t} - #it{t}_{min})");
+    p2.add_dashed( {kC->Wth() + EPS, 7}, [&](double W){ return EXP->integrated_xsection(W*W); });
+    p2.save("FF_compare.pdf");
+
     // Compare chic1 exchanges
     plot p1 = plotter.new_plot();
     p1.set_curve_points(100);
@@ -100,39 +116,25 @@ void exclusives()
     };
     p1.add_curve( {kC->Wth() + EPS, 7}, [&](double W){ return C_sum_VMD->integrated_xsection(W*W); }, "Sum");
     p1.add_dashed({kC->Wth() + EPS, 7}, [&](double W){ return C_sum->integrated_xsection(W*W); });
-
-    // // Compare FF choices 
-    // plot p2 = plotter.new_plot();
-    // p2.set_curve_points(100);
-    // p2.set_logscale(false, true);
-    // p2.set_ranges({4.35, 7}, {4E-3, 1});
-    // p2.set_legend(0.22, 0.7);
-    // p2.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #chi_{c1} #it{p})  [nb]");
-    // amplitude VMD = C_sum_VMD, EXP = C_sum;
-    // VMD->set_option(photon_exchange::kUseT);      EXP->set_option(vector_exchange::kUseT);   
-    // p2.add_curve(  {kC->Wth() + EPS, 7}, [&](double W){ return VMD->integrated_xsection(W*W); }, "#beta(#it{t})");
-    // p2.add_dashed( {kC->Wth() + EPS, 7}, [&](double W){ return EXP->integrated_xsection(W*W); });
-    // VMD->set_option(photon_exchange::kUseTprime); EXP->set_option(vector_exchange::kUseTprime);   
-    // p2.add_curve(  {kC->Wth() + EPS, 7}, [&](double W){ return VMD->integrated_xsection(W*W); }, "#beta(#it{t} - #it{t}_{min})");
-    // p2.add_dashed( {kC->Wth() + EPS, 7}, [&](double W){ return EXP->integrated_xsection(W*W); });
-    // p2.save("FF_compare.pdf");
-
+    
     // X(3872) productions
     plot p3 = plotter.new_plot();
     p3.set_curve_points(50);
     p3.set_logscale(false, true);
-    p3.set_ranges({4.35, 7}, {3E-2, 4E2});
+    p3.set_ranges({4.35, 7}, {3E-1, 2E2});
     p3.set_legend(0.65, 0.22);
     p3.set_legend_spacing(0.035);
     p3.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #it{X}#it{p})  [nb]");
     p3.add_curve( {kX->Wth(), 7}, [&](double W){ return X_sum_VMD->integrated_xsection(W*W); },  "VMD 1");
     p3.add_dashed({kX->Wth(), 7}, [&](double W){ return X_sum->integrated_xsection(W*W);     });
-    X_rho_VMD->set_parameters(  {0.0316481, gamma_rho/2, 1.4});
-    X_omega_VMD->set_parameters({0.0717942, gamma_omega/2, 1.2});
-    X_rho->set_parameters({0.0316481*pow(M_RHO/M_X3872, 2.), 2.4, 14.6, 1.4});
-    X_omega->set_parameters({0.0717942*pow(M_OMEGA/M_X3872, 2.), 16, 0, 1.2});
 
+    X_rho_VMD->set_parameters(  {-0.199228*gamma_rho/gamma_omega, gamma_rho/2, 1.4});
+    X_omega_VMD->set_parameters({ 0.199228, gamma_omega/2, 1.2});
     p3.add_curve( {kX->Wth(), 7}, [&](double W){ return X_sum_VMD->integrated_xsection(W*W); },  "VMD 2");
-    p3.add_dashed({kX->Wth(), 7}, [&](double W){ return X_sum->integrated_xsection(W*W);     });
-    plotter.combine({2,1}, {p1,p3}, "X_compare.pdf");
+
+    X_rho_VMD->set_parameters(  { 0.0879857, gamma_rho/2, 1.4});
+    X_omega_VMD->set_parameters({-0.0879857*gamma_omega/gamma_rho, gamma_omega/2, 1.2});
+    p3.add_curve( {kX->Wth(), 7}, [&](double W){ return X_sum_VMD->integrated_xsection(W*W); },  "VMD 3");
+
+    plotter.combine({2,1}, {p3,p1}, "X_compare.pdf");
 };

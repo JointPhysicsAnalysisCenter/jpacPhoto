@@ -121,26 +121,26 @@ void inclusives()
 
     plotter plotter;
 
-    // // Near threshold production plot
-    // plot p1 = plotter.new_plot();
-    // p1.set_curve_points(30);
-    // p1.set_logscale(false, true);
-    // p1.set_ranges({4.1, 7}, {1E-2, 2E3});
-    // p1.set_legend(0.27, 0.72);
-    // p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma  [nb]");
-    // p1.print_to_terminal(true);
-    // p1.shade_region({W_cm(22), 10}, {kBlack, 1001});
-    // print("chic1 (inclusive)"); divider(2);
-    // p1.add_curve( C_NT, [&](double W){ return iC->integrated_xsection(W*W, 0.7); }, "#chi_{#it{c}1}");
-    // print("chic1 (exclusive)"); divider(2);
-    // p1.add_dashed(C_NT, [&](double W){ return eC->integrated_xsection(W*W); });
-    // print("X(3872) (inclusive)"); divider(2);
-    // p1.add_curve( X_NT, [&](double W){ return iX->integrated_xsection(W*W, 0.7); }, "#it{X}(3872)");
-    // print("X(3872) (exclusive)"); divider(2);
-    // p1.add_dashed(X_NT, [&](double W){ return eX->integrated_xsection(W*W); });
-    // p1.save("NT.pdf");
+    // Near threshold production plot
+    plot p1 = plotter.new_plot();
+    p1.set_curve_points(30);
+    p1.set_logscale(false, true);
+    p1.set_ranges({4.1, 7}, {1E-2, 2E3});
+    p1.set_legend(0.27, 0.72);
+    p1.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma  [nb]");
+    p1.print_to_terminal(true);
+    p1.shade_region({W_cm(22), 10}, {kBlack, 1001});
+    print("chic1 (inclusive)"); divider(2);
+    p1.add_curve( C_NT, [&](double W){ return iC->integrated_xsection(W*W, 0.7); }, "#chi_{#it{c}1}");
+    print("chic1 (exclusive)"); divider(2);
+    p1.add_dashed(C_NT, [&](double W){ return eC->integrated_xsection(W*W); });
+    print("X(3872) (inclusive)"); divider(2);
+    p1.add_curve( X_NT, [&](double W){ return iX->integrated_xsection(W*W, 0.7); }, "#it{X}(3872)");
+    print("X(3872) (exclusive)"); divider(2);
+    p1.add_dashed(X_NT, [&](double W){ return eX->integrated_xsection(W*W); });
+    p1.save("NT.pdf");
 
-    // Plot the breakdown of contributions for the chic1
+    // // Plot the breakdown of contributions for the chic1
     plot p3 = plotter.new_plot();
     p3.set_curve_points(20);
     p3.set_logscale(false, true);

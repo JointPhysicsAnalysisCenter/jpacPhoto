@@ -49,43 +49,34 @@ namespace jpacPhoto
                 store( s, t, M2);  // Sync kinematics
                 update(s, t, M2);  // Recalculate form factors
 
-                double PTdotW = 0;
+                double TdotW = 0;
 
                 // Form factors for rho and omega
-                std::array<double,2> beta = {  exp(t/_lam2[0])/pow(1-t/0.71,-2), 
-                                               exp(t/_lam2[1])/pow(1-t/0.71,-2)} ;
+                double tprime  = t - TMINfromM2(s, M2_PROTON);
+                std::array<double,2> beta = {  exp(tprime/_lam2[0])/pow(1-tprime/0.71,-2), 
+                                               exp(tprime/_lam2[1])/pow(1-tprime/0.71,-2)} ;
 
-                for (int i = 0; i < _gammas.size(); i++)
+                double exch_piece, spiece, alpha;
+                if (!_regge)
                 {
-                    double tpiece, spiece, alpha;
-                    if (!_regge)
-                    {
-                        alpha  = 1;
-                        tpiece = pow(beta[0]*_g[0]*_eta[0]*E/2/(_mEx2[0] - t) + beta[1]*_g[1]*_eta[1]*E/2/(_mEx2[1] - t), 2);
-                        spiece = 2*_pdotk / M2;
-                    }
-                    else
-                    {
-                        alpha = _alpha0 + _alphaP * t;
-                        tpiece = pow(E*beta[0]*_g[0]*_eta[0]/2 + E*beta[1]*_g[1]*_eta[1]/2, 2) * std::norm(_alphaP * cgamma(1. - alpha) * (1.-exp(-I*PI*alpha))/2);
-                        spiece = s / M2;
-                    };
-                    
-                    PTdotW += _gammas[i] * tpiece * pow(spiece, 2*alpha - i);
+                    alpha  = 1;
+                    exch_piece = std::norm(beta[0]*_g[0]*_eta[0]/(_mEx2[0] - t) + beta[1]*_g[1]*_eta[1]/(_mEx2[1] - t));
+                    spiece = 2*_pdotk / M2;
+                }
+                else
+                {
+                    alpha = _alpha0 + _alphaP * t;
+                    exch_piece = std::norm(beta[0]*_g[0]*_eta[0] + beta[1]*_g[1]*_eta[1]) * std::norm(_alphaP * cgamma(1. - alpha) * (1.-exp(-I*PI*alpha))/2);
+                    spiece = s / M2;
                 };
+
+                for (int i = 0; i < _gammas.size(); i++)  TdotW += _gammas[i] * pow(spiece, 2*alpha - i);
 
                 // Flux factor
                 double flux = 1/(2*sqrt(s)*qGamma(s));
 
-                // Form factor in the case of massive vectors
-                double tprime  = t - TMINfromM2(s, M2_PROTON);
-
-                // The form factor of the top vertex
-                double mX2 = pow(_kinematics->get_meson_mass(), 2);
-                double beta_Qgg = pow(mX2 / (mX2 - t), 2.);
-
                 // in nanobarn!!!!!
-                return flux * beta_Qgg * PTdotW / (8*PI*PI) / (2.56819E-6); 
+                return flux * E*E/4 * exch_piece * TdotW / (8*PI*PI) * HBARC; 
             };
 
             // Options select proton or neutron target
@@ -102,10 +93,6 @@ namespace jpacPhoto
                 return;
             };
 
-            // Everything regarding reggeization is handled in the code
-            // except when a photon exchange is evaluated at high energies
-            // even through photon doesnt reggeize we have to treat this 
-            // case special to avoid probing Q2 > 300 GeV^2!
             virtual inline void reggeized(bool x) { _regge = x; set_option(_option); };
 
             protected:
@@ -118,8 +105,10 @@ namespace jpacPhoto
                 _pdotq = (M2 - M2_PROTON - t) / 2;
                 _kdotq = (t - _mX2)           / 2;
 
-                // Production form factors
-                _prefactors = 1./2*t*t/_mX2/_mX2/_mX2;
+                // The form factors of the top vertex
+                double beta_Qgg = pow(1. - t/_mX2, -2.);
+                _prefactors = beta_Qgg/2*t*t/_mX2/_mX2/_mX2;
+
                 _T1 = _prefactors * _kdotq*_kdotq;
                 _T2 = _prefactors * _kdotq*(_mX2 - 2*_kdotq);
 

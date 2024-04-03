@@ -73,5 +73,5 @@ void structure_Fs()
     p3.add_curve( {1, 3},  [&](double M){ return F2_DnL->evaluate(M*M, -10) ; });
     p3.add_dashed( {1, 3},  [&](double M){ return F2_PDF->evaluate(M*M, -10) ; });
     p3.add_dotted( {1, 3},  [&](double M){ return F2_CnB->evaluate(M*M, -10) ; });
-    plotter.combine({2,1}, {p2,p3}, "Fs_compare.pdf");
+    plotter.combine({2,1}, {p3,p2}, "Fs_compare.pdf");
 };
