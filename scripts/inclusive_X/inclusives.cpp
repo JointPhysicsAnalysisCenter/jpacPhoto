@@ -1,13 +1,18 @@
 // Calculates the integrated cross section for both inclusive and exclusive 
-// X(3872) via photon and vector meson exchanges
+// axial-vector production at near threshold and high energies
+// Reproduces figs. 8 and 8 of [1]
 //
-// OUTPUT: inclusive_X.pdf
+// OUTPUT: NT.pdf (fig 8)
+//         HE.pdf (fig 9)
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2023)
-// Affiliation:  Joint Physics Analysis Center (JPAC),
-//               South China Normal Univeristy (SCNU)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
 // Email:        daniel.winney@iu.alumni.edu
-//               dwinney@scnu.edu.cn
+//               winney@hiskp.uni-bonn.de
+// ------------------------------------------------------------------------------
+// REFERENCES:
+//
+// [1] - https://arxiv.org/abs/2404.05326
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"

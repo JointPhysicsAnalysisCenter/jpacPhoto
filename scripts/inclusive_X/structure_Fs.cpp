@@ -1,15 +1,20 @@
-// Plots F_1 and F_2 at fixed Q2 as a function of W using the low-energy
-// empirical formulae of [1]
+// Print out Sach's form factors for the proton and neutron 
+// based on the parameterization of [1] and [2]. Reproduces fig. 2 in [3].
+//
+// Output: CB_pdf (unpublished)
+//         Fs_compare.pdf (fig. 2)
 //
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2023)
-// Affiliation:  Joint Physics Analysis Center (JPAC),
-//               South China Normal Univeristy (SCNU)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+//               Universitat Bonn, HISKP
 // Email:        daniel.winney@iu.alumni.edu
-//               dwinney@scnu.edu.cn
+//               winney@hiskp.uni-bonn.de
 // ------------------------------------------------------------------------------
-// REFERENCES:
-// [1] - https://arxiv.org/abs/0712.3731
+// References:
+// [1] - https://arxiv.org/abs/hep-ph/0402081
+// [2] - https://arxiv.org/abs/1512.09113
+// [3] - https://arxiv.org/abs/2404.05326
 // ------------------------------------------------------------------------------
 
 #include "semi_inclusive/CB_F.hpp"

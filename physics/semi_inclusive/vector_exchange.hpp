@@ -1,12 +1,17 @@
-// Semi-inclusive production of axial vectors vector exchange using proton structure
-// functions
+// Semi-inclusive production of axial vectors via meson ex using proton structure
+// functions.
+// This form combines the rho and omega exchanges to incorporate the non-diagonal contirbution 
 //
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2023)
-// Affiliation:  Joint Physics Analysis Center (JPAC),
-//               South China Normal Univeristy (SCNU)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+//               Universitat Bonn, HISKP
 // Email:        daniel.winney@iu.alumni.edu
-//               dwinney@scnu.edu.cn
+//               winney@hiskp.uni-bonn.de
+// ------------------------------------------------------------------------------
+// REFERENCES:
+//
+// [1] - https://arxiv.org/abs/2404.05326
 // ------------------------------------------------------------------------------
 
 #ifndef INCLUSIVE_VECTOR_EXCHANGE_HPP       

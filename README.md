@@ -26,7 +26,7 @@ setenv JPACPHOTO /path/to/jpacPhoto # for csh
 
 ##  USAGE
 
-The primary use case is to reproduce results from recent [[1-4]](#references) and older analyses [[5-7]](#references) from the JPAC collaboration in a general and unified framework for amplitude analysis in photoproduction. The compiled library contains the framework of amplitudes and observables as abstract classes with specific amplitude models needed to be imported at run-time as header-only libraries. 
+The primary use case is to reproduce results from recent [[1-5]](#references) and older analyses [[5-7]](#references) from the JPAC collaboration in a general and unified framework for amplitude analysis in photoproduction. The compiled library contains the framework of amplitudes and observables as abstract classes with specific amplitude models needed to be imported at run-time as header-only libraries. 
 
 The compiled jpacPhoto executable pipes an analysis script, relevent amplitude files, and the compiled library into ROOT's cling interpeter to run. 
 This set up mimics a Python-like environment without requiring recompilation of the whole library when changes are made to amplitude files. Amplitudes and scripts relevant for JPAC papers are located in [`/physics`](./physics) and [`/scripts`](./scripts) respectively. To run a script located in the bin directory simply run 
@@ -95,7 +95,7 @@ pwave->integrated_xsection(s); // Only P-wave contribution of sum
 ```
 
 ### SEMI-INCLUSIVE DISTRIBUTIONS
-Methods for semi-inclusive processes can be added via the [`semi_inclusive`](./src/semi_inclusive.hpp) class. These are used for example in [[3]](#references) to investigate inclusive XYZ production. 
+Methods for semi-inclusive processes can be added via the [`semi_inclusive`](./src/semi_inclusive.hpp) class. These are used for example in [[3-4]](#references) to investigate inclusive XYZ production. 
 Because semi-inclusive models are implemented at the cross section level and lose explicit helicity dependence, only unpolarized observables are available (Units of GeV and nb assumed where appropriate):
 | Observable                                       |   | Callable `semi_inclusive` function |
 |--------------------------------------------------|---|---------------------------------------|
@@ -175,6 +175,7 @@ To run these scripts with the `jpacPhoto` executable requires having AmpTools to
 + [1] [Double Polarization Observables in Pentaquark Photoproduction](https://arxiv.org/abs/1907.09393)
 + [2] [XYZ spectroscopy at electron-hadron facilities: Exclusive processes](https://arxiv.org/abs/2008.01001)
 + [3] [XYZ spectroscopy at electron-hadron facilities II: Semi-inclusive processes with pion exchange](https://arxiv.org/abs/2209.05882)
++ [4] [XYZ spectroscopy at electron-hadron facilities III: Semi-inclusive processes with vector exchanges](https://arxiv.org/abs/2404.05326)
 + [4] [Dynamics in near-threshold J/ψ photoproduction](https://arxiv.org/abs/2305.01449)
 + [5] [Features of πΔ Photoproduction at High Energies](https://arxiv.org/abs/1710.09394)
 + [6] [Vector Meson Photoproduction with a Linearly Polarized Beam](https://arxiv.org/abs/1802.09403)

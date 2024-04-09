@@ -1,4 +1,4 @@
-//
+// Reproduces a semi-incusive distribution following phasespace with constant amplitude
 //
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2023)

@@ -1,14 +1,18 @@
-// Exploration of the photon exchange amplitude for the X(3872)
-// Produces the raw primakoff production rates for both proton and neutron targets
-// Also uses VMD to relate this to the meson exchanges previously considered
+// Re-evaluation of exclusive axial vector exchanges
+// Reproduces figs. 3 and 4 of [1]
 //
-// OUTPUT: primakoff_compare.pdf 
+// OUTPUT: FF_compare.pdf (fig. 3)
+//         NT_compare.pdf (fig. 4)
 // ------------------------------------------------------------------------------
-// Author:       Daniel Winney (2023)
+// Author:       Daniel Winney (2024)
 // Affiliation:  Joint Physics Analysis Center (JPAC),
 //               South China Normal Univeristy (SCNU)
 // Email:        daniel.winney@iu.alumni.edu
 //               dwinney@scnu.edu.cn
+// ------------------------------------------------------------------------------
+// REFERENCES
+//
+// [1] - https://arxiv.org/abs/2404.05326
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"
@@ -136,5 +140,5 @@ void exclusives()
     X_omega_VMD->set_parameters({-0.0879857*gamma_omega/gamma_rho, gamma_omega/2, 1.2});
     p3.add_curve( {kX->Wth(), 7}, [&](double W){ return X_sum_VMD->integrated_xsection(W*W); },  "VMD 3");
 
-    plotter.combine({2,1}, {p3,p1}, "X_compare.pdf");
+    plotter.combine({2,1}, {p3,p1}, "NT_compare.pdf");
 };

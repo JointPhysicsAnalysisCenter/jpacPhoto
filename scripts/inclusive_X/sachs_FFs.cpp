@@ -1,15 +1,18 @@
 // Print out Sach's form factors for the proton and neutron 
-// based on the parameterization of [1]
+// based on the parameterization of [1]. Reproduces fig. 2 in [2].
+//
+// Output: Gp.pdf 
 //
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2023)
-// Affiliation:  Joint Physics Analysis Center (JPAC),
-//               South China Normal Univeristy (SCNU)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+//               Universitat Bonn, HISKP
 // Email:        daniel.winney@iu.alumni.edu
-//               dwinney@scnu.edu.cn
+//               winney@hiskp.uni-bonn.de
 // ------------------------------------------------------------------------------
 // References:
 // [1] - https://arxiv.org/abs/1707.09063
+// [2] - https://arxiv.org/abs/2404.05326
 // ------------------------------------------------------------------------------
 
 #include "plotter.hpp"
