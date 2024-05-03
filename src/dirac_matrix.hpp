@@ -47,11 +47,20 @@ namespace jpacPhoto
         dirac_matrix()
         {};
 
+        // Destructor
+        ~dirac_matrix(){};
+
+        // Copy constructor
+        dirac_matrix(const dirac_matrix & old)
+        : _N(old._N), _entries(old._entries)
+        {};
+
         // Access a single element
         inline complex operator()(dirac_index i, dirac_index j)
         {
             return _N*_entries[+i][+j];
         };
+
 
         // Assignement operations
         dirac_matrix & operator=(dirac_matrix const & G);

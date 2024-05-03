@@ -37,6 +37,14 @@ namespace jpacPhoto
         : _entries(entries)
         {};
         
+        // Destructor
+        ~dirac_spinor(){};
+
+        // Copy constructor
+        dirac_spinor(const dirac_spinor & old)
+        : _entries(old._entries)
+        {};
+
         // Access an element
         complex operator()(dirac_index a);
         inline complex operator()(int a){return operator()(static_cast<dirac_index>(a));};
