@@ -15,6 +15,9 @@ namespace jpacPhoto
     // Set up the colors we can use
     void plotter::initialize_colors()
     {
+        // Check if colors are already define
+        if (gROOT->GetColor(+jpacColor::Blue) != nullptr) return;
+
         // make sure each color gets a free index
         jpacBlue     = new TColor(+jpacColor::Blue,     0.12156862745098039, 0.4666666666666667,  0.7058823529411765);
         jpacRed      = new TColor(+jpacColor::Red,      0.8392156862745098,  0.15294117647058825, 0.1568627450980392);
@@ -136,7 +139,7 @@ namespace jpacPhoto
 
             // Apply the linewidth 
             plot.scale_linewidth(scale);
-            plot.draw();
+            plot.draw(true);
             index++;
         };
 

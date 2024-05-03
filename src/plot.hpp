@@ -46,10 +46,35 @@ namespace jpacPhoto
         std::string _draw_opt = "L";                // string which enters ROOT::Draw() 
     };
 
-    enum curve_type { 
-                      sigma_s,      sigma_w,      sigma_Egam,       // Integrated cross-sections as functions of s, W, and Egam
-                      dsigmadt_s,   dsigmadt_w,   dsigmadt_Egam,    // Differential x-sections as function of t at fixed s, W, Egam
-                    };
+    inline entry_style dashed(jpacColor color, std::string id = "")
+    {
+        entry_style custom;
+        custom._color = color;
+        custom._style = kDashed;
+        custom._label = id;
+        custom._add_to_legend = (custom._label != "");
+        return custom;
+    };
+
+    inline entry_style solid(jpacColor color, std::string id = "")
+    {
+        entry_style custom;
+        custom._color = color;
+        custom._style = kSolid;
+        custom._label = id;
+        custom._add_to_legend = (custom._label != "");
+        return custom;
+    };
+
+    inline entry_style dotted(jpacColor color, std::string id = "")
+    {
+        entry_style custom;
+        custom._color = color;
+        custom._style = kDotted;
+        custom._label = id;
+        custom._add_to_legend = (custom._label != "");
+        return custom;
+    };
 
     // Each entry represents a curve to draw as a TGraph
     struct plot_entry 
@@ -304,7 +329,7 @@ namespace jpacPhoto
         };
 
         // Load all the settings into the graphs and draw them
-        void draw();
+        void draw(bool if_close = false);
 
         // -----------------------------------------------------------------------
         // AXIS SETUP 

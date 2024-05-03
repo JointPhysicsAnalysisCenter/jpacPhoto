@@ -36,7 +36,7 @@ namespace jpacPhoto
         _canvas->Print(_filename.c_str());
     };
 
-    void plot::draw()
+    void plot::draw(bool close)
     {
         TMultiGraph * mg = new TMultiGraph("mg", "mg");
 
@@ -134,6 +134,8 @@ namespace jpacPhoto
             b->SetFillStyle(shade._style);
             b->Draw();
         }
+
+        if (close) _canvas->Close();
     };
 
     // ---------------------------------------------------------------------------
