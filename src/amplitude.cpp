@@ -124,12 +124,13 @@ namespace jpacPhoto
     {
         _lamB = helicities[0]; _lamT = helicities[1];
         _lamX = helicities[2]; _lamR = helicities[3];
-    
-        _s = s; _t = t; _theta = _kinematics->theta_s(s,t);
-        _u = _mB*_mB + _mT*_mT + _mX*_mX + _mR*_mR - s - t;
 
         _mB = _kinematics->get_beam_mass();  _mT = _kinematics->get_target_mass();
         _mX = _kinematics->get_meson_mass(); _mR = _kinematics->get_recoil_mass();
+    
+        _s = s; _t = t; _theta = _kinematics->theta_s(s,t);
+        _u = _mB*_mB + _mT*_mT + _mX*_mX + _mR*_mR - s - t;
+        
         return;
     };
 
