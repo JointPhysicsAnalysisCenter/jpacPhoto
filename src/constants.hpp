@@ -225,6 +225,14 @@ namespace jpacPhoto
     inline complex Kallen(double a, complex z, double b) { return Kallen<complex>(XR*a, z, XR*b); };
     inline complex Kallen(double a, double b, complex z) { return Kallen<complex>(XR*a, XR*b, z); };
 
+    // Kinematic function for 2->2 scattering (see eq. 5.23 in Byckling & Kajantie)
+    inline double G(double x, double y, double z, double u, double v, double w)
+    {
+        return  x*x*y + x*y*y + z*z*u + z*u*u + v*v*w + v*w*w 
+              + x*z*w + x*u*v + y*z*w + y*u*w + y*z*v - y*z*w
+              - x*y*(z + u + v + w) - z*u*(x + y + v + w) - v*w*(x + y + z + u);
+    };
+
     // ---------------------------------------------------------------------------
     // Function for easier comparison of doubles using the EPS value defined above
     // be careful when using this in general purposes since its a fixed-tolerance comparision and not always appropriate
