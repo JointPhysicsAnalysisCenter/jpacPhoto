@@ -356,7 +356,7 @@ namespace jpacPhoto
         void store(std::array<int,4> helicities, double s, double t);
 
         // Invariant masses and scattering angle
-        double _s, _t, _theta;
+        double _s, _t, _u, _theta;
 
         // External particle masses
         double _mB, _mX, _mR, _mT;
