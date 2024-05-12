@@ -23,9 +23,9 @@ namespace jpacPhoto { namespace piN {
     {
         public:
 
-        mgi_pion(key k, kinematics xkinem, std::string id = "m.g.i. #pi")
+        mgi_pion(key k, kinematics xkinem, int i = kFixedSpin, std::string id = "m.g.i. #pi")
         : raw_amplitude(k, xkinem, id)
-        { initialize(0); set_option(kFixedSpin); };       
+        { initialize(0); set_option(i); };       
 
         inline complex helicity_amplitude(std::array<int,4> helicities, double s, double t)
         {
@@ -38,7 +38,7 @@ namespace jpacPhoto { namespace piN {
             _cost = (_s - _u)/(4*_kt*_pt);
             _sint = csqrt(_kinematics->Kibble(s,t)/t) / (2*_kt*_pt);
 
-            return -2*_ePi*_gNNpi*_lamB*_lamT*_t*_sint*propagator();
+            return -2*_ePi*_gNNpi*_lamB*_lamT*_t*_cost/_sint*propagator();
         };
 
         // Everything is evaluated in the t-channel
@@ -89,9 +89,9 @@ namespace jpacPhoto { namespace piN {
             }
         };
 
-        inline complex bare_propagator()      { return 2*_pt/csqrt(_t)/(_s - _u); };
-        inline complex single_Jpole()         { return _aP*_cost/_sint/_sint/alpha(); };
-        inline complex asymptotic_propagator(){ return 2*_aP/sqrt(PI)*_cost/(_cost*_cost - 1)*cgamma(alpha()+3/2.)*signature()*cgamma(-alpha())*pow(2*_s*_r2, alpha()); };
+        inline complex bare_propagator()      { return -1./(_t - M2_PION); };
+        inline complex single_Jpole()         { return -_aP/alpha(); };
+        inline complex asymptotic_propagator(){ return 2*_aP/sqrt(PI)*cgamma(alpha()+3/2.)*signature()*cgamma(-alpha())*pow(2*_s*_r2, alpha()); };
 
         inline complex resummed_propagator()
         {
@@ -114,7 +114,7 @@ namespace jpacPhoto { namespace piN {
             };
             complex integral = boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integrand, 0, 1, 25, 1.E-9, NULL);
 
-            return -(J0 + _aP*K*integral/2.);
+            return (J0 - _sint*_sint/_cost*_aP*K*integral/2.);
         };
 
 
