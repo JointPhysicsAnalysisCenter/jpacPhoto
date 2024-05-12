@@ -5,6 +5,7 @@
 #include "pion/mgi_pion.hpp"
 #include "pion/electric_nucleon.hpp"
 #include "pion/magnetic_nucleon.hpp"
+#include "pion/VGL.hpp"
 #include "piN/slac/data.hpp"
 
 void compare()
@@ -33,6 +34,8 @@ void compare()
     amplitude N_mFF = new_amplitude<magnetic_nucleon>(kpi);
     N_mFF->set_option(magnetic_nucleon::kAddFF);
 
+    amplitude vgl   = new_amplitude<VGL>(kpi, "VGL");
+
     amplitude sum1 = pi + N_e + N_m;
     sum1->set_id("Elementary");
 
@@ -54,8 +57,6 @@ void compare()
 
     plotter plotter;
 
-    std::vector<amplitude> to_plot = {sum1, sum2, sum3};
-
     auto plot_dsigma = [&](class plotter & pltr, double Egam, std::array<double,2> yrange, bool legend = false)
     {  
         plot p = pltr.new_plot();
@@ -74,7 +75,10 @@ void compare()
         double s    = s_cm(Egam);
         double tmin = -kpi->t_min(s) + 0.001 ;
 
-        for (auto amp : to_plot) 
+        p.add_curve( {tmin, 0.2}, [s, vgl] (double mt){ return vgl->differential_xsection(s, -mt) * 1E-3; },   vgl->id()); 
+        p.add_curve( {tmin, 0.2}, [s, sum1](double mt){ return sum1->differential_xsection(s, -mt) * 1E-3; },  sum1->id()); 
+
+        for (auto amp : {sum2, sum3}) 
         { 
             pi_R->set_parameters({1./2});
             p.add_curve( {tmin, 0.2}, [s, amp](double mt){ return amp->differential_xsection(s, -mt) * 1E-3; }, amp->id()); 
