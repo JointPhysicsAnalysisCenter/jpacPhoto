@@ -174,7 +174,7 @@ void dsigdt()
     phi_pomeron->set_parameters( {alp0_pom, alpP_pom, b_pom, beta_pom[2]/2, 0, 0, 1., kappa_pom} );   
     p.add_dashed({-phi->t_min(s),   0.6}, [&](double mt){ return phi_total->differential_xsection(  s, -mt) * 1E-3; });
     p.add_curve( {-omega->t_min(s), 0.6}, [&](double mt){ return omega_total->differential_xsection(s, -mt) * 1E-3; }, "#omega");
-    p.set_legend(0.25,0.25);
+    p.set_legend(0.25,0.25, 1.);
     p.save("dsig.pdf");
 
     plot p1 = plotter.new_plot();
@@ -182,7 +182,7 @@ void dsigdt()
     p1.set_logscale(false, true);
     p1.set_labels("#minus #it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
     p1.add_header("#gamma#it{p} #rightarrow #rho#it{p}");
-    p1.set_legend(0.25,0.2);
+    p1.set_legend(0.25,0.2, 1.);
 
     s = s_cm(4.7E3);
     p1.add_curve( {-rho->t_min(s),   0.6}, [&](double mt){ return rho_total->differential_xsection(  s, -mt) * 1E-3; }, "4.7 TeV");
@@ -198,8 +198,7 @@ void dsigdt()
     p2.set_logscale(false, true);
     p2.set_labels("#minus #it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
     p2.add_header("#gamma#it{p} #rightarrow #omega#it{p}");
-    p2.set_legend(0.25,0.25);
-    p2.set_legend_spacing(0.06);
+    p2.set_legend(0.25,0.25, 1.8);
 
     s = s_cm((50 + 130)/2);
     p2.add_curve( {-omega->t_min(s),   0.6}, [&](double mt){ return omega_total->differential_xsection(  s, -mt) * 1E-3; }, "50 - 130 GeV");

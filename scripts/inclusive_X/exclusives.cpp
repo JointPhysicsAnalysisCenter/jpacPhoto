@@ -130,8 +130,7 @@ void exclusives()
     p3.set_curve_points(50);
     p3.set_logscale(false, true);
     p3.set_ranges({4.35, 7}, {3E-1, 2E2});
-    p3.set_legend(0.65, 0.22);
-    p3.set_legend_spacing(0.035);
+    p3.set_legend(0.65, 0.22, 1.);
     p3.set_labels( "#it{W}_{#gamma#it{p}}  [GeV]", "#sigma(#gamma#it{p} #rightarrow #it{X}#it{p})  [nb]");
     p3.add_curve( {kX->Wth(), 7}, [&](double W){ return X_sum_VMD->integrated_xsection(W*W); },  "VMD 1");
     p3.add_dashed({kX->Wth(), 7}, [&](double W){ return X_sum->integrated_xsection(W*W);     });

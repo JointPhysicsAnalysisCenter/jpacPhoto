@@ -95,10 +95,9 @@ void a2_VMD()
     p1.set_labels("#minus#it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
     p1.set_ranges({0, 2.0}, {0, 0.6});
     p1.add_header("Minimal");
-    p1.set_legend(0.65, 0.65);
+    p1.set_legend(0.65, 0.65, 0.9);
     p1.add_data({mt4, sig4}, {mte4, err4}, jpacColor::Blue);
     p1.add_data({mt5, sig5}, {mte5, err5}, jpacColor::Red);
-    p1.set_legend_spacing(0.03);
     s = s_cm(4);
     p1.add_curve({0.07, 2}, [&](double mt){ return MIN->differential_xsection(s, -mt) * 1E-3; }, "#it{E}_{#gamma} = 4 GeV");
     s = s_cm(5);
@@ -108,7 +107,7 @@ void a2_VMD()
     p2.set_labels("#minus#it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
     p2.set_ranges({0, 2.0}, {0, 2.2});
     p2.add_header("TMD");
-    p2.set_legend(0.65, 0.65);
+    p2.set_legend(0.65, 0.65, 0.9);
     p2.add_data({mt4, sig4}, {mte4, err4}, jpacColor::Blue);
     p2.add_data({mt5, sig5}, {mte5, err5}, jpacColor::Red);
     s = s_cm(4);
@@ -126,7 +125,6 @@ void a2_VMD()
     p3.add_data({mt4, sig4}, {mte4, err4}, jpacColor::Blue);
     p3.add_data({mt5, sig5}, {mte5, err5}, jpacColor::Red);
     p3.set_legend(0.65, 0.65);
-    p3.set_legend_spacing(0.03);
     s = s_cm(4);
     p3.add_curve({0.07, 2}, [&](double mt){ return MIN->differential_xsection(s, -mt) * 1E-3; }, "#it{E}_{#gamma} = 4 GeV");
     s = s_cm(5);
