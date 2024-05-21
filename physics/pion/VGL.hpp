@@ -35,7 +35,7 @@ namespace jpacPhoto { namespace piN {
             _covariants->update(helicities, s, t);
 
             complex reggeize = (_regge) ? (_t - M2_PION)*regge_propagator() : 1;
-            return electric()*reggeize + magnetic();
+            return (electric() + magnetic())*reggeize;
         };
 
         // Covariants are always natively s-channel helicity amplitudes

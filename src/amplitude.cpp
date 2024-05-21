@@ -300,7 +300,10 @@ namespace jpacPhoto
     // Polarization asymmetry between beam and recoil baryon
     double raw_amplitude::K_LL(double s, double t)
     {
-        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+        if ((s < _kinematics->sth()) || (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)))
+        {
+            return error("amplitude::K_LL", "Outside physical region!", NaN<double>());
+        };
 
         double sum = 0; 
         auto cache = get_cache(s, t); int n = cache.size();
@@ -316,7 +319,10 @@ namespace jpacPhoto
     // Polarization asymmetry between beam and target proton
     double raw_amplitude::A_LL(double s, double t)
     {
-        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+        if ((s < _kinematics->sth()) || (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)))
+        {
+            return error("amplitude::A_LL", "Outside physical region!", NaN<double>());
+        };
 
         double sum = 0; 
         auto cache = get_cache(s, t); int n = cache.size();

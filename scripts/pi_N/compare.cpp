@@ -98,6 +98,6 @@ void compare()
     p3.add_data(boyarski[1]);
     p4.add_data(boyarski[0]);
 
-    plotter.combine({2,2}, {p1,p2,p3,p4}, "fig3.pdf");
+    plotter.combine({2,2}, {p1,p2,p3,p4}, "fig5.pdf");
 
 };

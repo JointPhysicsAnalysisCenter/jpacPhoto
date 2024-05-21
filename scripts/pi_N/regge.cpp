@@ -7,7 +7,7 @@
 #include "pion/magnetic_nucleon.hpp"
 #include "piN/slac/data.hpp"
 
-void regge_compare()
+void regge()
 {
     using namespace jpacPhoto;
     using namespace jpacPhoto::piN;
@@ -85,10 +85,11 @@ void regge_compare()
     };
 
     plot p1 = plot_dsigma(plotter, 16, {3E-2, 1}, true);
-    plot p2 = plot_dsigma(plotter, 11, {1E-1, 1.2});
-    plot p3 = plot_dsigma(plotter, 8 , {1E-1, 3});
-    plot p4 = plot_dsigma(plotter, 5 , {4E-1, 10});
+    p1.save("fig4.pdf");
+    // plot p2 = plot_dsigma(plotter, 11, {1E-1, 1.2});
+    // plot p3 = plot_dsigma(plotter, 8 , {1E-1, 3});
+    // plot p4 = plot_dsigma(plotter, 5 , {4E-1, 10});
 
-    plotter.combine({2,2}, {p1,p2,p3,p4}, "fig3.pdf");
+    // plotter.combine({2,2}, {p1,p2,p3,p4}, "fig3.pdf");
 
 };
