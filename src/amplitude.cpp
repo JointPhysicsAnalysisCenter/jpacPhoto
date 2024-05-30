@@ -389,7 +389,7 @@ namespace jpacPhoto
                 bool gam_fails = (alpha == 0) ? hi[0] != hj[0] : hi[0] == hj[0];
                 if (gam_fails) continue;
 
-                auto x = (alpha == 2) ? hi[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
+                auto x = (alpha == 2) ? hj[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
                 sum += x;
             };
         };
@@ -411,7 +411,7 @@ namespace jpacPhoto
         {
             for (int mp = -J; mp <= J; mp += 2)
             {
-                result += wigner_d_half(J, lam, m, -theta) * bSDME(alpha, m, mp, s, t) * wigner_d_half(J, mp, lamp, theta);
+                result += wigner_d_half(J, lam, m, theta) * bSDME(alpha, m, mp, s, t) * wigner_d_half(J, lamp, mp, theta);
             };
         };
 
@@ -488,7 +488,7 @@ namespace jpacPhoto
                 if (gam_fails) continue;
                 if (hi[1] != hj[1] || hj[2] != lamp || hi[3] != hj[3]) continue;
                 
-                auto x = (alpha == 2) ? hi[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
+                auto x = (alpha == 2) ? hj[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
                 sum += x;
             };
         };
@@ -511,7 +511,7 @@ namespace jpacPhoto
         {
             for (int mp = -J; mp <= J; mp++)
             {
-                result += wigner_d_int(J, lam, m, -theta) * mSDME(alpha, m, mp, s, t) * wigner_d_int(J, mp, lamp, theta);
+                result += wigner_d_int(J, lam, m, theta) * mSDME(alpha, m, mp, s, t) * wigner_d_int(J, lamp, mp, theta);
             };
         };
         return result;
