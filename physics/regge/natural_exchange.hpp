@@ -47,8 +47,22 @@ namespace jpacPhoto
             inline std::vector<quantum_numbers> allowed_baryons(){ return { THREEPLUS    }; };
 
             // Options
-            static const int kPole = 0;
-            static const int kCut  = 1;
+            static const int kPole            = 0;
+            static const int kCut             = 1;
+            static const int kSimpleHalfAngle = 2;
+            static const int kFullHalfAngle   = 3;
+            
+            inline void set_option(int opt)
+            {
+                switch (opt)
+                {
+                    case kPole:            {_option = opt;   return; };
+                    case kCut:             {_option = opt;   return; };
+                    case kSimpleHalfAngle: {_fullHA = false; return; };
+                    case kFullHalfAngle:   {_fullHA = true;  return; };
+                    default: option_error();
+                };
+            };
 
             // -----------------------------------------------------------------------
             // Internal data members 
@@ -59,7 +73,8 @@ namespace jpacPhoto
             int _signature = +1;
             double _s0 = 1;
             double _alpha0Pom = 1.08, _alphaPPom = 0.25; // Pomeron trajectory for cut model
-
+            bool _fullHA = true;
+            
             // Free parameters
             double _alpha0 = 0, _alphaP = 0;
             double _gT = 0., _gB1 = 0., _gB2 = 0, _gB3 = 0;
@@ -120,8 +135,12 @@ namespace jpacPhoto
             complex half_angle()
             {
                 double mui = double(_lamB) - _lamT/2., muf = double(_lamX) - _lamR/2.;
+                
+                // If we want to keep only the leading s behavior of the half angle factors to preserve exact factorization
+                if (!_fullHA) return 1.;
+
                 double z = cos(_theta);
-                return pow((_s/-_t)*(1-z)/2, std::abs(mui-muf)/2.) * pow( (1+z)/2, std::abs(mui + muf)/2.);
+                return pow((_s/-_t)*(1.-z)/2, std::abs(mui-muf)/2.) * pow( (1.+z)/2., std::abs(mui + muf)/2.);
             };
 
         };

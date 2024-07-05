@@ -47,8 +47,22 @@ namespace jpacPhoto
             inline std::vector<quantum_numbers> allowed_baryons(){ return { THREEPLUS    }; };
             
             // Options
-            static const int kYesPMA = 0;
-            static const int kNoPMA  = 1;
+            static const int kYesPMA          = 0;
+            static const int kNoPMA           = 1;
+            static const int kSimpleHalfAngle = 2;
+            static const int kFullHalfAngle   = 3;
+
+            inline void set_option(int opt)
+            {
+                switch (opt)
+                {
+                    case kYesPMA:          {_pma = true;     return; };
+                    case kNoPMA:           {_pma = false;    return; };
+                    case kSimpleHalfAngle: {_fullHA = false; return; };
+                    case kFullHalfAngle:   {_fullHA = true;  return; };
+                    default: return;
+                };
+            };
 
             // -----------------------------------------------------------------------
             // Internal data members 
@@ -58,6 +72,7 @@ namespace jpacPhoto
             // Fixed parameters 
             int _signature = +1;
             double _s0 = 1;
+            bool  _pma = true, _fullHA = true;
 
             // Free parameters
             double _alpha0 = 0, _alphaP = 0;
@@ -87,7 +102,7 @@ namespace jpacPhoto
             // Top coupling
             // note no sqr(-t), all powers of which have been collected in bottom()
             // for a more clear implementation of PMA
-            double top(){ return _gT; };
+            double top(){ return _lamB*_gT; };
 
             // Bottom coupling
             double bottom()
@@ -99,7 +114,7 @@ namespace jpacPhoto
                 }
 
                 double tfactor;
-                if (_option == kYesPMA)
+                if (_pma)
                 {
                     int n = std::abs(-_lamB - (_lamR - _lamT)/2); 
                     int x = std::abs((_lamT - _lamR)/2) + abs(_lamB) - n;
@@ -126,6 +141,10 @@ namespace jpacPhoto
             complex half_angle()
             {
                 double mui = double(_lamB) - _lamT/2., muf = double(_lamX) - _lamR/2.;
+                
+                // If we want to keep only the leading s behavior of the half angle factors to preserve exact factorization
+                if (!_fullHA) return 1.;
+
                 double z = cos(_theta);
                 return pow((_s/-_t)*(1-z)/2, std::abs(mui-muf)/2) * pow( (1+z)/2, std::abs(mui + muf)/2);
             };
