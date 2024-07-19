@@ -70,7 +70,7 @@ namespace jpacPhoto
     class tensor_object 
     {
         public: 
-        virtual const int rank() = 0;
+        virtual int rank() const = 0;
         virtual Type operator()(std::vector<lorentz_index> indices) = 0;
 
         virtual std::shared_ptr<tensor_object<dirac_matrix>> matrixify(){ return nullptr; };
@@ -90,7 +90,7 @@ namespace jpacPhoto
         {};
 
         // Always a rank 1 tensor
-        inline const int rank(){ return 1; };
+        inline int rank() const{ return 1; };
 
         inline Type operator()(std::vector<lorentz_index> indices)
         {
@@ -134,7 +134,7 @@ namespace jpacPhoto
         raw_metric_tensor(){};
 
         // Always a rank 2 tensor
-        inline const int rank(){ return 2; };
+        inline int rank() const{ return 2; };
 
         inline Type operator()(std::vector<lorentz_index> indices)
         {
@@ -168,7 +168,7 @@ namespace jpacPhoto
         raw_levicivita_tensor(){};
 
         // Always a rank 2 tensor
-        inline const int rank(){ return 4; };
+        inline int rank() const{ return 4; };
 
         inline Type operator()(std::vector<lorentz_index> indices)
         {

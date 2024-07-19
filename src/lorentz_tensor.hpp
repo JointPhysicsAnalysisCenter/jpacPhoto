@@ -49,7 +49,7 @@ namespace jpacPhoto
         {};
 
         // Get the rank of the tensor (number of open indicies)
-        const inline int rank(){ return Rank; };
+        inline int rank() const{ return Rank; };
 
         // Re-assignment, just makes a copy basically
         inline lorentz_tensor<Type,Rank> & operator=(lorentz_tensor<Type,Rank> const & T)
