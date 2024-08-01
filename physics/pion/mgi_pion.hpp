@@ -38,7 +38,7 @@ namespace jpacPhoto { namespace piN {
             _cost = (_s - _u)/(4*_kt*_pt);
             _sint = csqrt(_kinematics->Kibble(s,t)/t) / (2*_kt*_pt);
 
-            return -2*_ePi*_gNNpi*_lamB*_lamT*_t*_cost/_sint*propagator();
+            return -I*2*_ePi*_gNNpi*_lamB*_lamT*_t*reduced_amplitude();
         };
 
         // Everything is evaluated in the t-channel
@@ -77,7 +77,7 @@ namespace jpacPhoto { namespace piN {
 
         private:
         
-        inline complex propagator()
+        inline complex reduced_amplitude()
         {
             switch (_option)
             {
@@ -90,14 +90,21 @@ namespace jpacPhoto { namespace piN {
         };
 
         inline complex bare_propagator()      { return -1./(_t - M2_PION); };
-        inline complex single_Jpole()         { return -_aP/alpha(); };
-        inline complex asymptotic_propagator(){ return 2*_aP/sqrt(PI)*cgamma(alpha()+3/2.)*signature()*cgamma(-alpha())*pow(2*_s*_r2, alpha()); };
+        inline complex single_Jpole()         { return -I*_aP/alpha()*_cost/sqrt(1-_cost*_cost); };
+        inline complex asymptotic_propagator(){ return _aP*2./sqrt(PI)*cgamma(alpha()+3/2.)*signature()*cgamma(-alpha())*pow(_s*_r2, alpha()); };
 
         inline complex resummed_propagator()
         {
             complex J0 = single_Jpole();
-            complex K  = -2.*_pt*_kt*_r2;
+            complex K  = _pt*_kt*_r2;
             double a   = alpha();
+
+            auto G = [&](complex z, complex k){ return sqrt(1-2*z*k+k*k); };
+            auto kernel = [&](complex z, complex k)
+            {
+                return  2/G(+z, k)/(pow(1+G(+z, k), 2) - k*k) 
+                      - 2/G(-z, k)/(pow(1+G(-z, k), 2) - k*k);
+            };
 
             auto integrand = [&](double y)
             {
@@ -105,16 +112,12 @@ namespace jpacPhoto { namespace piN {
                 complex term2 = _jp*(a+_jz)*(a+1)*(2*a+1)/a/_jz/(a+_jp)  *pow(y,  -a);
                 complex term3 = (_jz - _jp)*(1-_jp)*(1-2*_jp)/_jz/(_jp+a)*pow(y, _jp);
 
-                complex Gp = sqrt(1-2*_cost*K*y+K*K*y*y);
-                complex Gm = sqrt(1+2*_cost*K*y+K*K*y*y);
 
-                complex resum = 2/Gp/(pow(1+Gp, 2) - K*K*y*y) - 2/Gm/(pow(1+Gm, 2) - K*K*y*y);
-
-                return (term1 + term2 + term3) * resum;
+                return (term1 + term2 + term3) * kernel(_cost, K*y) + 2*_jp/_jz*kernel(_cost, K);
             };
-            complex integral = boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integrand, 0, 1, 25, 1.E-9, NULL);
+            complex integral = boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integrand, 0, 1, 40, 1.E-9, NULL);
 
-            return (J0 - _sint*_sint/_cost*_aP*K*integral/2.);
+            return (J0 - I*_sint*_aP*K*integral/2.);
         };
 
 

@@ -21,75 +21,65 @@ void regge()
     kpi->set_meson_JP(PSEUDOSCALAR);
     kpi->set_baryon_JP(HALFPLUS);
 
+    amplitude pi_J0      = new_amplitude<mgi_pion>(kpi, mgi_pion::kFixedSpin, "J =0 ");
     amplitude pi_R_asymp = new_amplitude<mgi_pion>(kpi, mgi_pion::kHighEnergyLimit, "#it{s} #rightarrow #infty");
     pi_R_asymp->set_parameters({1/2.});
 
-    amplitude pi_R1 = new_amplitude<mgi_pion>(kpi, mgi_pion::kResummed, "#it{j}#kern[-0.15]{_{#it{p}}} = 1, #it{j}#kern[-0.2]{_{#it{z}}} = #frac{1}{2}");
-    pi_R1->set_parameters({1/2., 1, 1./2});
-
-    amplitude pi_R2 = new_amplitude<mgi_pion>(kpi, mgi_pion::kResummed, "#it{j}#kern[-0.15]{_{#it{p}}} = 1, #it{j}#kern[-0.2]{_{#it{z}}} = 1");
-    pi_R2->set_parameters({1/2., 1, 1.});
-
-    amplitude pi_R3 = new_amplitude<mgi_pion>(kpi, mgi_pion::kResummed, "#it{j}#kern[-0.15]{_{#it{p}}} = 2, #it{j}#kern[-0.2]{_{#it{z}}} = #frac{1}{2}");
-    pi_R3->set_parameters({1/2., 2., 1./2.});
-
+    amplitude pi_R_high = new_amplitude<mgi_pion>(kpi, mgi_pion::kResummed, "large jz");
+    amplitude pi_R_low  = new_amplitude<mgi_pion>(kpi, mgi_pion::kResummed, "large jp");
 
     // ---------------------------------------------------------------------------
     // Plot results
     // ---------------------------------------------------------------------------
 
+    double Egam = 16;
+    double s = s_cm(Egam),  tmin = - kpi->t_min(s) + 0.0001;
+
     plotter plotter;
 
-    std::vector<amplitude> to_plot = {pi_R_asymp, pi_R1, pi_R2, pi_R3};
-
-    auto add_curves = [&](class plot & p, double Egam, double R2, std::string label, jpacColor color)
+    auto add_curves = [&](class plot & p, double R2, std::string label, jpacColor color)
     {
-        double s = s_cm(Egam),  tmin = - kpi->t_min(s) + 0.0001;
+
         pi_R_asymp->set_parameters({R2});
-        pi_R1->set_parameters({R2, 1,  1./2});
-        pi_R2->set_parameters({R2, 1,  1.});
-        pi_R3->set_parameters({R2, 2., 1./2.});
-        p.add_curve({tmin, 0.2}, [s,pi_R_asymp](double mt){ return pi_R_asymp->differential_xsection(s, -mt) * 1E-3; },  solid(color , label)); 
-        p.add_curve({tmin, 0.2}, [s,pi_R1]     (double mt){ return pi_R1->differential_xsection(s, -mt)      * 1E-3; },  dashed(color)); 
-        p.add_curve({tmin, 0.2}, [s,pi_R2]     (double mt){ return pi_R2->differential_xsection(s, -mt)      * 1E-3; },  dotted(color)); 
-        p.add_curve({tmin, 0.2}, [s,pi_R3]     (double mt){ return pi_R3->differential_xsection(s, -mt)      * 1E-3; },  dash_dotted(color)); 
+        p.color_offset(1);
+        p.add_curve({tmin, 0.2}, [s,pi_R_asymp](double mt){ return pi_R_asymp->differential_xsection(s, -mt) * 1E-3; }, dashed(color, label)); 
+
+        pi_R_high->set_parameters({R2, 1000,  0.5   });
+        pi_R_low->set_parameters( {R2, 1,     1000.5});
+        std::vector<double> x, yh, yl;
+        for (int i = 0; i < 20; i++)
+        {
+            double tx = tmin + double(i)*(0.2 - tmin)/19.;
+            x.push_back(tx);
+            yh.push_back(pi_R_high->differential_xsection(s, -tx) * 1E-3);
+            yl.push_back(pi_R_low->differential_xsection( s, -tx) * 1E-3);
+        };
+        p.add_band(x, {yh, yl});
     };
 
-    auto plot_dsigma = [&](class plotter & pltr, double Egam, std::array<double,2> yrange, bool legend = false)
-    {  
+    auto plot_dsigma = [&](class plotter & pltr, std::array<double,2> yrange, bool legend = false)
+    {          
         plot p = pltr.new_plot();
-        p.set_legend(0.22, 0.65+0.07*!legend, 1.1);
+        p.set_legend(0.32, 0.20+0.07*!legend, 1.1);
         p.set_legend(legend);
         p.set_ranges({0, 0.2}, yrange);
         p.set_curve_points(40);
         p.set_logscale(false, true);
         p.set_labels("#minus #it{t} [GeV^{2}]", "d#sigma/d#it{t}  [#mub GeV^{-2}]");
         p.add_header(var_def("#it{E}_{#gamma}", Egam, "GeV"));
-        if (legend)
-        { 
-            p.add_style_legend({  "#it{s} #rightarrow #infty", 
-                              "#it{j}#kern[-0.15]{_{#it{p}}} = 1, #it{j}#kern[-0.2]{_{#it{z}}} = #frac{1}{2}", 
-                              "#it{j}#kern[-0.15]{_{#it{p}}} = 1, #it{j}#kern[-0.2]{_{#it{z}}} = 1", 
-                              "#it{j}#kern[-0.15]{_{#it{p}}} = 2, #it{j}#kern[-0.2]{_{#it{z}}} = #frac{1}{2}"} );
-            p.set_style_legend(0.7, 0.65, 1.);
-        };
 
-        
         double fm2gev = 5.068;
 
-        add_curves(p, Egam, 1/2.,     "#it{R}^{2} = (2#it{s}_{0})^{-1}", jpacColor::Blue);
-        add_curves(p, Egam, 1*fm2gev, "#it{R}^{2} = 1 fm",               jpacColor::Red);
-        add_curves(p, Egam, 2*fm2gev, "#it{R}^{2} = 2 fm",               jpacColor::Green);
+        p.add_curve({tmin, 0.2}, [&](double mt){ return pi_J0->differential_xsection(s, -mt) * 1E-3; }, "#it{J} = 0"); 
+
+        add_curves(p, 1.,     "#it{R} = 1/#sqrt{#it{s}_{0}}",    jpacColor::Red);
+        add_curves(p, pow(1*fm2gev, 2), "#it{R} = 1 fm",         jpacColor::Green);
+        add_curves(p, pow(2*fm2gev, 2), "#it{R} = 2 fm",         jpacColor::Orange);
 
         return p;
     };
 
-    plot p1 = plot_dsigma(plotter, 16, {3E-2, 1}, true);
+    plot p1 = plot_dsigma(plotter, {1E-2, 1}, true);
+
     p1.save("fig4.pdf");
-    // plot p2 = plot_dsigma(plotter, 11, {1E-1, 1.2});
-    // plot p3 = plot_dsigma(plotter, 8 , {1E-1, 3});
-    // plot p4 = plot_dsigma(plotter, 5 , {4E-1, 10});
-
-    // plotter.combine({2,2}, {p1,p2,p3,p4}, "fig3.pdf");
-
 };
