@@ -56,6 +56,7 @@ namespace jpacPhoto
         double _upper         = 0;
         double _lower         = 0;
         double _step          = 0.1;
+        bool   _positive      = false;
 
         // If this parameter is synced to be equal to another
         bool   _synced        = false;
@@ -139,6 +140,14 @@ namespace jpacPhoto
             int index = find_parameter(label);
             if (index < 0) return;
             return set_parameter_limits(_pars[index], bounds, step);
+        };
+
+        inline void make_positive_definite(parameter& par, bool x = true){ par._positive = x; };
+        inline void make_positive_definite(std::string label, bool x = true)
+        {
+            int index = find_parameter(label);
+            if (index < 0) return;
+            make_positive_definite(_pars[index], x);
         };
 
         inline void fix_parameter(parameter& par, double val)
@@ -250,6 +259,7 @@ namespace jpacPhoto
                 if (par._synced){ synced_pars.push_back(par._i); continue; } // Flag any synced parameters, we'll come back to them
 
                 if (par._custom_limits) guess.push_back(_guesser->Uniform(par._lower, par._upper)); 
+                else if (par._positive) guess.push_back(_guesser->Uniform(0., _guess_range[1]));
                 else                    guess.push_back(_guesser->Uniform(_guess_range[0], _guess_range[1]));
                 par._value = guess.back();
             };  
@@ -287,6 +297,7 @@ namespace jpacPhoto
                     if (par._synced){ synced_pars.push_back(par._i); continue; } // Flag any synced parameters, we'll come back to them
 
                     if (par._custom_limits) guess.push_back(_guesser->Uniform(par._lower, par._upper)); 
+                    else if (par._positive) guess.push_back(_guesser->Uniform(0., _guess_range[1]));
                     else                    guess.push_back(_guesser->Uniform(_guess_range[0], _guess_range[1]));
                     par._value = guess.back();
                 };
@@ -376,6 +387,7 @@ namespace jpacPhoto
                 if (par._fixed || par._synced) continue;
                 _minuit->SetVariable(i, par._label, starting_guess[i], par._step);
                 if (par._custom_limits) _minuit->SetVariableLimits(i, par._lower, par._upper);
+                if (par._positive)      _minuit->SetVariableLowerLimit(i, 0.);
                 i++; // move index up
             };
         
@@ -523,14 +535,18 @@ namespace jpacPhoto
                     continue;
                 }
 
-                par._value = starting_guess[i];
-                vals.push_back(par._value);
+                // if posdef
+                if (par._positive) par._message  =  "[>= 0]";
+
                 if (par._custom_limits)
                 {   
                     std::stringstream ss;
                     ss << std::setprecision(5) << "[" << par._lower << ", " << par._upper << "]";
                     par._message = ss.str();
                 };
+
+                par._value = starting_guess[i];
+                vals.push_back(par._value);
                 i++;
             };
 
