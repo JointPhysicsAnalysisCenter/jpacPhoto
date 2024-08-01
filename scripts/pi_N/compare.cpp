@@ -1,3 +1,17 @@
+// Comparison of all considered forms of the pion exchange against SLAC data.
+// Reproduces Figure 4 of [1]
+//
+// OUTPUT: fig4.pdf
+// ------------------------------------------------------------------------------
+// Author:       Daniel Winney (2023)
+// Affiliation:  Joint Physics Analysis Center (JPAC),
+//               Universitat Bonn (HISKP)
+// Email:        daniel.winney@gmail.com
+// ------------------------------------------------------------------------------
+// REFERENCES:
+// [1] - arXiv:2407.19577 [hep-ph]
+// ------------------------------------------------------------------------------
+
 #include "constants.hpp"
 #include "kinematics.hpp"
 #include "plotter.hpp"
@@ -17,6 +31,7 @@ void compare()
     // Amplitude set up
     // ---------------------------------------------------------------------------
 
+    double fm2gev = 5.068;
 
     kinematics kpi = new_kinematics(M_PION, M_PROTON);
     kpi->set_meson_JP(PSEUDOSCALAR);
@@ -68,23 +83,26 @@ void compare()
         p.add_header(var_def("#it{E}_{#gamma}", Egam, "GeV"));
         if (legend)
         {
-            p.add_style_legend({"#it{R}^{2} = (2#it{s}_{0})^{-1}", "#it{R}^{2} = 1 fm", "", ""});
-            p.set_style_legend(0.70, 0.65, 0.5);
+            p.add_style_legend({"#it{R} = 1 fm", "#it{R} = 2 fm", "#it{R} = 1/#sqrt{#it{s}_{0}}", ""});
+            p.set_style_legend(0.70, 0.65, 0.8);
         };
 
         double s    = s_cm(Egam);
         double tmin = -kpi->t_min(s) + 0.001 ;
 
-        p.add_curve( {tmin, 0.2}, [s, vgl] (double mt){ return vgl->differential_xsection(s, -mt) * 1E-3; },   vgl->id()); 
         p.add_curve( {tmin, 0.2}, [s, sum1](double mt){ return sum1->differential_xsection(s, -mt) * 1E-3; },  sum1->id()); 
 
         for (auto amp : {sum2, sum3}) 
         { 
-            pi_R->set_parameters({1./2});
+            pi_R->set_parameters({pow(1*fm2gev, 2)});
             p.add_curve( {tmin, 0.2}, [s, amp](double mt){ return amp->differential_xsection(s, -mt) * 1E-3; }, amp->id()); 
-            pi_R->set_parameters({5.068});
+            pi_R->set_parameters({pow(2*fm2gev, 2)});
             p.add_dashed({tmin, 0.2}, [s, amp](double mt){ return amp->differential_xsection(s, -mt) * 1E-3; }); 
+            pi_R->set_parameters({1});
+            p.add_dotted({tmin, 0.2}, [s, amp](double mt){ return amp->differential_xsection(s, -mt) * 1E-3; }); 
         };
+
+        p.add_curve( {tmin, 0.2}, [s, vgl] (double mt){ return vgl->differential_xsection(s, -mt) * 1E-3; },   solid(jpacColor::Grey, vgl->id())); 
         return p;
     };
 
@@ -98,6 +116,6 @@ void compare()
     p3.add_data(boyarski[1]);
     p4.add_data(boyarski[0]);
 
-    plotter.combine({2,2}, {p1,p2,p3,p4}, "fig5.pdf");
+    plotter.combine({2,2}, {p1,p2,p3,p4}, "fig4.pdf");
 
 };

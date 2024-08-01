@@ -1,3 +1,15 @@
+// Comparison of different components to the Born model of charged pi photoproduction
+// with an unReggeized (i.e. bare) pion exchange
+//
+// OUTPUT: bare_pion.pdf
+// ------------------------------------------------------------------------------
+// Author:       Daniel Winney (2023)
+// Affiliation:  Joint Physics Analysis Center (JPAC),
+//               Universitat Bonn (HISKP)
+// Email:        daniel.winney@gmail.com
+// ------------------------------------------------------------------------------
+
+
 #include "constants.hpp"
 #include "kinematics.hpp"
 #include "plotter.hpp"
@@ -81,5 +93,5 @@ void bare()
     p3.add_data(boyarski[1]);
     p4.add_data(boyarski[0]);
 
-    plotter.combine({2,2}, {p1,p2,p3,p4}, "fig3.pdf");
+    plotter.combine({2,2}, {p1,p2,p3,p4}, "bare_pion.pdf");
 };

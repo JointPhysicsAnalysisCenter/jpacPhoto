@@ -115,7 +115,7 @@ namespace jpacPhoto { namespace piN {
 
                 return (term1 + term2 + term3) * kernel(_cost, K*y) + 2*_jp/_jz*kernel(_cost, K);
             };
-            complex integral = boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integrand, 0, 1, 40, 1.E-9, NULL);
+            complex integral = boost::math::quadrature::gauss_kronrod<double, 61>::integrate(integrand, 0, 1, 25, 1.E-9, NULL);
 
             return (J0 - I*_sint*_aP*K*integral/2.);
         };

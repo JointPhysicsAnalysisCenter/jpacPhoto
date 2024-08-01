@@ -1,3 +1,18 @@
+// Comparison of the Reggeized pion exchange with different values of interaction 
+// radius, effective pole, and effective zero
+// Reproduces Figure 2 of [1]
+//
+// OUTPUT: fig2.pdf
+// ------------------------------------------------------------------------------
+// Author:       Daniel Winney (2023)
+// Affiliation:  Joint Physics Analysis Center (JPAC),
+//               Universitat Bonn (HISKP)
+// Email:        daniel.winney@gmail.com
+// ------------------------------------------------------------------------------
+// REFERENCES:
+// [1] - arXiv:2407.19577 [hep-ph]
+// ------------------------------------------------------------------------------
+
 #include "constants.hpp"
 #include "kinematics.hpp"
 #include "plotter.hpp"
@@ -33,7 +48,7 @@ void regge()
     // ---------------------------------------------------------------------------
 
     double Egam = 16;
-    double s = s_cm(Egam),  tmin = - kpi->t_min(s) + 0.0001;
+    double s = s_cm(Egam),  tmin = - kpi->t_min(s) + 0.003;
 
     plotter plotter;
 
@@ -63,7 +78,7 @@ void regge()
         p.set_legend(0.32, 0.20+0.07*!legend, 1.1);
         p.set_legend(legend);
         p.set_ranges({0, 0.2}, yrange);
-        p.set_curve_points(40);
+        p.set_curve_points(20);
         p.set_logscale(false, true);
         p.set_labels("#minus #it{t} [GeV^{2}]", "d#sigma/d#it{t}  [#mub GeV^{-2}]");
         p.add_header(var_def("#it{E}_{#gamma}", Egam, "GeV"));
@@ -81,5 +96,5 @@ void regge()
 
     plot p1 = plot_dsigma(plotter, {1E-2, 1}, true);
 
-    p1.save("fig4.pdf");
+    p1.save("fig2.pdf");
 };
