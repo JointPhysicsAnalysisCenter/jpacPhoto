@@ -82,7 +82,7 @@ namespace jpacPhoto
         };
 
         // Get the rank of the tensor (number of open indicies)
-        const inline int rank(){ return Rank; };
+        inline unsigned int rank() const{ return Rank; };
 
         protected:
 

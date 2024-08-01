@@ -49,7 +49,7 @@ namespace jpacPhoto
         {};
 
         // Get the rank of the tensor (number of open indicies)
-        const inline int rank(){ return Rank; };
+        inline unsigned int rank() const{ return Rank; };
 
         // Re-assignment, just makes a copy basically
         inline lorentz_tensor<Type,Rank> & operator=(lorentz_tensor<Type,Rank> const & T)
@@ -87,7 +87,7 @@ namespace jpacPhoto
             Type prod = _subtensors[0]->operator()(ind0);
             running_index += subrank0;
 
-            for (int i = 1; i < _subtensors.size(); i++)
+            for (uint i = 1; i < _subtensors.size(); i++)
             {
                 int subrank = _subtensors[i]->rank();
                 prod *= _subtensors[i]->operator()( std::vector<lorentz_index>(running_index, running_index + subrank));

@@ -26,7 +26,7 @@ namespace jpacPhoto
         {
             initialize(0);
             if (bounds[0] > bounds[1]) warning("jpacPhoto::blended", "Lower limit bigger than upper limit!");
-            if ((amps[0]->_kinematics != amps[1]->_kinematics) || (xkinem != amps[0]->_kinematics))
+            if ((amps[0]->get_kinematics() != amps[1]->get_kinematics()) || (xkinem != amps[0]->get_kinematics()))
             {
                 warning("jpacPhoto::blended", "Kinematics instances not compatible with each other!");
             };
@@ -35,7 +35,7 @@ namespace jpacPhoto
         // Calculate each helicity amplitude 
         inline complex helicity_amplitude(std::array<int,4> helicities, double s, double t)
         {
-            int index = find_helicity(helicities, _kinematics->get_meson_JP()[0], _kinematics->get_baryon_JP()[0], _kinematics->is_photon());
+            int index = find_helicity(helicities, get_kinematics()->get_meson_JP()[0], get_kinematics()->get_baryon_JP()[0], get_kinematics()->is_photon());
             if (s < _bounds[0]) return _low->helicity_amplitude(helicities, s, t);
             if (s > _bounds[1]) return _high->helicity_amplitude(helicities, s, t);
 
