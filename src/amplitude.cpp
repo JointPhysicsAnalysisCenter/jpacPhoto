@@ -124,11 +124,13 @@ namespace jpacPhoto
     {
         _lamB = helicities[0]; _lamT = helicities[1];
         _lamX = helicities[2]; _lamR = helicities[3];
-    
-        _s = s; _t = t; _theta = _kinematics->theta_s(s,t);
 
         _mB = _kinematics->get_beam_mass();  _mT = _kinematics->get_target_mass();
         _mX = _kinematics->get_meson_mass(); _mR = _kinematics->get_recoil_mass();
+    
+        _s = s; _t = t; _theta = _kinematics->theta_s(s,t);
+        _u = _mB*_mB + _mT*_mT + _mX*_mX + _mR*_mR - s - t;
+        
         return;
     };
 
@@ -298,7 +300,10 @@ namespace jpacPhoto
     // Polarization asymmetry between beam and recoil baryon
     double raw_amplitude::K_LL(double s, double t)
     {
-        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+        if ((s < _kinematics->sth()) || (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)))
+        {
+            return error("amplitude::K_LL", "Outside physical region!", NaN<double>());
+        };
 
         double sum = 0; 
         auto cache = get_cache(s, t); int n = cache.size();
@@ -314,7 +319,10 @@ namespace jpacPhoto
     // Polarization asymmetry between beam and target proton
     double raw_amplitude::A_LL(double s, double t)
     {
-        if (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)) return 0.;
+        if ((s < _kinematics->sth()) || (t > _kinematics->t_min(s) || t < _kinematics->t_max(s)))
+        {
+            return error("amplitude::A_LL", "Outside physical region!", NaN<double>());
+        };
 
         double sum = 0; 
         auto cache = get_cache(s, t); int n = cache.size();
@@ -381,7 +389,7 @@ namespace jpacPhoto
                 bool gam_fails = (alpha == 0) ? hi[0] != hj[0] : hi[0] == hj[0];
                 if (gam_fails) continue;
 
-                auto x = (alpha == 2) ? hi[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
+                auto x = (alpha == 2) ? hj[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
                 sum += x;
             };
         };
@@ -403,7 +411,7 @@ namespace jpacPhoto
         {
             for (int mp = -J; mp <= J; mp += 2)
             {
-                result += wigner_d_half(J, lam, m, -theta) * bSDME(alpha, m, mp, s, t) * wigner_d_half(J, mp, lamp, theta);
+                result += wigner_d_half(J, lam, m, theta) * bSDME(alpha, m, mp, s, t) * wigner_d_half(J, lamp, mp, theta);
             };
         };
 
@@ -480,7 +488,7 @@ namespace jpacPhoto
                 if (gam_fails) continue;
                 if (hi[1] != hj[1] || hj[2] != lamp || hi[3] != hj[3]) continue;
                 
-                auto x = (alpha == 2) ? hi[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
+                auto x = (alpha == 2) ? hj[0]*cache[j]*conj(cache[i]) : cache[j]*conj(cache[i]);
                 sum += x;
             };
         };
@@ -503,7 +511,7 @@ namespace jpacPhoto
         {
             for (int mp = -J; mp <= J; mp++)
             {
-                result += wigner_d_int(J, lam, m, -theta) * mSDME(alpha, m, mp, s, t) * wigner_d_int(J, mp, lamp, theta);
+                result += wigner_d_int(J, lam, m, theta) * mSDME(alpha, m, mp, s, t) * wigner_d_int(J, lamp, mp, theta);
             };
         };
         return result;

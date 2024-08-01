@@ -76,6 +76,16 @@ namespace jpacPhoto
         return custom;
     };
 
+    inline entry_style dash_dotted(jpacColor color, std::string id = "")
+    {
+        entry_style custom;
+        custom._color = color;
+        custom._style = kDashDotted;
+        custom._label = id;
+        custom._add_to_legend = (custom._label != "");
+        return custom;
+    };
+
     // Each entry represents a curve to draw as a TGraph
     struct plot_entry 
     {
@@ -232,7 +242,8 @@ namespace jpacPhoto
         inline void set_ranges( std::array<double,2> x,  std::array<double,2> y)
         { _xbounds = x; _ybounds = y; _customranges = true; };
 
-        inline void set_legend(double x, double y){ _addlegend = true; _legendxcord = x; _legendycord = y; };
+        inline void set_legend(double x, double y, double z = 1.){ _addlegend = true; _legendxcord = x; _legendycord = y; _legendyscale = z; };
+        inline void set_legend_spacing(double x){ _legendyscale = x; };
         inline void set_legend(bool x){_addlegend = x;};
         inline void add_header(std::string x){ _header = x; _addheader = true; };
         inline void add_header(std::string variable, double value, std::string units = "")
@@ -248,13 +259,12 @@ namespace jpacPhoto
             _add_logo = x; _logo_coords = coords; _logo_scale = scale;
         };
         inline void reset_logo(){ _add_logo = true; _logo_coords =  {0.93, 0.885}; _logo_scale = 1; };
-        inline void set_legend_spacing(double x){ _legendyscale = x; };
         inline void preliminary(bool x){ _prelim = x; };
 
         inline void print_to_terminal(bool x){ _print  = x; };
 
-        inline void add_style_legend(std::array<std::string,3> labels){ _style_labels = labels; _add_style_legend = true; };
-        inline void set_style_legend(double x, double y){ _slegendx = x; _slegendy = y;};
+        inline void add_style_legend(std::array<std::string,4> labels){ _style_labels = labels; _add_style_legend = true; };
+        inline void set_style_legend(double x, double y, double z = 1){ _slegendx = x; _slegendy = y; _slegendscale = z;};
 
         // -----------------------------------------------------------------------
         
@@ -349,7 +359,7 @@ namespace jpacPhoto
 
         bool   _addlegend     = true;
         double _legendxcord   = 0.3, _legendycord   = 0.7;
-        double _legendxoffset = 0.3, _legendyoffset = 0.15, _legendyscale = 0.036;
+        double _legendxoffset = 0.3, _legendyoffset = 0.15, _legendyscale = 1;
 
         // Number of entries to expect on the legend
         // used to calculate the offset to be visually appealing
@@ -360,8 +370,8 @@ namespace jpacPhoto
 
         // If we want a second legend to dictate the styles
         bool _add_style_legend = false;
-        double _slegendx = 0.3, _slegendy = 0.4;
-        std::array<std::string,3> _style_labels;
+        double _slegendx = 0.3, _slegendy = 0.4, _slegendscale = 1;
+        std::array<std::string,4> _style_labels;
 
         // ------------------------------------------------------------------------
         // ENTRY MANAGEMENT

@@ -125,7 +125,13 @@ namespace jpacPhoto
                     // Ghost killing factor for natural exchanges
                     double gf = (_naturality == +1) ? alpha / _alpha0 : 1.; 
                     if (is_zero(gf)) gf = 1/_alpha0/PI; // Treat the pole at alpha(t) = 0 special
+
+                    // This model has poles at alpha = integer
+                    // to allow us to integrate over all phase space
+                    // we will saturate alpha in the propagator at -t = 2 GeV^-2
+                    if (-_t > 2) gf /= sin(PI*(_alpha0+_alphaP*(-2)));
                     else gf /= sin(PI*alpha);
+
                     return -_alphaP*sigf*gf*PI*pow(_s/_s0, alpha);
                 };
 

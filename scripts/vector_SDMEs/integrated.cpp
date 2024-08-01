@@ -1,8 +1,7 @@
 // Model for high energy photoproduction of the vector mesons via Regge exchanges
 //
 // Adapted from models and codes originally written by V. Mathieu in [1]
-// Plots SDMEs for rho, omega, and phi photoproduction. 
-// Reproduces Fig. 9 in [1] into "dsig2.pdf" and Fig. 10 in "dsig.pdf"
+// Plots integrated cross sectons for rho, omega, and phi photoproduction
 //
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2024)
@@ -19,7 +18,7 @@
 #include "regge/reggeon_exchange.hpp"
 #include "amplitude.hpp"
 
-void dsigdt()
+void integrated()
 {
     using namespace jpacPhoto;
     using regge::reggeon_exchange;
@@ -160,52 +159,21 @@ void dsigdt()
     //-------------------------------------------------
     // Plot results
 
-    double s = s_cm(9.3);
-    std::array<double,2> bounds = {0., 0.6};
+    std::array<double,2> bounds = {1., 6};
     plotter plotter;
 
     plot p = plotter.new_plot();
-    p.set_ranges(bounds, {1E-2, 200});
+    p.set_ranges(bounds, {1E-1, 100});
     p.set_logscale(false, true);
-    p.set_labels("#minus #it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
-    p.add_header("#it{E}_{#gamma} = 9.3 GeV");
-    p.add_curve( {-rho->t_min(s),   0.6}, [&](double mt){ return rho_total->differential_xsection(  s, -mt) * 1E-3; }, "#rho");
-    p.add_curve( {-phi->t_min(s),   0.6}, [&](double mt){ return phi_total->differential_xsection(  s, -mt) * 1E-3; }, "#phi");
+    p.set_labels("#it{W}  [GeV]", "#sigma  [#mub]");
+    p.add_curve( {0, 6}, [&](double W){ return rho_total->integrated_xsection(W*W) * 1E-3; }, "#rho");
+    p.add_curve( {0, 6}, [&](double W){ return phi_total->integrated_xsection(W*W) * 1E-3; }, "#phi");
     phi_pomeron->set_parameters( {alp0_pom, alpP_pom, b_pom, beta_pom[2]/2, 0, 0, 1., kappa_pom} );   
-    p.add_dashed({-phi->t_min(s),   0.6}, [&](double mt){ return phi_total->differential_xsection(  s, -mt) * 1E-3; });
-    p.add_curve( {-omega->t_min(s), 0.6}, [&](double mt){ return omega_total->differential_xsection(s, -mt) * 1E-3; }, "#omega");
-    p.set_legend(0.25,0.25, 1.);
-    p.save("dsig.pdf");
+    p.add_dashed({0, 6}, [&](double W){ return phi_total->integrated_xsection(W*W) * 1E-3; });
+    p.add_curve( {0, 6}, [&](double W){ return omega_total->integrated_xsection(W*W) * 1E-3; }, "#omega");
 
-    plot p1 = plotter.new_plot();
-    p1.set_ranges(bounds, {0.03, 200});
-    p1.set_logscale(false, true);
-    p1.set_labels("#minus #it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
-    p1.add_header("#gamma#it{p} #rightarrow #rho#it{p}");
-    p1.set_legend(0.25,0.2, 1.);
-
-    s = s_cm(4.7E3);
-    p1.add_curve( {-rho->t_min(s),   0.6}, [&](double mt){ return rho_total->differential_xsection(  s, -mt) * 1E-3; }, "4.7 TeV");
-    s = s_cm(2.8E3);
-    p1.add_curve( {-rho->t_min(s),   0.6}, [&](double mt){ return rho_total->differential_xsection(  s, -mt) * 1E-3; }, "2.8 TeV");
-    s = s_cm(1.6E3);
-    p1.add_curve( {-rho->t_min(s),   0.6}, [&](double mt){ return rho_total->differential_xsection(  s, -mt) * 1E-3; }, "1.6 TeV");
-    s = s_cm(111.5E3);
-    p1.add_curve( {-rho->t_min(s),   0.6}, [&](double mt){ return rho_total->differential_xsection(  s, -mt) * 1E-3; }, "111.5 TeV");
-
-    plot p2 = plotter.new_plot();
-    p2.set_ranges(bounds, {0.01, 20});
-    p2.set_logscale(false, true);
-    p2.set_labels("#minus #it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
-    p2.add_header("#gamma#it{p} #rightarrow #omega#it{p}");
-    p2.set_legend(0.25,0.25, 1.8);
-
-    s = s_cm((50 + 130)/2);
-    p2.add_curve( {-omega->t_min(s),   0.6}, [&](double mt){ return omega_total->differential_xsection(  s, -mt) * 1E-3; }, "50 - 130 GeV");
-    s = s_cm((60 + 225)/2);
-    p2.add_curve( {-omega->t_min(s),   0.6}, [&](double mt){ return omega_total->differential_xsection(  s, -mt) * 1E-3; }, "60 - 225 GeV");
-    s = s_cm((2.6 + 4.3)/2 * 1E3);
-    p2.add_curve( {-omega->t_min(s),   0.6}, [&](double mt){ return omega_total->differential_xsection(  s, -mt) * 1E-3; }, "2.6 - 4.3 TeV");
-
-    plotter.stack({p1,p2}, "dsig2.pdf");
+    // p.add_curve( {-phi->t_min(s),   0.6}, [&](double mt){ return phi_total->differential_xsection(  s, -mt) * 1E-3; }, "#phi");
+    // p.add_curve( {-omega->t_min(s), 0.6}, [&](double mt){ return omega_total->differential_xsection(s, -mt) * 1E-3; }, "#omega");
+    p.set_legend(0.65,0.75, 1.);
+    p.save("integrated_xsection.pdf");
 };

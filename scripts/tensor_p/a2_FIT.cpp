@@ -112,8 +112,7 @@ void a2_FIT()
     p1.set_labels("#minus#it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
     p1.set_ranges({0, 2.0}, {0.0, 0.6});
     p1.add_header("Minimal");
-    p1.set_legend(0.65, 0.65);
-    p1.set_legend_spacing(0.03);
+    p1.set_legend(0.65, 0.65, 0.9);
     p1.add_data({mt4, sig4}, {mte4, err4}, jpacColor::Blue);
     p1.add_data({mt5, sig5}, {mte5, err5}, jpacColor::Red);
     s = s_cm(4);
@@ -127,7 +126,7 @@ void a2_FIT()
     p2.set_labels("#minus#it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
     p2.set_ranges({0, 2.0}, {0, 0.6});
     p2.add_header("TMD");
-    p2.set_legend(0.65, 0.65);
+    p2.set_legend(0.65, 0.65, 0.9);
     p2.add_data({mt4, sig4}, {mte4, err4}, jpacColor::Blue);
     p2.add_data({mt5, sig5}, {mte5, err5}, jpacColor::Red);
     s = s_cm(4);

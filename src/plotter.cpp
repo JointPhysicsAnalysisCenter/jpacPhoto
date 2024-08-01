@@ -159,14 +159,12 @@ namespace jpacPhoto
 
     void plotter::stack(std::vector<plot> plots, std::string filename)
     {
-   // Make it the global default style
-        gROOT->SetStyle("jpacStyle");
-
         // Get dimensions of the parition we're making
         int ydim = plots.size();
 
         TCanvas *canvas = new TCanvas(filename.c_str(), filename.c_str(), 600, 460*ydim);
-        
+        gROOT->SetStyle("jpacStyle");
+
         canvas->Divide(1, ydim, 0, 0);
 
         for (auto plot = begin(plots); plot != end(plots); ++plot)
@@ -207,7 +205,7 @@ namespace jpacPhoto
                 gPad->SetBottomMargin(0);
                 
                 // Apply the linewidth 
-                plot->set_legend_spacing(0.05);
+                plot->set_legend_spacing(1.6);
                 plot->draw();
                 continue;
             };

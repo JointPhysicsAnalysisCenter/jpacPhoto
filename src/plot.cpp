@@ -49,7 +49,7 @@ namespace jpacPhoto
 
         // Set up legend
         _legendxoffset  = 0.3;
-        _legendyoffset  = _legendyscale*(_Nlegend + _addheader);
+        _legendyoffset  = _legendyscale*(0.036)*(_Nlegend + _addheader);
         auto legend = new TLegend(_legendxcord,  _legendycord, 
                                   _legendxcord + _legendxoffset, 
                                   _legendycord + _legendyoffset);
@@ -81,14 +81,15 @@ namespace jpacPhoto
             // Set up legend
             auto slegend = new TLegend(_slegendx,  _slegendy, 
                                        _slegendx + 0.35, 
-                                       _slegendy + 0.12);
+                                       _slegendy + 0.17*_slegendscale);
             slegend->SetFillStyle(0); // Make legend transparent
 
             // For each of the three style make an empty histogram
             double y[1] = {1};
             std::string sopt = "L";
-            for (int i = 0; i < 3; i++)
+            for (int i = 0; i < 4; i++)
             {
+                if (_style_labels[i] == "") continue;
                 TGraph * sentry = new TGraph(1, y);
                 sentry->SetLineColorAlpha(+jpacColor::DarkGrey, 0.9);
                 sentry->SetLineStyle(1+i);

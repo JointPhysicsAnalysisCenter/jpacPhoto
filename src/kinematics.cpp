@@ -293,22 +293,14 @@ namespace jpacPhoto
     // Wigner rotation angle connecting helicity and gottfried-jackson frames 
     double raw_kinematics::mH_to_GJ_angle(double s, double t)
     {
-        double beta = final_momentum(s) / meson_energy(s);
-        double zs = z_s(s, t);
-
-        double cosAlpha = (beta - zs) / (beta * zs - 1.);
-
+        double cosAlpha = ((s - _mR2 + _mX2)*(t + _mX2 - _mB2) - 2*_mX2*(_mT2 + _mX2 - _mR2 - _mB2)) / sqrt( Kallen(s, _mR2, _mX2) * Kallen(t, _mX2, _mB2) );
         return TMath::ACos( cosAlpha );
     };
 
     // Wigner rotation angle connecting helicity and gottfried-jackson frames 
     double raw_kinematics::bH_to_GJ_angle(double s, double t)
     {
-        double beta = final_momentum(s) / recoil_energy(s);
-        double zs = z_s(s, t);
-
-        double cosAlpha = (beta - zs) / (beta * zs - 1.);
-
+        double cosAlpha = ((s + _mR2 - _mX2)*(t + _mR2 - _mT2) + 2*_mR2*(_mT2 + _mX2 - _mR2 - _mB2)) / sqrt( Kallen(s, _mR2, _mX2) * Kallen(t, _mT2, _mR2) );
         return TMath::ACos( cosAlpha );
     };
 };

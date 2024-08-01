@@ -78,7 +78,7 @@ namespace jpacPhoto
         std::cout << std::boolalpha << std::setprecision(9);  
         for (auto vi : v)
         {
-            std::cout << std::left << std::setw(PRINT_SPACING) << vi;
+            std::cout << std::left << std::setw(PRINT_SPACING) << vi << std::endl;
         };
         std::cout << std::endl;
     };

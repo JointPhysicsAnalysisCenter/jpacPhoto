@@ -182,8 +182,6 @@ void a2_f2()
     p1.set_ranges({0, 2.0}, {0.0, 0.6});
     p1.add_data({mt4, sig4}, {mte4, err4}, jpacColor::Blue);
     p1.add_data({mt5, sig5}, {mte5, err5}, jpacColor::Red);
-    p1.set_legend_spacing(0.025);
-    p1.set_legend(0.7, 0.55);
     print_dxs(p1, 4,   a2_MIN);
     print_dxs(p1, 5,   a2_MIN);
     print_dxs(p1, 8.5, a2_MIN);
@@ -203,8 +201,6 @@ void a2_f2()
     p3.set_labels("#minus#it{t}  [GeV^{2}]", "d#sigma/d#it{t}  [#mub/GeV^{2}]");
     p3.set_ranges({0, 2.0}, {0.0, 1.5});
     p3.add_data({mt3, sig3}, {mte3, err3}, jpacColor::Purple);
-    p3.set_legend_spacing(0.025);
-    p3.set_legend(0.7, 0.55);
     print_dxs(p3, 4,   f2_MIN);
     print_dxs(p3, 5,   f2_MIN);
     print_dxs(p3, 8.5, f2_MIN);
