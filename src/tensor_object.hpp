@@ -70,7 +70,7 @@ namespace jpacPhoto
     class tensor_object 
     {
         public: 
-        virtual int rank() const = 0;
+        virtual unsigned int rank() const = 0;
         virtual Type operator()(std::vector<lorentz_index> indices) = 0;
 
         virtual std::shared_ptr<tensor_object<dirac_matrix>> matrixify(){ return nullptr; };
@@ -90,11 +90,11 @@ namespace jpacPhoto
         {};
 
         // Always a rank 1 tensor
-        inline int rank() const{ return 1; };
+        inline unsigned int rank() const{ return 1; };
 
         inline Type operator()(std::vector<lorentz_index> indices)
         {
-	  if (indices.size() != static_cast<uint>(rank())) return error("lorentz_tensor", "Incorrect number of indices passed!", NaN<Type>());
+	  if (indices.size() != rank()) return error("lorentz_tensor", "Incorrect number of indices passed!", NaN<Type>());
             int mu = +indices[0];
             return _entries[mu];
         };
@@ -134,11 +134,11 @@ namespace jpacPhoto
         raw_metric_tensor(){};
 
         // Always a rank 2 tensor
-        inline int rank() const{ return 2; };
+        inline unsigned int rank() const{ return 2; };
 
         inline Type operator()(std::vector<lorentz_index> indices)
         {
-	  if (indices.size() != static_cast<uint>(rank())) return error("lorentz_tensor", "Incorrect number of indices passed!", NaN<Type>());
+	  if (indices.size() != rank()) return error("lorentz_tensor", "Incorrect number of indices passed!", NaN<Type>());
             int mu = +indices[0], nu = +indices[1];
             return (mu == nu) ? complex((mu == 0) - (mu != 0)) * id : z;
         };
@@ -168,7 +168,7 @@ namespace jpacPhoto
         raw_levicivita_tensor(){};
 
         // Always a rank 2 tensor
-        inline int rank() const{ return 4; };
+        inline unsigned int rank() const{ return 4; };
 
         inline Type operator()(std::vector<lorentz_index> indices)
         {
