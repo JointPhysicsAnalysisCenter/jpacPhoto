@@ -38,7 +38,16 @@ namespace jpacPhoto
             {
                 // Save inputs
                 store(helicities, s, t);
-                return half_angle()*form_factor()*top()*bottom()*propagator();
+
+                double pma = 1;
+                if (_pma)
+                {
+                    int n = std::abs(-_lamB - (_lamR - _lamT)/2); 
+                    int x = std::abs((_lamT - _lamR)/2) + abs(_lamB) - n;
+                    pma   = pow(sqrt(-_t), n) * pow(-M_PION*M_PION, x/2);
+                };
+                
+                return pma*half_angle()*form_factor()*top()*bottom()*propagator();
             };
 
             // Explicitly require t-channel helicities
@@ -100,28 +109,22 @@ namespace jpacPhoto
             };
 
             // Top coupling
-            // note no sqr(-t), all powers of which have been collected in bottom()
-            // for a more clear implementation of PMA
-            double top(){ return _lamB*_gT; };
+            double top()
+            { 
+                // Only evaluate beam helicity = +1 so dont have to worry about phases here
+                double tfactor = (_pma) ? 1 : sqrt(-_t);
+                return _lamB*_gT*tfactor; 
+            };
 
             // Bottom coupling
             double bottom()
             {
+                // If target helicity is negative, flip both signs
                 int phase = 1, sign = 1;
-                if (_lamT < 0)
-                {
-                    phase = pow(-1, (_lamT - _lamR)/ 2); sign = -1;
-                }
+                if (_lamT < 0) {  phase = pow(-1, (_lamT - _lamR)/ 2); sign = -1; };
 
-                double tfactor;
-                if (_pma)
-                {
-                    int n = std::abs(-_lamB - (_lamR - _lamT)/2); 
-                    int x = std::abs((_lamT - _lamR)/2) + abs(_lamB) - n;
-                    tfactor  = phase * pow(sqrt(-_t), n) * pow(-M_PION*M_PION, x/2);
-                }
-                else tfactor = phase * pow(sqrt(-_t), std::abs((_lamT - _lamR)/2) + abs(_lamB));
-                
+                double tfactor = (_pma) ? 1 : pow(sqrt(-_t), std::abs((_lamT - _lamR)/2));
+                tfactor *= phase;
 
                 switch (sign*_lamR)
                 {
@@ -146,7 +149,7 @@ namespace jpacPhoto
                 if (!_fullHA) return 1.;
 
                 double z = cos(_theta);
-                return pow((_s/-_t)*(1-z)/2, std::abs(mui-muf)/2) * pow( (1+z)/2, std::abs(mui + muf)/2);
+                return pow((_s/-_t)*(1-z)/2, std::abs(mui-muf)/2)*pow( (1+z)/2, std::abs(mui + muf)/2);
             };
 
         };
