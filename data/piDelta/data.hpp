@@ -121,6 +121,45 @@ namespace jpacPhoto
             return ds;
         };
 
+        // New SDME but filtered to only fit a section of the data
+        inline data_set SDME(int a, int m, int mp, std::array<double,2> trange)
+        {
+            data_set full = SDME(a, m, mp);
+            data_set cut;
+            
+            cut._id = full._id;
+            cut._type = full._type;
+            cut._add_to_legend = full._add_to_legend;
+
+            for (int i = 0; i < full._N; i++)
+            {
+                if (full._x[i] < trange[0] || full._x[i] > trange[1]) continue;
+
+                cut._x.push_back(full._x[i]);
+                cut._xerr[0].push_back(full._xerr[0][i]);
+                cut._xerr[1].push_back(full._xerr[1][i]);
+                cut._z.push_back(full._z[i]);
+                cut._zerr[0].push_back(full._zerr[0][i]);
+                cut._zerr[0].push_back(full._zerr[0][i]);
+            };
+
+            cut._N = cut._x.size();
+            cut._extras.push_back( full._extras[0]);
+
+            return cut;
+        };
+
+        inline std::vector<data_set> SDMEs(std::array<double,2> trange)
+        {
+            std::vector<data_set> ds;
+            for (int i = 1; i <= 9; i++) 
+            {
+                std::array<int,3> ids = SDME_indices(i);
+                ds.push_back(SDME(ids[0], ids[1], ids[2], trange));
+            };
+            return ds;
+        };
+
         inline data_set beam_asymmetry()
         {
             std::string id = "GlueX (2024)";
