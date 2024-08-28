@@ -39,7 +39,7 @@ namespace jpacPhoto
                 // Save inputs
                 store(helicities, s, t);
 
-                double pma = 1;
+                complex pma = 1;
                 if (_pma)
                 {
                     int n = std::abs(-_lamB - (_lamR - _lamT)/2); 
@@ -60,6 +60,8 @@ namespace jpacPhoto
             static const int kNoPMA           = 1;
             static const int kSimpleHalfAngle = 2;
             static const int kFullHalfAngle   = 3;
+            static const int kFreezePars      = 4;
+            static const int kUnfreezePars    = 5;
 
             inline void set_option(int opt)
             {
@@ -69,6 +71,8 @@ namespace jpacPhoto
                     case kNoPMA:           {_pma = false;    return; };
                     case kSimpleHalfAngle: {_fullHA = false; return; };
                     case kFullHalfAngle:   {_fullHA = true;  return; };
+                    case kFreezePars:      { set_N_pars(0); _frozen = true;  return; };
+                    case kUnfreezePars:    { set_N_pars(6); _frozen = false; return; };
                     default: return;
                 };
             };
@@ -81,7 +85,7 @@ namespace jpacPhoto
             // Fixed parameters 
             int _signature = +1;
             double _s0 = 1;
-            bool  _pma = true, _fullHA = true;
+            bool  _pma = true, _fullHA = true, _frozen = false;
 
             // Free parameters
             double _alpha0 = 0, _alphaP = 0;
@@ -91,6 +95,7 @@ namespace jpacPhoto
             // Set parameters
             inline void allocate_parameters(std::vector<double> x)
             {
+                if (_frozen) return;
                 _alpha0 = x[0]; _alphaP = x[1];
                 _gT     = x[2];
                 _gB     = x[3];
@@ -129,8 +134,8 @@ namespace jpacPhoto
                 switch (sign*_lamR)
                 {
                     case  3: return   tfactor*_gB*(_mT + _mR)/(sqrt(2.)*_mR);
-                    case -1: return - tfactor*_gB*(-_mT*_mT + _mT*_mR + 2.*_mR*_mR + _t)/(sqrt(6)*_mR*_mR);
                     case  1: return - tfactor*_gB*(-_mT*_mT*_mT - _mT*_mT*_mR + _mR*_mR*_mR + 2.*_mR*_t + _mT*(_mR*_mR + _t))/(sqrt(6)*_mR*_mR);
+                    case -1: return - tfactor*_gB*(-_mT*_mT + _mT*_mR + 2.*_mR*_mR + _t)/(sqrt(6)*_mR*_mR);
                     case -3: return - tfactor*_gB/(sqrt(2.)*_mR);
                     default:  return std::nan("");
                 }

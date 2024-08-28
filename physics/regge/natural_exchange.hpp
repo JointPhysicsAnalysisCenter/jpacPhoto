@@ -47,10 +47,12 @@ namespace jpacPhoto
             inline std::vector<quantum_numbers> allowed_baryons(){ return { THREEPLUS    }; };
 
             // Options
-            static const int kPole            = 0;
-            static const int kCut             = 1;
-            static const int kSimpleHalfAngle = 2;
-            static const int kFullHalfAngle   = 3;
+            static const int kPole             = 0;
+            static const int kCut              = 1;
+            static const int kSimpleHalfAngle  = 2;
+            static const int kFullHalfAngle    = 3;
+            static const int kFreezePars       = 4;
+            static const int kUnfreezePars     = 5;
             
             inline void set_option(int opt)
             {
@@ -60,6 +62,9 @@ namespace jpacPhoto
                     case kCut:             {_option = opt;   return; };
                     case kSimpleHalfAngle: {_fullHA = false; return; };
                     case kFullHalfAngle:   {_fullHA = true;  return; };
+                    case kFreezePars:      { set_N_pars(0); _frozen = true;  return; };
+                    case kUnfreezePars:    { set_N_pars(7); _frozen = false; return; };
+
                     default: option_error();
                 };
             };
@@ -74,6 +79,7 @@ namespace jpacPhoto
             double _s0 = 1;
             double _alpha0Pom = 1.08, _alphaPPom = 0.25; // Pomeron trajectory for cut model
             bool _fullHA = true;
+            bool _frozen = false;
             
             // Free parameters
             double _alpha0 = 0, _alphaP = 0;
@@ -83,6 +89,8 @@ namespace jpacPhoto
             // Set parameters
             inline void allocate_parameters(std::vector<double> x)
             {
+                if (_frozen) return;
+
                 _alpha0 = x[0]; _alphaP = x[1];
                 _gT     = x[2];
                 _gB1    = x[3], _gB2    = x[4], _gB3 = x[5];
@@ -110,12 +118,9 @@ namespace jpacPhoto
             double bottom()
             {
                 int phase = 1, sign = 1;
-                if (_lamT < 0)
-                {
-                    phase = pow(-1, 1 + (_lamT - _lamR)/ 2); sign = -1;
-                }
+                if (_lamT < 0) {  phase = pow(-1, 1 + (_lamT - _lamR)/2.); sign = -1; };
 
-                double tfactor = phase * pow(sqrt(-_t), abs(_lamT - _lamR)/2);
+                double tfactor = phase * pow(sqrt(-_t), abs(_lamT - _lamR)/2.);
 
                 switch (sign*_lamR)
                 {
