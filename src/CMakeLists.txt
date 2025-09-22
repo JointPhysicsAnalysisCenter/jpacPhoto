@@ -32,7 +32,7 @@ ROOT_GENERATE_DICTIONARY(G__JPACPHOTO
 )
 add_library(JPACPHOTO SHARED ${SRC} G__JPACPHOTO.cxx )
 
-target_link_libraries( JPACPHOTO ROOT::Core ROOT::MathMore )
+target_link_libraries( JPACPHOTO ROOT::Core ROOT::MathMore ROOT::Matrix ROOT::RIO ROOT::Rint ROOT::Gpad ROOT::Hist)
 target_link_libraries( JPACPHOTO Boost::boost)
 
 install(TARGETS JPACPHOTO
@@ -44,5 +44,5 @@ install (FILES  ${CMAKE_CURRENT_BINARY_DIR}/libJPACPHOTO_rdict.pcm
 
 # Build the executable to integrate with root cling
 add_executable( jpacPhoto "cling/jpacPhoto.cpp" )
-target_link_libraries( jpacPhoto ROOT::Core ROOT::MathMore ROOT::RIO ROOT::Rint )
+target_link_libraries( jpacPhoto ROOT::Core ROOT::MathMore ROOT::Matrix ROOT::RIO ROOT::Rint ROOT::Gpad ROOT::Hist )
 target_link_libraries( jpacPhoto JPACPHOTO )
