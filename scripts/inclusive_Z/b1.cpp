@@ -12,7 +12,7 @@
 // [1] 	arXiv:2209.05882 [hep-ph]
 // ------------------------------------------------------------------------------
 
-#include "inclusive_pion/pion_exchange.hpp"
+#include "inclusive/pion_exchange.hpp"
 #include "analytic/pseudoscalar_exchange.hpp"
 
 #include "Math/GSLIntegrator.h"
@@ -22,6 +22,7 @@
 void b1()
 {
     using namespace jpacPhoto;
+    using namespace jpacPhoto::inclusive;
     
     plotter plotter;
 
@@ -165,7 +166,7 @@ void b1()
     p3.add_data({x, sig}, {dx, dsig}, "Omega Photon");
 
     // Plot both the cross section with resonances 
-    b1_piN->reggeized(true);
+    b1_piN->set_option(pion_exchange::kReggeized);
     b1_piN->set_option(piN_xsection::kJPAC);
     p3.add_curve( bounds, [&](double x){ return b1_piN->dsigma_dx(s, x) * 1E-3; }, "Inclusive #it{b}_{1}(1235)^{#plus}");
     // and without

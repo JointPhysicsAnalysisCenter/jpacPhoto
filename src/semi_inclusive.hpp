@@ -114,10 +114,7 @@ namespace jpacPhoto
 
         // Pass a flag and make the appropriate changes, defaults to do nothing excpet save the flag
         virtual inline void set_option( int opt ){ _option = opt; };
-
-        // Specify whether our cross section is reggeized
-        virtual inline void reggeized(bool x){ _regge = x; };
-        
+                
         // ----------------------------------------------------------------------
         // Kinematics 
 

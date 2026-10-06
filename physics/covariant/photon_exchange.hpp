@@ -18,7 +18,7 @@
 #include "constants.hpp"
 #include "kinematics.hpp"
 #include "amplitude.hpp"
-#include "elementwise.hpp"
+#include "utilities.hpp"
 
 namespace jpacPhoto 
 { 
@@ -55,29 +55,38 @@ namespace jpacPhoto
 
             inline void allocate_parameters(std::vector<double> pars)
             {
-                _mEx   = pars[0];
-                _gTop  = pars[1];
-                _eta   = pars[2];
-                _lam   = pars[3];
+                if (_useVMD)
+                {
+                    _mEx   = pars[0];
+                    _gTop  = pars[1];
+                    _eta   = pars[2];
+                    _lam   = pars[3];
+                }
+                else
+                {
+                    _gTop  = pars[0];
+                    _eta   = pars[1];
+                    _lam   = pars[2];
+                }
             };
-
-            // Assign each parameter a name, useful for fitting utlities
-            inline std::vector<std::string> parameter_labels(){ return {"exchange_mass", "gTop", "etaEx", "mEx"}; };
 
             // Options choose either proton or neutron target
             static const int kProton    = 0;
             static const int kNeutron   = 1;
-            static const int kUseT      = 2;
-            static const int kUseTprime = 3;
-            static const int kDefault = kProton;
+            static const int kVMD       = 2;
+            static const int kNotVMD    = 3;
+            static const int kUseT      = 4;
+            static const int kUseTprime = 5;
             inline void set_option (int opt)
             {
                 switch (opt)
                 {
-                    case kProton:    _option = kProton;  break;
-                    case kNeutron:   _option = kNeutron; break;
-                    case kUseT:      _useT   = true;  break;
-                    case kUseTprime: _useT   = false; break;
+                    case kProton:    _isospin = kProton;  break;
+                    case kNeutron:   _isospin = kNeutron; break;
+                    case kVMD:       _useVMD  = true;  set_N_pars(4); break;
+                    case kNotVMD:    _useVMD  = false; set_N_pars(3); break;
+                    case kUseT:      _useT    = true;     break;
+                    case kUseTprime: _useT    = false;    break;
                     default: return;
                 };
             }
@@ -86,7 +95,7 @@ namespace jpacPhoto
             inline double G_E(double Q2)
             {
                 double z  = z_conformal(Q2);
-                auto pars = (_option == kProton) ? _GEp_pars : _GEn_pars;
+                auto pars = (_isospin == kProton) ? _GEp_pars : _GEn_pars;
                 double sum = 0;
                 for (int i = 0; i < pars.size(); i++) sum += pars[i] * pow(z, double(i));
                 return sum;
@@ -97,8 +106,8 @@ namespace jpacPhoto
             inline double G_M(double Q2)
             {
                 double z  = z_conformal(Q2);
-                auto pars = (_option == kProton) ? _GMp_pars : _GMn_pars;
-                double mu = (_option == kProton) ? _mup : _mun;
+                auto pars = (_isospin == kProton) ? _GMp_pars : _GMn_pars;
+                double mu = (_isospin == kProton) ? _mup : _mun;
                 double sum = 0;
                 for (int i = 0; i < pars.size(); i++) sum += pars[i] * pow(z, double(i));
                 return mu*sum;
@@ -124,7 +133,7 @@ namespace jpacPhoto
             double _eta   = 1;
             double _mEx   = 0;
             double _lam   = 1;
-            bool   _useT = false;
+            bool   _useT = false, _useVMD = false, _isospin = kProton;
 
                 // Top coupling refers to the beam-gamma-meson interaction
             inline lorentz_tensor<complex,1> top_coupling()

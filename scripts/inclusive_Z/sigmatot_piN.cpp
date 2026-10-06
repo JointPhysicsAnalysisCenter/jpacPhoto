@@ -12,12 +12,13 @@
 // [1] 	arXiv:2209.05882 [hep-ph]
 // ------------------------------------------------------------------------------
 
-#include "inclusive_pion/piN_xsection.hpp"
+#include "inclusive/piN_xsection.hpp"
 #include "plotter.hpp"
 
 void sigmatot_piN()
 {
     using namespace jpacPhoto;
+    using namespace jpacPhoto::inclusive;
 
     piN_xsection sigma;
 
@@ -25,13 +26,15 @@ void sigmatot_piN()
     plot p = plotter.new_plot();
 
     double Wth = M_PION + M_PROTON + 1E-3;
-    p.add_curve({ Wth, 2.5}, [&](double w){ return sigma(+1, w*w); }, "#pi^{#plus} #it{p}");
+    sigma.set_option(piN_xsection::kPI_PLUS);
+    p.add_curve({ Wth, 2.5}, [&](double w){ return sigma(w*w); }, "#pi^{#plus} #it{p}");
     sigma.set_option(piN_xsection::kPDG);
-    p.add_dashed({Wth, 2.5}, [&](double w){ return sigma(+1, w*w); });
-    sigma.set_option(piN_xsection::kJPAC);
-    p.add_curve( {Wth, 2.5}, [&](double w){ return sigma(-1, w*w); }, "#pi^{#minus} #it{p}");
+    p.add_dashed({Wth, 2.5}, [&](double w){ return sigma(w*w); });
+    sigma.set_option(piN_xsection::kPI_MINUS);
+    sigma.set_option(piN_xsection::kJPAC); 
+    p.add_curve( {Wth, 2.5}, [&](double w){ return sigma(w*w); }, "#pi^{#minus} #it{p}");
     sigma.set_option(piN_xsection::kPDG);
-    p.add_dashed({Wth, 2.5}, [&](double w){ return sigma(-1, w*w); });
+    p.add_dashed({Wth, 2.5}, [&](double w){ return sigma(w*w); });
 
     p.set_ranges({1, 2.5}, {6, 400});
     p.set_logscale(false, true);

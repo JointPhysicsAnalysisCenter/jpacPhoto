@@ -13,7 +13,7 @@
 
 #include "constants.hpp"
 #include "semi_inclusive.hpp"
-#include "inclusive_pion/piN_xsection.hpp"
+#include "inclusive/piN_xsection.hpp"
 
 namespace jpacPhoto
 {
@@ -25,9 +25,12 @@ namespace jpacPhoto
             public: 
 
             pion_exchange(key k, kinematics kinem, int pm)
-            : raw_semi_inclusive(k, kinem, "pion_exchange"),
-                _pm(pm)
+            : raw_semi_inclusive(k, kinem, "pion_exchange")
             {
+                // For pi+ production we have a pi- exchanged at the bottom vertex
+                if (pm == +1) set_option(piN_xsection::kPI_MINUS);
+                // likewise pi- final state involves the pi+N xsection
+                else          set_option(piN_xsection::kPI_PLUS);
                 set_N_pars(1);
             };
 
@@ -65,12 +68,18 @@ namespace jpacPhoto
                 if (are_equal(M2, minimum_M2())) return 0.;
 
                 // Total cross-section always gets the physical M2 
-                double  sigmatot  = _sigma(-_pm, M2, t) * 1E6; // in nb
+                double  sigmatot  = _sigma(M2, t) * 1E6; // in nb
                 
                 return K/(16*PI*PI*PI) * pow(coupling()*P_pi, 2) * sigmatot;
             };
 
-            inline void set_option (int opt){ _sigma.set_option(opt); };
+            static const int kNotReggeized = 0;
+            static const int kReggeized    = 1;
+            inline void set_option (int opt)
+            { 
+                if (opt == kReggeized || opt == kNotReggeized) _regge = opt;
+                else _sigma.set_option(opt); 
+            };
 
             protected:
 

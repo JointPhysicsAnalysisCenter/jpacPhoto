@@ -16,12 +16,13 @@
 #include "constants.hpp"
 #include "kinematics.hpp"
 #include "plotter.hpp"
-#include "inclusive_pion/pion_exchange.hpp"
+#include "inclusive/pion_exchange.hpp"
 #include "analytic/pseudoscalar_exchange.hpp"
 
 void Z_totals()
 {
     using namespace jpacPhoto;
+    using namespace jpacPhoto::inclusive;
 
     plotter plotter;
 
