@@ -44,8 +44,8 @@ namespace jpacPhoto
         public:
 
         // This constructor should be used for any user defined derived classes
-        raw_partial_wave(key key, int J, kinematics xkinem)
-        : raw_amplitude(key, xkinem, "partial_wave"), _J(J)
+        raw_partial_wave(key key, kinematics xkinem,  int J, std::string id = "partial_wave")
+        : raw_amplitude(key, xkinem, id), _J(J)
         {
             set_N_pars(0);
         };
