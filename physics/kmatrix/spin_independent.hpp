@@ -50,11 +50,13 @@ namespace jpacPhoto
                     _thresholds.push_back({extra_threshold[0], extra_threshold[1]});
                 };
 
-                // Each diagonal 
                 double nchan = _thresholds.size();
                 int offdiags = (nchan+1)*nchan/2;
-                int npars = (args._production_expansion + args._diagonal_elastic_expansion)*nchan 
-                           + args._off_diagonal_elastic_expansion*offdiags;
+                _n_prod    = args._production_expansion;
+                _n_diag    = args._diagonal_elastic_expansion;
+                _n_offdiag = args._off_diagonal_elastic_expansion;
+                
+                int npars = (_n_prod + _n_diag)*nchan + _n_offdiag*offdiags;
                 initialize(npars);
             };
 
@@ -84,7 +86,22 @@ namespace jpacPhoto
                 return 1.;
             };
 
+            inline void set_parameters(std::vector<double> x)
+            {
+                _production_pars.clear(); _elastic_pars.clear();
+                for (int i = 0; i < x.size(); i++)
+                {
+                    if (x < _thresholds.size()) _production_pars.push_back(x[i]);
+                    else                        _elastic_pars.push_back(x[i]);
+                };
+            };
+
             protected:
+
+            int _n_prod, _n_diag _n_offdiag;
+
+            // Save the different parameters
+            std::vector<double> _production_pars, _elastic_pars;
 
             // Mass of intermediate coupled channels
             // we can have up to two additional channels
