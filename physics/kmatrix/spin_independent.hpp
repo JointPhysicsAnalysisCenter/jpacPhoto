@@ -79,21 +79,11 @@ namespace jpacPhoto
             // We can have any quantum numbers
             inline std::vector<quantum_numbers> allowed_mesons() { return {ANY}; };
             inline std::vector<quantum_numbers> allowed_baryons(){ return {ANY}; };
-
             // And helicity independent
             inline helicity_frame native_helicity_frame(){ return HELICITY_INDEPENDENT; };
 
-            inline complex helicity_amplitude(std::array<int,4> helicities, double s, double t)
-            {
-                store(helicities, s, t);
-                
-                // s-channel scattering angle
-                double theta = _kinematics->theta_s(s, t);
-                return (2*_J+1) * legendre(_J, cos(theta)) * partial_wave(s);
-            };
-
             // Partial wave comes from K-matrix unitarized form
-            inline complex partial_wave(double s)
+            inline complex partial_wave(std::array<int,4> helicities, double s)
             {
                 // Store the energy 
                 store({_lamB, _lamT, _lamX, _lamR}, s, _t);

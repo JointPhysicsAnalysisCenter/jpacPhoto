@@ -2,7 +2,6 @@
 #include "constants.hpp"
 #include "plotter.hpp"
 #include "kmatrix/spin_independent.hpp"
-#include "kmatrix/K_matrix.hpp"
 #include "jpsip/gluex/plots.hpp"
 #include <Eigen/Dense>
 
