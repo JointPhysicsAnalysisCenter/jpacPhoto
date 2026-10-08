@@ -46,11 +46,11 @@ namespace jpacPhoto
                 int lam  = 2 * helicities[0] - helicities[1]; // Photon - Target
                 int lamp = 2 * helicities[2] - helicities[3]; // Meson  - Recoil
                 
-                return (_J + 1) * wigner_d_half(_J, lam, lamp, theta) * partial_wave(helicities, s);
+                return (_J + 1) * wigner_d_half(_J, lam, lamp, theta) * this->partial_wave(helicities, s);
             }
             case helicity_frame::HELICITY_INDEPENDENT:
             {
-                return (2*_J+1) * legendre(_J, cos(theta)) * partial_wave(s);
+                return (2*_J+1) * legendre(_J, cos(theta)) * this->partial_wave(s);
             };
             default: return NaN<complex>();
         };

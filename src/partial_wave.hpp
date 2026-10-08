@@ -13,6 +13,7 @@
 #include "utilities.hpp"
 #include "kinematics.hpp"
 #include "amplitude.hpp"
+#include "crossing.hpp"
 
 #include <boost/math/quadrature/gauss_kronrod.hpp>
 #include <memory>
@@ -50,11 +51,18 @@ namespace jpacPhoto
             set_N_pars(0);
         };
 
-        // This constructor should be used for any user defined derived classes
+        // This constructor is used wen using the project() function above
         raw_partial_wave(key key, uint J, amplitude to_project)
         : raw_amplitude(key, to_project->get_kinematics(), "partial_wave"), 
           _J(J)
         {
+            switch (to_project->native_helicity_frame())
+            {
+                case helicity_frame::S_CHANNEL:
+                case helicity_frame::HELICITY_INDEPENDENT: _amplitude = to_project; break;
+                case helicity_frame::T_CHANNEL: _amplitude = cross_to<helicity_frame::S_CHANNEL>(to_project); break;
+                default: warning("project - Unknown native_helicity_frame()!");
+            };
             set_N_pars(0);
         };
 

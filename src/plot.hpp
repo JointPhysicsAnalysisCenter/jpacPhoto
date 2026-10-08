@@ -182,10 +182,14 @@ namespace jpacPhoto
         // Methods to add data points to your plot
 
         // Add data by simply feeding it vectors 
+        
         void add_data(std::array<std::vector<double>,2> dat, std::array<std::vector<double>,2> errs, std::string id = "");
-
+        
         // Add data by simply feeding it vectors 
         void add_data(std::array<std::vector<double>,2> dat, std::array<std::vector<double>,2> errs, jpacColor col);
+
+        // Add data from a data_set
+        void add_data(data_set x);
 
         // Add a small offset to change the running color index
         inline void color_offset(unsigned n)

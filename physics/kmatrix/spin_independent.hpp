@@ -1,5 +1,8 @@
 // Implementation of a PWA in the scattering-length approximation with up to three
-// coupled channels
+// coupled channels.
+//
+// This amplitude explicitly uses Eigen C++ to manipulate complex matrices,
+// make sure an environment variable EIGEN points to the top level directory
 //
 // ------------------------------------------------------------------------------
 // Author:       Daniel Winney (2022)
@@ -16,22 +19,31 @@
 #include "utilities.hpp"
 #include "partial_wave.hpp"
 
+#include <Eigen/Dense>
+
+
 namespace jpacPhoto
 {
     namespace kmatrix
     {
         struct arguments 
         {
-            arguments( int j) : _spin(j) {};
-
-            // Spin of the partial wave
-            int  _spin;
-            // How many terms to consider in the production vector
-            int  _production_expansion  = 1; 
-            // How many terms to include in the K-matrix for the diagonal and off-diagonal entries
-            int  _diagonal_elastic_expansion = 1, _off_diagonal_elastic_expansion = 1;
-            // If this is coupled channel or not
+            arguments(uint j, std::array<uint,3>exp={1,1,1}) 
+            : _spin(j), 
+            _production_expansion(exp[0]),
+            _diagonal_elastic_expansion(exp[1]),
+            _off_diagonal_elastic_expansion(exp[2])
+            {};
+            
             void add_coupled_channel(double x, double y){ _coupled_channels.push_back({x,y}); };
+            
+            // Spin of the partial wave
+            uint  _spin;
+            // How many terms to consider in the production vector
+            uint  _production_expansion  = 1; 
+            // How many terms to include in the K-matrix for the diagonal and off-diagonal entries
+            uint  _diagonal_elastic_expansion = 1, _off_diagonal_elastic_expansion = 1;
+            // If this is coupled channel or not
             std::vector<std::array<double,2>> _coupled_channels;
         };
 
@@ -51,12 +63,13 @@ namespace jpacPhoto
                 };
 
                 double nchan = _thresholds.size();
-                int offdiags = (nchan+1)*nchan/2;
+                int offdiags = (nchan-1)*nchan/2;
                 _n_prod    = args._production_expansion;
                 _n_diag    = args._diagonal_elastic_expansion;
                 _n_offdiag = args._off_diagonal_elastic_expansion;
                 
-                int npars = (_n_prod + _n_diag)*nchan + _n_offdiag*offdiags;
+                // Total number of parameters
+                int npars = (_n_prod+_n_diag)*nchan + _n_offdiag*offdiags;
                 initialize(npars);
             };
 
@@ -70,35 +83,68 @@ namespace jpacPhoto
             // And helicity independent
             inline helicity_frame native_helicity_frame(){ return HELICITY_INDEPENDENT; };
 
-            // These are projections onto the orbital angular momentum and therefore
-            // helicity independent
             inline complex helicity_amplitude(std::array<int,4> helicities, double s, double t)
             {
-                // Save inputes
                 store(helicities, s, t);
                 
-                return (_debug == 1) ? (2*_J+1) * legendre(_J, _kinematics->z_s(s,t)) * partial_wave(_s)
-                                     : (2*_J+1) * legendre(_J, cos(_theta))           * partial_wave(_s);
+                // s-channel scattering angle
+                double theta = _kinematics->theta_s(s, t);
+                return (2*_J+1) * legendre(_J, cos(theta)) * partial_wave(s);
             };
 
+            // Partial wave comes from K-matrix unitarized form
             inline complex partial_wave(double s)
             {
-                return 1.;
+                // Store the energy 
+                store({_lamB, _lamT, _lamX, _lamR}, s, _t);
+                int N  = _thresholds.size();
+                int Np = N*_n_diag; // Number of elastic parameters
+
+                // Set up Q-vector
+                Eigen::VectorXcd Q(N);
+                for (int i = 0; i < N; i++)
+                {
+                    for (int j = 0; j < _n_prod; j++) Q(i) += _production_pars[j]*pow(p(0)*q(i) , _J+j);
+                };
+
+                // Set up K-matrix
+                Eigen::MatrixXcd K(N,N), G(N,N), One(N,N);
+                
+                // Populate diagonals
+                for (int i = 0; i < N; i++)
+                {
+                    One(i,i) = 1.; G(i,i) = i_rho(i);
+                    for (int j = 0; j < _n_diag; j++) K(i, i) += _elastic_pars[i*_n_diag+j]*pow(q(i)*q(i), _J+j);
+                };
+                // Populate off-diagonals
+                for (int i = 0; i < N; i++)
+                {
+                    for (int j = i+1; j < N-i; j++)
+                    {
+                        for (int k = 0; k < _n_offdiag; k++) K(i,j) += _elastic_pars[Np+i*_n_offdiag+k]*pow(q(i)*q(j), _J+k);
+                        K(j,i) = K(i,j); // Symmetrize
+                    }
+                };
+
+                auto T = K*(One-G*K).inverse();
+                auto F = (One+G*T)*Q;
+
+                return F(0);
             };
 
-            inline void set_parameters(std::vector<double> x)
+            inline void allocate_parameters(std::vector<double> x)
             {
                 _production_pars.clear(); _elastic_pars.clear();
                 for (int i = 0; i < x.size(); i++)
                 {
-                    if (x < _thresholds.size()) _production_pars.push_back(x[i]);
-                    else                        _elastic_pars.push_back(x[i]);
+                    if (i < _n_prod*_thresholds.size()) _production_pars.push_back(x[i]);
+                    else                                _elastic_pars.push_back(x[i]);
                 };
             };
 
             protected:
 
-            int _n_prod, _n_diag _n_offdiag;
+            int _n_prod, _n_diag, _n_offdiag;
 
             // Save the different parameters
             std::vector<double> _production_pars, _elastic_pars;
@@ -107,6 +153,27 @@ namespace jpacPhoto
             // we can have up to two additional channels
             std::vector<std::array<double,2>> _thresholds;
             
+            // Chew-Mandelstam phase-space 
+            inline complex i_rho(double m1, double m2)
+            {
+                complex rho, xi;
+                complex result;
+
+                rho    = csqrt(kallen(_s, m1*m1, m2*m2)) / _s;
+                xi     = 1. - (m1+m2)*(m1+m2)/_s;
+                result = (rho*log((xi + rho) / (xi - rho)) - xi*(m2-m1)/(m2+m1)*log(m2/m1)) / PI;
+                return - result / (16.*PI);
+            };
+            inline complex i_rho(unsigned i){ return i_rho(_thresholds[i][0], _thresholds[i][1]); };
+
+            // Incoming break-up momentum (define it with a threshold index but we only need i=0)
+            inline complex p(int i){ return (i==0) ? _kinematics->initial_momentum(_s) : 0; };
+            // Outgoing break-up momentum
+            inline complex q(double m1, double m2)
+            {
+                return csqrt(kallen(_s, m1*m1, m2*m2)) / csqrt(4.*_s);
+            };
+            inline complex q(unsigned i){ return q(_thresholds[i][0], _thresholds[i][1]); };
         };
     };
 };
