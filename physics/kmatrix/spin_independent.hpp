@@ -96,14 +96,14 @@ namespace jpacPhoto
                     Q(i) = 0.;
                     for (int j = 0; j < _n_prod; j++) Q(i) += _production_pars[i*_n_prod+j]*pow(p(0)*q(i) , _J+j);
                 };
-                
+
                 // Set up K-matrix
                 Eigen::MatrixXcd K(N,N), G(N,N), One(N,N);
                 
                 // Populate diagonals
                 for (int i = 0; i < N; i++)
                 {
-                    One(i,i) = 2.; G(i,i) = i_rho(i); K(i,i) = 0.;
+                    One(i,i) = 1.; G(i,i) = i_rho(i); K(i,i) = 0.;
                     for (int j = 0; j < _n_diag; j++) K(i,i) += _elastic_pars[i*_n_diag+j]*pow(q(i)*q(i), _J+j);
                 };
                 // Populate off-diagonals
@@ -116,9 +116,10 @@ namespace jpacPhoto
                         K(j,i) = K(i,j); One(j,i) = One(i,j); G(j,i) = G(i,j); // Symmetrize
                     }
                 };
-
+                
                 auto T = K*(One-G*K).inverse();
                 auto F = (One+G*T)*Q;
+
                 return F(0);
             };
 
