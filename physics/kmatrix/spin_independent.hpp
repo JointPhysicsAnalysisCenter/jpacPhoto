@@ -85,8 +85,7 @@ namespace jpacPhoto
             // Partial wave comes from K-matrix unitarized form
             inline complex partial_wave(std::array<int,4> helicities, double s)
             {
-                // Store the energy 
-                store({_lamB, _lamT, _lamX, _lamR}, s, _t);
+                store(helicities, s, _t);
                 int N  = _thresholds.size();
                 int Np = N*_n_diag; // Number of elastic parameters
 
@@ -94,41 +93,42 @@ namespace jpacPhoto
                 Eigen::VectorXcd Q(N);
                 for (int i = 0; i < N; i++)
                 {
-                    for (int j = 0; j < _n_prod; j++) Q(i) += _production_pars[j]*pow(p(0)*q(i) , _J+j);
+                    Q(i) = 0.;
+                    for (int j = 0; j < _n_prod; j++) Q(i) += _production_pars[i*_n_prod+j]*pow(p(0)*q(i) , _J+j);
                 };
-
+                
                 // Set up K-matrix
                 Eigen::MatrixXcd K(N,N), G(N,N), One(N,N);
                 
                 // Populate diagonals
                 for (int i = 0; i < N; i++)
                 {
-                    One(i,i) = 1.; G(i,i) = i_rho(i);
-                    for (int j = 0; j < _n_diag; j++) K(i, i) += _elastic_pars[i*_n_diag+j]*pow(q(i)*q(i), _J+j);
+                    One(i,i) = 2.; G(i,i) = i_rho(i); K(i,i) = 0.;
+                    for (int j = 0; j < _n_diag; j++) K(i,i) += _elastic_pars[i*_n_diag+j]*pow(q(i)*q(i), _J+j);
                 };
                 // Populate off-diagonals
                 for (int i = 0; i < N; i++)
                 {
                     for (int j = i+1; j < N-i; j++)
                     {
+                        K(i,j) = 0.; One(i,j) = 0.; G(i,j) = 0.;
                         for (int k = 0; k < _n_offdiag; k++) K(i,j) += _elastic_pars[Np+i*_n_offdiag+k]*pow(q(i)*q(j), _J+k);
-                        K(j,i) = K(i,j); // Symmetrize
+                        K(j,i) = K(i,j); One(j,i) = One(i,j); G(j,i) = G(i,j); // Symmetrize
                     }
                 };
 
                 auto T = K*(One-G*K).inverse();
                 auto F = (One+G*T)*Q;
-
                 return F(0);
             };
 
-            inline void allocate_parameters(std::vector<double> x)
+            inline void allocate_parameters(std::vector<double> pars)
             {
                 _production_pars.clear(); _elastic_pars.clear();
-                for (int i = 0; i < x.size(); i++)
+                for (int i = 0; i < pars.size(); i++)
                 {
-                    if (i < _n_prod*_thresholds.size()) _production_pars.push_back(x[i]);
-                    else                                _elastic_pars.push_back(x[i]);
+                    if (i < _n_prod*_thresholds.size()) _production_pars.push_back(pars[i]); 
+                    else                                _elastic_pars.push_back(pars[i]);
                 };
             };
 
