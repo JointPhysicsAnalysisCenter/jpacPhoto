@@ -52,6 +52,36 @@ namespace jpacPhoto
                 return wrapped;
             };
     
+                        // Integrated cross-section data as a function of Egamma
+            inline data_set integrated_with_cut(double emax)
+            {
+                std::string id = "GlueX (2023)";
+    
+                auto raw  = import_data<6>(data_dir()+"/gluex/gluex2022_int.tsv");
+                int  N    = check<6>(raw, id);
+
+                data_set wrapped;
+                wrapped._id   = id;
+                wrapped._type = 0;
+                wrapped._add_to_legend = true;
+                
+                int N_cut = 0;
+                for (int i = 0; i < N; i++)
+                {
+                    if (raw[1][i] > emax) continue;
+                    wrapped._x.push_back(raw[1][i]);
+                    wrapped._xerr[0].push_back(raw[1][i] - raw[4][i]);
+                    wrapped._xerr[1].push_back(raw[5][i] - raw[1][i]);
+                    wrapped._z.push_back(raw[2][i]);
+                    wrapped._zerr[0].push_back(raw[3][i]); 
+                    wrapped._zerr[1].push_back(raw[3][i]); 
+                    N_cut++;
+                };
+                wrapped._N    = N_cut;
+    
+                return wrapped;
+            };
+    
             // Parses the three slices available for differential cross-section
             inline data_set slice(int sliceid)
             {

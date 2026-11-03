@@ -1,6 +1,4 @@
-// Implementation of a HPWA with spin-3/2 intermediate state. This tries to be
-// the most human readable by putting everything in 6x6 matrices but as a result
-// its way too slow for fitting....
+// Implementation of a HPWA with spin-3/2 intermediate state. 
 //
 // This amplitude explicitly uses Eigen C++ to manipulate complex matrices,
 // make sure an environment variable EIGEN points to the top level directory
@@ -123,24 +121,23 @@ namespace jpacPhoto
                 // Work in terms of \pm \sqrt{s}
                 _cached_sqrts = sqrt(_s);
                 
-                Eigen::Matrix3cd One = Eigen::Matrix3cd::Identity(), one_minus_irhot;
+                Eigen::Matrix3cd one = Eigen::Matrix3cd::Identity(), one_plus_irhot;
                 std::array<Eigen::Matrix3cd,4> m;
                 
                 // First we calculate the Natural case (\eta_s = +1 or \sqrt{s}>1)
-                one_minus_irhot = (One+i_rho()*t_matrix(+1)); // Unitarized elastic amplitudes
+                one_plus_irhot = (one+i_rho()*t_matrix(+1)); // Unitarized elastic amplitudes
                 m = m_matrices(+1);                           // Production kinematic matrices
-                _FN.head<3>() = one_minus_irhot*(m[0]*_fp+m[1]*_fm);
-                _FN.tail<3>() = one_minus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
+                _FN.head<3>() = one_plus_irhot*(m[0]*_fp+m[1]*_fm);
+                _FN.tail<3>() = one_plus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
 
                 // Now we do the exact same but with \eta = -1
-                one_minus_irhot = (One+i_rho()*t_matrix(-1));                   
+                one_plus_irhot = (one+i_rho()*t_matrix(-1));                   
                 m = m_matrices(-1); 
-                _FU.head<3>() = one_minus_irhot*(m[0]*_fp+m[1]*_fm);
-                _FU.tail<3>() = one_minus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
+                _FU.head<3>() = one_plus_irhot*(m[0]*_fp+m[1]*_fm);
+                _FU.tail<3>() = one_plus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
 
                 // Reset flag
                 _pars_changed = false;
-
             };  
 
             // Initial fermion factor as function of sqrts
@@ -248,10 +245,9 @@ namespace jpacPhoto
             // i.e. the unitarized elastic rescattering amplitudes
             Eigen::Matrix3cd t_matrix(int eta)
             {
-                Eigen::Matrix3cd One = Eigen::Matrix3cd::Identity();
+                Eigen::Matrix3cd one = Eigen::Matrix3cd::Identity();
                 Eigen::Matrix3cd k   = k_matrix(eta);
-
-                return (One-i_rho()*k).inverse()*k;
+                return (one-i_rho()*k).inverse()*k;
             };
             
             // Diagonal 3x3 blocks of the 6x6 (big) M-matrix
@@ -276,7 +272,6 @@ namespace jpacPhoto
 
                 // m- (i.e. the lower 3x3 diagonal block)
                 Eigen::Matrix3cd mm = Eigen::Matrix3cd::Zero();
-                mm(0,0) = 0;
                 mm(0,1) = sqrt(6)*mV*x/sqrt_s;
                 mm(0,2) = sqrt(3)*mV;
                 mm(1,0) = sqrt(3)*ps*ps*sqrt_s;

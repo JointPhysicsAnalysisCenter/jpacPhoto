@@ -111,19 +111,12 @@ namespace jpacPhoto
                 _cached_sqrts = sqrt(_s);
 
                 Eigen::Matrix2cd One  = Eigen::Matrix2cd::Identity();
-                // Unitarized K-matrix form for elastic amplitude
-                Eigen::Matrix2cd K_p  = K_matrix(+1);
-                Eigen::Matrix2cd T_p  = (One-i_rho()*K_p).inverse()*K_p;
-                // Mixing matrix for production amplitude
-                Eigen::Matrix2cd M_p  = M_matrix(+1);
+
                 // Unitarized with the Q-vector of production parameters
-                _Fp = (One+i_rho()*T_p)*M_p*_Q;
+                _Fp = (One+i_rho()*T_matrix(+1))*M_matrix(+1)*_Q;
 
                 // Now we do the exact same but with \eta = -1
-                Eigen::Matrix2cd K_m  = K_matrix(-1);
-                Eigen::Matrix2cd T_m  = (One-i_rho()*K_m).inverse()*K_m;
-                Eigen::Matrix2cd M_m  = M_matrix(-1);
-                _Fm = (One+i_rho()*T_m)*M_m*_Q;
+                _Fm = (One+i_rho()*T_matrix(-1))*M_matrix(-1)*_Q;
 
                 // Once recalculated reset the pars changed flag
                 _pars_changed = false;
@@ -188,6 +181,13 @@ namespace jpacPhoto
                 Eigen::Matrix2cd K = Eigen::Matrix2cd::Zero();
                 for (int n = 0; n < 3; n++) K += N_matrix(n, eta) * _elastic_pars[n];
                 return K;
+            };
+
+            // 
+            inline Eigen::Matrix2cd T_matrix(int eta)
+            {
+                Eigen::Matrix2cd K = K_matrix(eta), One = Eigen::Matrix2cd::Identity();
+                return (One-i_rho()*K).inverse()*K;
             };
             
             // Mixing matrix between helicities and the 2 possible helicity structures

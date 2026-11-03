@@ -49,6 +49,39 @@ namespace jpacPhoto
                 return out;
             };
     
+            // Integrated cross-section data  as a function of Egamma
+            inline data_set integrated_with_cut(double emax)
+            {
+                std::string id = "CLAS (2026)";
+    
+                auto raw = import_data<7>(data_dir()+"/clas/clas2026_int.tsv");
+                int  N   = check<7>(raw, id);
+    
+                data_set out;
+                out._id   = id;
+                out._type = kIntegrated;
+                out._add_to_legend = true;
+                
+                int N_cut = 0;
+                for (int i = 0; i < N; i++)
+                {
+                    if (raw[2][i] > emax) continue;
+
+                    out._x.push_back(raw[2][i]); // <Egamma>
+                    out._xerr[0].push_back(raw[3][i]); /* raw[2] - raw[0] */; // Bin size lower bound
+                    out._xerr[1].push_back(raw[3][i]); /* raw[1] - raw[2] */; // bin size upper bound
+                    
+                    out._z.push_back(raw[4][i]); // sigma
+                    out._zerr[0].push_back(sqrt(std::norm(raw[5][i])+std::norm(raw[6][i])));
+                    out._zerr[1].push_back(sqrt(std::norm(raw[5][i])+std::norm(raw[6][i])));
+                    N_cut++;
+                }
+                
+                out._N    = N_cut;
+                return out;
+            };
+    
+
             // Parse the three slices available for the differential cross-section
             inline data_set slice(int sliceid)
             {

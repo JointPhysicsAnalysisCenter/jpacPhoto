@@ -135,6 +135,16 @@ namespace jpacPhoto
                     out << left << setw(spacing) << pars[5+n];
                     out << left << setw(spacing) << pars[11+n] << endl;
                 };
+                out << left << "#"+std::string(3*spacing-10, '-') << endl;
+                out << left << "#                        J = 5/2" << endl;
+                out << left << "#"+std::string(3*spacing-10, '-') << endl;
+
+                for (int n = 0; n < 6; n++)
+                {
+                    out << left << setw(12) << "  "+to_string(n);
+                    out << left << setw(spacing) << pars[17+n];
+                    out << left << setw(spacing) << pars[23+n] << endl;
+                };
                 out.close();
             };
 
@@ -176,6 +186,9 @@ namespace jpacPhoto
                 // J = 3/2
                 for (int i = 0; i < 6; i++) pars.push_back(fs[2+i]);
                 for (int i = 0; i < 6; i++) pars.push_back(as[3+i]);
+                // J = 5/2
+                for (int i = 0; i < 6; i++) pars.push_back(fs[8+i]);
+                for (int i = 0; i < 6; i++) pars.push_back(as[9+i]);
 
                 return pars;
             };
