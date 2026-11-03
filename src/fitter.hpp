@@ -344,6 +344,8 @@ namespace jpacPhoto
         // Return value of fit function from last fit
         inline double fcn()     { return (_fit) ? _fcn     : NaN<double>(); };
         inline double fcn_dof() { return (_fit) ? _fcn_dof : NaN<double>(); };
+        inline int    N_free()   { return _minuit->NFree(); };
+        inline int    N_data()   { return _N; };
 
         // Return the pointer to the amp being fit at its current state
         inline amplitude get_amplitude(){ return _amplitude; };
