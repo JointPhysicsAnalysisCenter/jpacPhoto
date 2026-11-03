@@ -104,7 +104,7 @@ namespace jpacPhoto
                 // Populate diagonals
                 for (int i = 0; i < N; i++)
                 {
-                    G(i,i) = i_rho(i);
+                    G(i,i) = I*rho(i);
                     for (int j = 0; j < _n_diag; j++) K(i,i) += _elastic_pars[i*_n_diag+j]*pow(q(i)*q(i), _J+j);
                 };
                 // Populate off-diagonals
@@ -158,7 +158,18 @@ namespace jpacPhoto
             // we can have up to two additional channels
             std::vector<std::array<double,2>> _thresholds;
             
-            inline complex i_rho(unsigned i){ return raw_partial_wave::i_rho(_thresholds[i][0], _thresholds[i][1]); };
+            // Chew-Mandelstam phase-space 
+            inline complex rho(double m1, double m2, complex s)
+            {
+                complex rho, xi;
+                complex result;
+
+                rho    = csqrt(kallen(s, m1*m1, m2*m2)) / s;
+                xi     = 1. - (m1+m2)*(m1+m2)/s;
+                result = (rho*log((xi + rho) / (xi - rho)) - xi*(m2-m1)/(m2+m1)*log(m2/m1)) / PI;
+                return I*result / (16.*PI);
+            };
+            inline complex rho(unsigned i){ return rho(_thresholds[i][0], _thresholds[i][1]); };
 
             // Incoming break-up momentum (define it with a threshold index but we only need i=0)
             inline complex p(int i){ return (i==0) ? _kinematics->initial_momentum(_s) : 0; };

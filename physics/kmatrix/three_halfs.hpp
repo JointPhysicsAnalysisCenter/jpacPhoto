@@ -35,6 +35,8 @@ namespace jpacPhoto
             {
                 // 6 Production parameters and 6 elastic rescattering
                 initialize(12);
+                _mV = xkinem->get_meson_mass();
+                _mN = xkinem->get_recoil_mass();
             };
 
             // -----------------------------------------------------------------------
@@ -48,14 +50,12 @@ namespace jpacPhoto
             inline helicity_frame native_helicity_frame(){ return S_CHANNEL; };
 
             // Partial wave comes from K-matrix unitarized form
-            inline complex partial_wave(std::array<int,4> helicities, double s)
+            inline complex partial_wave(std::array<int,4> helicities, complex sqrt_s)
             {
-                store(helicities, s, _t);
+                bool need_to_recalculate =  !are_equal(sqrt_s, _cached_sqrt_s, _cache_tolerance) || _pars_changed;
+                if ( need_to_recalculate ) recalculate(sqrt_s);
 
-                bool need_to_recalculate =  !are_equal(sqrt(_s), _cached_sqrts, _cache_tolerance) || _pars_changed;
-                if ( need_to_recalculate ) recalculate();
-
-                auto hels = helicities;
+                auto hels   = helicities;
                 bool barred = (2*hels[2] - hels[3] < 0);
                 if (barred) { hels[2] *= -1; hels[3] *= -1; };
 
@@ -82,12 +82,17 @@ namespace jpacPhoto
 
                 return (!barred) ? (_FN(i)+_FU(i))/2 : (_FN(i)-_FU(i))/2; 
             };
+            inline complex partial_wave(std::array<int,4> helicities, double s)
+            {
+                return partial_wave(helicities, sqrt(s)+_ieps);
+            };
 
             protected:
 
-            // Save the different parameters
+            // Production parameters
             // In the J=3/2 case we decompose the 6x6 problem into two 3x3's
             Eigen::Vector3cd _fp = Eigen::Vector3cd::Zero(), _fm = Eigen::Vector3cd::Zero();
+            // Elastic parameters
             std::array<double,6> _a;
             inline void allocate_parameters(std::vector<double> pars)
             {
@@ -104,63 +109,82 @@ namespace jpacPhoto
                 for (int i = 0; i < 6; i++) labels.push_back("a_3/2[" + to_string(i) +"]");
                 return labels;
             };
-
+            
+            // Masses 
+            double _mV, _mN; 
             // Small imaginary part to help control cut structures
             complex _ieps = I*1E-10;
+            // Two body phase-space
+            complex _rho = 0;
 
-            bool _pars_changed = false;
-            double _cached_sqrts = -1, _cache_tolerance = 1E-4;
+            // Parameters to know when to recalculate amplitudes
+            bool    _pars_changed    = false;
+            complex _cached_sqrt_s   = 0.;
+            double  _cache_tolerance = 1E-4;
 
             // Partial wave vectors
-            Eigen::VectorXcd _FN = Eigen::VectorXcd::Zero(6); // Natural 
-            Eigen::VectorXcd _FU = Eigen::VectorXcd::Zero(6); // Unnatural
+            Eigen::VectorXcd _FN  = Eigen::VectorXcd::Zero(6); // Natural 
+            Eigen::VectorXcd _FU  = Eigen::VectorXcd::Zero(6); // Unnatural
+            // Identity matrix
+            Eigen::Matrix3cd _one = Eigen::Matrix3cd::Identity();
 
             // Recalculate cached partial-waves if needed
-            void recalculate()
+            void recalculate(complex sqrt_s)
             {
                 // Work in terms of \pm \sqrt{s}
-                _cached_sqrts = sqrt(_s);
+                _cached_sqrt_s = sqrt_s;
+                _rho           = rho(sqrt_s*sqrt_s);
                 
-                Eigen::Matrix3cd one = Eigen::Matrix3cd::Identity(), one_plus_irhot;
+                Eigen::Matrix3cd one_plus_irhot;
                 std::array<Eigen::Matrix3cd,4> m;
                 
                 // First we calculate the Natural case (\eta_s = +1 or \sqrt{s}>1)
-                one_plus_irhot = (one+i_rho()*t_matrix(+1)); // Unitarized elastic amplitudes
+                one_plus_irhot = (_one+I*_rho*t_matrix(+1)); // Unitarized elastic amplitudes
                 m = m_matrices(+1);                           // Production kinematic matrices
-                _FN.head<3>() = one_plus_irhot*(m[0]*_fp+m[1]*_fm);
-                _FN.tail<3>() = one_plus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
+                _FN.head<3>()  = one_plus_irhot*(m[0]*_fp+m[1]*_fm);
+                _FN.tail<3>()  = one_plus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
 
                 // Now we do the exact same but with \eta = -1
-                one_plus_irhot = (one+i_rho()*t_matrix(-1));                   
+                one_plus_irhot = (_one+I*_rho*t_matrix(-1));                   
                 m = m_matrices(-1); 
-                _FU.head<3>() = one_plus_irhot*(m[0]*_fp+m[1]*_fm);
-                _FU.tail<3>() = one_plus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
+                _FU.head<3>()  = one_plus_irhot*(m[0]*_fp+m[1]*_fm);
+                _FU.tail<3>()  = one_plus_irhot*(/* m[2]*_fp+ */m[3]*_fm);
 
                 // Reset flag
-                _pars_changed = false;
+                _pars_changed  = false;
             };  
 
-            // Initial fermion factor as function of sqrts
-            // NOTE: MASS OF PROTON IS HARD-CODED HERE
-            inline complex omega_i(int pm, double sqrt_s)
-            { 
-                double Ei = (sqrt_s*sqrt_s + M_PROTON*M_PROTON)/(2*sqrt_s);
-                return csqrt(Ei+pm*M_PROTON+_ieps);
+            // Chew-Mandelstam phase-space 
+            inline complex rho(complex s)
+            {
+                double m1 = _mV, m2 = _mN;
+                complex rho, xi;
+                complex result;
+
+                rho    = csqrt(kallen(s, m1*m1, m2*m2)) / s;
+                xi     = 1. - (m1+m2)*(m1+m2)/s;
+                result = (rho*log((xi + rho)/(xi - rho))-xi*(m2-m1)/(m2+m1)*log(m2/m1))/PI;
+                return I*result / (16.*PI);
             };
-            // Recoil fermion factor as function of sqrts
-            // NOTE: MASS OF PROTON IS HARD-CODED HERE
-            inline complex omega_f(int pm, double sqrt_s)
+
+            // Initial fermion factor as function of sqrt_s
+            inline complex omega_i(int pm, complex sqrt_s)
             { 
-                double Ef = (sqrt_s*sqrt_s + M_PROTON*M_PROTON - _mX*_mX)/(2*sqrt_s);
-                return csqrt(Ef+pm*M_PROTON+_ieps);
+                complex Ei = (sqrt_s*sqrt_s + _mN*_mN)/(2*sqrt_s);
+                return csqrt(Ei+pm*_mN);
+            };
+            // Recoil fermion factor as function of sqrt_s
+            inline complex omega_f(int pm, complex sqrt_s)
+            { 
+                complex Ef = (sqrt_s*sqrt_s + _mN*_mN - _mV*_mV)/(2*sqrt_s);
+                return csqrt(Ef+pm*_mN);
             };
 
             // Calculate 3x3 (little) n-matrices
             Eigen::Matrix3cd n_matrix(unsigned int i, int eta)
             {              
-                double sqrt_s = (eta == +1) ? + _cached_sqrts : - _cached_sqrts;
-                double mV = _mX, mN = M_PROTON;
-                double ps = sqrt(kallen(sqrt_s*sqrt_s, mV*mV, mN*mN))/2/sqrt_s;
+                complex sqrt_s  = (eta == +1) ? + _cached_sqrt_s : - _cached_sqrt_s;
+                complex ps      = csqrt(kallen(sqrt_s*sqrt_s, _mV*_mV, _mN*_mN))/2/sqrt_s;
                 complex omegafp = omega_f(+1, sqrt_s), omegafm = omega_f(-1, sqrt_s);
 
                 Eigen::Matrix3cd n = Eigen::Matrix3cd::Zero();
@@ -190,33 +214,33 @@ namespace jpacPhoto
                     };
                     case 3:
                     {
-                        n(0,0) = 2*mV*mV; 
-                        n(1,1) = pow(mN+sqrt_s, 2); 
-                        n(0,1) = sqrt(2)*mV*(mN+sqrt_s);  n(1,0) = n(0,1);  
+                        n(0,0) = 2*_mV*_mV; 
+                        n(1,1) = pow(_mN+sqrt_s, 2); 
+                        n(0,1) = sqrt(2)*_mV*(_mN+sqrt_s);  n(1,0) = n(0,1);  
                         n *= pow(ps, 2); 
                         n *= omegafm * omegafm;
                         break;
                     };
                     case 4:
                     {
-                        double EV = (sqrt_s*sqrt_s+mV*mV-mN*mN)/2/sqrt_s;
-                        n(0,1) = 2*EV-mN-sqrt_s;       n(1,0) = n(0,1);
-                        n(0,2) = sqrt(6)*mV;           n(2,0) = n(0,2);
-                        n(1,2) = -sqrt(3)*(mN+sqrt_s); n(2,1) = n(1,2);
+                        complex EV = (sqrt_s*sqrt_s+_mV*_mV-_mN*_mN)/2/sqrt_s;
+                        n(0,1) = 2*EV-_mN-sqrt_s;       n(1,0) = n(0,1);
+                        n(0,2) = sqrt(6)*_mV;           n(2,0) = n(0,2);
+                        n(1,2) = -sqrt(3)*(_mN+sqrt_s); n(2,1) = n(1,2);
                         n *= ps; 
                         n *= omegafp * omegafm;
                         break;
                     };
                     case 5:
                     {
-                        double EV = (sqrt_s*sqrt_s+mV*mV-mN*mN)/2/sqrt_s;
-                        n(0,0) = mV*mV;
+                        complex EV = (sqrt_s*sqrt_s+_mV*_mV-_mN*_mN)/2/sqrt_s;
+                        n(0,0) = _mV*_mV;
                         n(1,1) = 2*EV*EV;
-                        n(2,2) = 3*mV*mV;
+                        n(2,2) = 3*_mV*_mV;
 
-                        n(0,1) = sqrt(2)*EV*mV;   n(1,0) = n(0,1);
-                        n(0,2) = sqrt(3)*mV*mV;   n(2,0) = n(0,2);
-                        n(1,2) = sqrt(6)*EV*mV;   n(2,1) = n(1,2);
+                        n(0,1) = sqrt(2)*EV*_mV;   n(1,0) = n(0,1);
+                        n(0,2) = sqrt(3)*_mV*_mV;  n(2,0) = n(0,2);
+                        n(1,2) = sqrt(6)*EV*_mV;   n(2,1) = n(1,2);
                         n *= omegafp * omegafp;
                         break;
                     };
@@ -245,53 +269,51 @@ namespace jpacPhoto
             // i.e. the unitarized elastic rescattering amplitudes
             Eigen::Matrix3cd t_matrix(int eta)
             {
-                Eigen::Matrix3cd one = Eigen::Matrix3cd::Identity();
                 Eigen::Matrix3cd k   = k_matrix(eta);
-                return (one-i_rho()*k).inverse()*k;
+                return (_one-I*_rho*k).inverse()*k;
             };
             
             // Diagonal 3x3 blocks of the 6x6 (big) M-matrix
             std::array<Eigen::Matrix3cd,4> m_matrices(int eta)
             {
-                double sqrt_s = (eta == +1) ? + _cached_sqrts : - _cached_sqrts;
-                double mV = _mX, mN = M_PROTON;
-                double qs = sqrt(kallen(sqrt_s*sqrt_s, 0.,    mN*mN))/2/sqrt_s;
-                double ps = sqrt(kallen(sqrt_s*sqrt_s, mV*mV, mN*mN))/2/sqrt_s;
-                double EV = (sqrt_s*sqrt_s+mV*mV-mN*mN)/2/sqrt_s;
-                double x  = pow(mN-sqrt_s, 2) - mV*mV;
-                double y  = (mN+sqrt_s);
+                complex sqrt_s = (eta == +1) ? + _cached_sqrt_s : - _cached_sqrt_s;
+                complex qs = csqrt(kallen(sqrt_s*sqrt_s, 0.,      _mN*_mN))/2/sqrt_s;
+                complex ps = csqrt(kallen(sqrt_s*sqrt_s, _mV*_mV, _mN*_mN))/2/sqrt_s;
+                complex EV = (sqrt_s*sqrt_s+_mV*_mV-_mN*_mN)/2/sqrt_s;
+                complex x  = pow(_mN-sqrt_s, 2) - _mV*_mV;
+                complex y  = (_mN+sqrt_s);
 
                 // m+ (i.e. the upper 3x3 diagonal block)
                 Eigen::Matrix3cd mp = Eigen::Matrix3cd::Zero();
-                mp(0,1) = sqrt(2)*mV*qs*x/sqrt_s;
-                mp(0,2) = mV*qs;
+                mp(0,1) = sqrt(2)*_mV*qs*x/sqrt_s;
+                mp(0,2) = _mV*qs;
                 mp(1,0) = ps*ps*qs*sqrt_s;
                 mp(1,1) = qs*x*y/sqrt_s;
                 mp(1,2) = sqrt(2)*EV*qs;
-                mp(2,2) = sqrt(3)*mV*qs;
+                mp(2,2) = sqrt(3)*_mV*qs;
 
                 // m- (i.e. the lower 3x3 diagonal block)
                 Eigen::Matrix3cd mm = Eigen::Matrix3cd::Zero();
-                mm(0,1) = sqrt(6)*mV*x/sqrt_s;
-                mm(0,2) = sqrt(3)*mV;
+                mm(0,1) = sqrt(6)*_mV*x/sqrt_s;
+                mm(0,2) = sqrt(3)*_mV;
                 mm(1,0) = sqrt(3)*ps*ps*sqrt_s;
                 mm(1,1) = sqrt(3)*x*y/sqrt_s;
                 mm(1,2) = sqrt(6)*EV;
-                mm(2,2) = 3*mV;
+                mm(2,2) = 3*_mV;
 
                 // m'+ (i.e. the upper 3x3 off-diagonal block)
                 Eigen::Matrix3cd mprimep = Eigen::Matrix3cd::Zero();
-                mprimep(0,1) = sqrt(2)*mN*mV*x/sqrt_s/sqrt_s;
-                mprimep(0,2) = mN*mV/sqrt_s;
-                mprimep(1,0) = mN*ps*ps;
-                mprimep(1,1) = mN*x*y/sqrt_s/sqrt_s;
-                mprimep(1,2) = sqrt(2)*EV*mN/sqrt_s;
-                mprimep(2,2) = sqrt(3)*mN*mV/sqrt_s;
+                mprimep(0,1) = sqrt(2)*_mN*_mV*x/sqrt_s/sqrt_s;
+                mprimep(0,2) = _mN*_mV/sqrt_s;
+                mprimep(1,0) = _mN*ps*ps;
+                mprimep(1,1) = _mN*x*y/sqrt_s/sqrt_s;
+                mprimep(1,2) = sqrt(2)*EV*_mN/sqrt_s;
+                mprimep(2,2) = sqrt(3)*_mN*_mV/sqrt_s;
 
                 // m'- (i.e. the lower 3x3 off-diagonal block)
                 Eigen::Matrix3cd mprimem = Eigen::Matrix3cd::Zero();
 
-                complex prefactor = omega_i(+1, sqrt_s)*omega_f(+1, sqrt_s)*(mN-sqrt_s);
+                complex prefactor = omega_i(+1, sqrt_s)*omega_f(+1, sqrt_s)*(_mN-sqrt_s);
                 mp *= prefactor; mprimep *= prefactor;
                 mm *= prefactor; mprimem *= prefactor;
                 

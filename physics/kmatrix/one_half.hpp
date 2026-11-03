@@ -35,6 +35,8 @@ namespace jpacPhoto
             {
                 // 2 Production parameters and 3 elastic rescattering
                 initialize(5);
+                _mV = xkinem->get_meson_mass();
+                _mN = xkinem->get_recoil_mass();
             };
 
             // -----------------------------------------------------------------------
@@ -48,12 +50,10 @@ namespace jpacPhoto
             inline helicity_frame native_helicity_frame(){ return S_CHANNEL; };
 
             // Partial wave comes from K-matrix unitarized form
-            inline complex partial_wave(std::array<int,4> helicities, double s)
+            inline complex partial_wave(std::array<int,4> helicities, complex sqrt_s)
             {
-                store(helicities, s, _t);
-
-                bool need_to_recalculate =  !are_equal(sqrt(_s), _cached_sqrts, _cache_tolerance) || _pars_changed;
-                if ( need_to_recalculate ) recalculate();
+                bool need_to_recalculate =  !are_equal(sqrt_s, _cached_sqrt_s, _cache_tolerance) || _pars_changed;
+                if ( need_to_recalculate ) recalculate(sqrt_s);
 
                 auto hels = helicities;
                 bool barred = (2*helicities[2] - helicities[3] < 0);
@@ -75,6 +75,12 @@ namespace jpacPhoto
                 return (!barred) ? (_Fp(i)+_Fm(i))/2 : (_Fp(i)-_Fm(i))/2; 
             };
 
+            // Evaluate on the real line (needed for raw_partial_wave::partial_wave)
+            inline complex partial_wave(std::array<int,4> helicities, double s)
+            {
+                return partial_wave(helicities, sqrt(s)+_ieps);
+            };
+            
             protected:
 
             // Save the different parameters
@@ -94,57 +100,71 @@ namespace jpacPhoto
                 return {"f_1/2[0]", "f_1/2[1]", 
                         "a_1/2[0]", "a_1/2[1]", "a_1/2[2]"};
             };
-
+            
+            // Masses 
+            double _mV, _mN; 
             // Small imaginary part to help control cut structures
             complex _ieps = I*1E-10;
+            // Two body phase-space
+            complex _rho  = 0;
 
-            bool _pars_changed = false;
-            double _cached_sqrts = -1, _cache_tolerance = 1E-4;
+            // Parameters to know when to recalculate amplitudes
+            bool    _pars_changed    = false;
+            complex _cached_sqrt_s   = 0.;
+            double  _cache_tolerance = 1E-4;
 
-            // Partial wave matrices
-            Eigen::Vector2cd _Fp = Eigen::Vector2cd::Zero(), _Fm = Eigen::Vector2cd::Zero();
+            // Partial wave vectors
+            Eigen::Vector2cd _Fp   = Eigen::Vector2cd::Zero(), _Fm = Eigen::Vector2cd::Zero();
+            // Identity matrix
+            Eigen::Matrix2cd _one  = Eigen::Matrix2cd::Identity();
 
             // Recalculate cached partial-waves if needed
-            void recalculate()
+            void recalculate(complex sqrt_s)
             {
-                // Work in terms of \pm \sqrt{s}
-                _cached_sqrts = sqrt(_s);
-
-                Eigen::Matrix2cd One  = Eigen::Matrix2cd::Identity();
-
+                _cached_sqrt_s = sqrt_s;
+                _rho          = rho(sqrt_s*sqrt_s);
                 // Unitarized with the Q-vector of production parameters
-                _Fp = (One+i_rho()*T_matrix(+1))*M_matrix(+1)*_Q;
-
+                _Fp = (_one+I*_rho*T_matrix(+1))*M_matrix(+1)*_Q;
                 // Now we do the exact same but with \eta = -1
-                _Fm = (One+i_rho()*T_matrix(-1))*M_matrix(-1)*_Q;
-
+                _Fm = (_one+I*_rho*T_matrix(-1))*M_matrix(-1)*_Q;
                 // Once recalculated reset the pars changed flag
                 _pars_changed = false;
             };  
 
-            // Initial fermion factor as function of sqrts
-            // NOTE: MASS OF PROTON IS HARD-CODED HERE
-            inline complex omega_i(int pm, double sqrt_s)
-            { 
-                double Ei = (sqrt_s*sqrt_s + M_PROTON*M_PROTON)/(2*sqrt_s);
-                return csqrt(Ei+pm*M_PROTON+_ieps);
+            // Chew-Mandelstam phase-space 
+            inline complex rho(complex s)
+            {
+                double m1 = _mV, m2 = _mN;
+                complex rho, xi;
+                complex result;
+
+                rho    = csqrt(kallen(s, m1*m1, m2*m2)) / s;
+                xi     = 1. - (m1+m2)*(m1+m2)/s;
+                result = (rho*log((xi + rho) / (xi - rho)) - xi*(m2-m1)/(m2+m1)*log(m2/m1)) / PI;
+                return I*result / (16.*PI);
             };
-            // Recoil fermion factor as function of sqrts
-            // NOTE: MASS OF PROTON IS HARD-CODED HERE
-            inline complex omega_f(int pm, double sqrt_s)
+
+            // Initial fermion factor as function of sqrt_s
+            inline complex omega_i(int pm, complex sqrt_s)
             { 
-                double Ef = (sqrt_s*sqrt_s + M_PROTON*M_PROTON - _mX*_mX)/(2*sqrt_s);
-                return csqrt(Ef+pm*M_PROTON+_ieps);
+                complex Ei = (sqrt_s*sqrt_s + _mN*_mN)/(2*sqrt_s);
+                return csqrt(Ei+pm*_mN);
+            };
+            // Recoil fermion factor as function of sqrt_s
+            inline complex omega_f(int pm, complex sqrt_s)
+            { 
+                complex Ef = (sqrt_s*sqrt_s + _mN*_mN - _mV*_mV)/(2*sqrt_s);
+                return csqrt(Ef+pm*_mN);
             };
 
             // Calculate 2x2 N-matrices
             inline Eigen::Matrix2cd N_matrix(unsigned int n, int eta)
             {              
-                double sqrt_s = (eta == +1) ? + _cached_sqrts : - _cached_sqrts;
+                complex sqrt_s = (eta == +1) ? + _cached_sqrt_s : - _cached_sqrt_s;
                 Eigen::Matrix2cd N = Eigen::Matrix2cd::Zero();
 
                 // Factors of (2 p_s \sqrt{s}) 
-                double ps = sqrt(kallen(sqrt_s*sqrt_s,_mX*_mX, _mR*_mR))/2/sqrt_s;
+                complex ps = csqrt(kallen(sqrt_s*sqrt_s,_mV*_mV, _mN*_mN))/2/sqrt_s;
 
                 switch (n)
                 {
@@ -164,9 +184,9 @@ namespace jpacPhoto
                     };
                     case 2:
                     {
-                        double ep = M_PROTON + sqrt_s;
-                        N(0,0) = 2*_mX*_mX;       N(0,1) = sqrt(2)*_mX*ep;
-                        N(1,0) = sqrt(2)*_mX*ep;  N(1,1) = ep*ep;   
+                        complex ep = _mN + sqrt_s;
+                        N(0,0) = 2*_mV*_mV;       N(0,1) = sqrt(2)*_mV*ep;
+                        N(1,0) = sqrt(2)*_mV*ep;  N(1,1) = ep*ep;   
                         N *= omega_f(-1, sqrt_s) * omega_f(-1, sqrt_s);
                         return N;
                     };
@@ -186,20 +206,20 @@ namespace jpacPhoto
             // 
             inline Eigen::Matrix2cd T_matrix(int eta)
             {
-                Eigen::Matrix2cd K = K_matrix(eta), One = Eigen::Matrix2cd::Identity();
-                return (One-i_rho()*K).inverse()*K;
+                Eigen::Matrix2cd K = K_matrix(eta);
+                return (_one-I*_rho*K).inverse()*K;
             };
             
             // Mixing matrix between helicities and the 2 possible helicity structures
             inline Eigen::Matrix2cd M_matrix(int eta)
             {
-                double sqrt_s = (eta == +1) ? + _cached_sqrts : - _cached_sqrts;
+                complex sqrt_s = (eta == +1) ? + _cached_sqrt_s : - _cached_sqrt_s;
 
                 Eigen::Matrix2cd M = Eigen::Matrix2cd::Zero();
-                double ep = M_PROTON + sqrt_s, em = M_PROTON - sqrt_s;
+                complex ep = _mN + sqrt_s, em = _mN - sqrt_s;
 
-                M(0,0) = 0;                M(0,1) = 2*sqrt(2)*_mX;
-                M(1,0) = ep*ep - _mX*_mX;  M(1,1) = 2*ep;
+                M(0,0) = 0;                M(0,1) = 2*sqrt(2)*_mV;
+                M(1,0) = ep*ep - _mV*_mV;  M(1,1) = 2*ep;
                 M *= omega_i(+1, sqrt_s) * omega_f(-1, sqrt_s) * em;
 
                 // No eta dependence because macdowell phase is trivial

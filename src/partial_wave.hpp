@@ -98,21 +98,7 @@ namespace jpacPhoto
         inline int J(){ return _J; };
         
         protected:
-
-        // Chew-Mandelstam phase-space 
-        inline complex i_rho(double m1, double m2)
-        {
-            complex rho, xi;
-            complex result;
-
-            rho    = csqrt(kallen(_s, m1*m1, m2*m2)) / _s;
-            xi     = 1. - (m1+m2)*(m1+m2)/_s;
-            result = (rho*log((xi + rho) / (xi - rho)) - xi*(m2-m1)/(m2+m1)*log(m2/m1)) / PI;
-            return - result / (16.*PI);
-        };
-        inline complex i_rho(){ return i_rho(_mX, _mR); };
-
-
+        
         // Produce a string of a parameter name which appends the J quantum number to it, i.e. "name[J]"
         inline std::string J_label(std::string name){ return name + "[" + std::to_string(_J) + "]"; };
 
