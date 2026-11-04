@@ -1,0 +1,358 @@
+// // Class to contain all relevant kinematic quantities. 
+// (e.g. angles, momenta, helicity info)
+//
+// Full kinematics of the process are entirely determiend by the masses of all quantum_numberss:
+// mB - beam mass 
+// mT - target (baryon) mass
+// mX - produced meson mass
+// mR - recoil baryon mass
+//
+// As well as quantum numbers of the final states
+// All of these are allowed to float with which combinations are allowed handled by individual amplitudes
+// 
+// --------------------------------------------------------------------------------
+// Author:       Daniel Winney (2020)
+// Affiliation:  Joint Physics Analysis Center (JPAC)
+// Email:        dwinney@iu.edu
+// --------------------------------------------------------------------------------
+
+#include "kinematics.hpp"
+
+namespace jpacPhoto
+{
+    // ------------------------------------------------------------------------------
+    // Things related to helicities
+
+    // Output a string of a given helicity set in format e.g. {+,+,+,+}
+    std::string print_helicities(std::array<int,4> lam)
+    {
+        std::array<std::string,4> lams;
+        for (int i = 0; i < 4; i++) lams[i] = std::to_string(lam[i]);
+        return "[ " + lams[0] + ", " + lams[1] + ", " + lams[2] + ", " + lams[3] + "]";
+    };
+
+    // Generate a vector containing all the helicity combinations
+    std::vector<std::array<int, 4>> get_helicities(int mJ, int bJ, bool is_massless)
+    {
+        std::vector<std::array<int,4>> output;
+
+        // Inital state is always the same
+        std::vector<int> hg = (is_massless) ? std::vector<int>({1, -1}) : std::vector<int>({1, 0, -1});
+        std::vector<int> ht = {1, -1};
+
+        // Final state depends on the spins 
+        std::vector<int> hx, hr; 
+        for (int i = 0;  mJ +   i >= - mJ; i--) hx.push_back(mJ +   i);
+        for (int i = 0;  bJ + 2*i >= - bJ; i--) hr.push_back(bJ + 2*i);
+
+        for (auto g : hg){
+            for (auto t : ht){
+                for (auto x : hx){
+                    for (auto r : hr){
+                        output.push_back({g, t, x, r});
+                    };
+                };
+            };
+        };
+        return output;
+    };
+
+    // Given a set of helicities, find its helicity index
+    unsigned int find_helicity(std::array<int, 4> helicities, int mj, int bj, bool is_massless)
+    {
+        std::vector<std::array<int,4>> hels = get_helicities(mj, bj, is_massless);
+
+        auto iterator = std::find(hels.begin(), hels.end(), helicities);
+        
+        if (iterator != hels.end())
+        {
+            return iterator - hels.begin();
+        }
+        
+        return error("find_helicity - Cannot find helicities: " + print_helicities(helicities) + "!", -1);
+    };
+
+    // ---------------------------------------------------------------------------
+    // Quantum number handling
+
+    quantum_numbers raw_kinematics::get_meson()
+    {
+        auto JP = get_meson_JP();
+        int  qns =  10 * JP[0] + (JP[1] == 1);
+        switch(qns)
+        {
+            case (21): return TENSOR;
+            case (20): return AXIALTENSOR;
+            case (11): return AXIALVECTOR;
+            case (10): return VECTOR;
+            case ( 0): return PSEUDOSCALAR;
+            case ( 1): return SCALAR;
+        };  
+        return PARTICLE_ERROR;
+    };
+
+    void raw_kinematics::set_meson_JP(quantum_numbers x)
+    {
+        int J, P;
+        switch (x)
+        {
+            case (      TENSOR): J = 2, P = +1; break;
+            case ( AXIALTENSOR): J = 2, P = -1; break;
+            case ( AXIALVECTOR): J = 1, P = +1; break;
+            case (      VECTOR): J = 1, P = -1; break;
+            case (      SCALAR): J = 0, P = +1; break;
+            case (PSEUDOSCALAR): J = 0, P = -1; break;
+            default: return;
+        };
+
+        set_meson_JP(J, P);
+    };
+
+    quantum_numbers raw_kinematics::get_baryon()
+    {
+        auto JP = get_baryon_JP();
+        int  qns =  10 * JP[0] + (JP[1] == 1);
+        switch(qns)
+        {
+            case (11): return HALFPLUS;
+            case (10): return HALFMINUS;
+            case (31): return THREEPLUS;
+            case (30): return THREEMINUS;
+        };  
+        return PARTICLE_ERROR;
+    };
+
+    void raw_kinematics::set_baryon_JP(quantum_numbers x)
+    {
+        int J, P;
+        switch (x)
+        {
+            case (  HALFPLUS): J = 1, P = +1; break;
+            case ( HALFMINUS): J = 1, P = -1; break;
+            case ( THREEPLUS): J = 3, P = +1; break;
+            case (THREEMINUS): J = 3, P = -1; break;
+            default: return;
+        };
+
+        set_baryon_JP(J, P);
+    };
+
+
+    // ---------------------------------------------------------------------------
+    // Find a set of helicities given an index
+
+    std::array<int, 4> raw_kinematics::helicities(int i)
+    {
+        if (i < 0 || i >= _nAmps) 
+        {
+            fatal("kinematics - Can't find helicities with index " + std::to_string(i) + "!");
+        }
+        return _helicities[i];
+    };
+
+    // ---------------------------------------------------------------------------
+    // Modulus of three-momenta (in the s-channel)
+
+    double raw_kinematics::initial_momentum(double s)
+    {
+        return sqrt(kallen(s, _mB2, _mT2)) / sqrt(4.*s);
+    };
+
+    double raw_kinematics::final_momentum(double s)
+    {
+        return sqrt(kallen(s, _mR2, _mX2)) / sqrt(4.*s);
+    };
+
+    // ------------------------------------------------------------------------------
+    // Energies of all particles in s-channel CM frame
+
+    double raw_kinematics::beam_energy(double s)
+    {
+        return (s - _mT2 + _mB2) / sqrt(4.*s);
+    };
+
+    double raw_kinematics::target_energy(double s)
+    {
+        return (s + _mT2 - _mB2) / sqrt(4.*s);
+    };
+
+    double raw_kinematics::meson_energy(double s)
+    {
+        return (s - _mR2 + _mX2) / sqrt(4.*s);
+    };
+
+    double raw_kinematics::recoil_energy(double s)
+    {
+        return (s + _mR2 - _mX2) / sqrt(4.*s);
+    };
+
+    // ---------------------------------------------------------------------------
+    // s-channel scattering length from invariants
+
+    double raw_kinematics::z_s(double s, double t)
+    {
+        complex qdotqp = initial_momentum(s) * final_momentum(s);
+        complex E1E3   = beam_energy(s) * meson_energy(s);
+
+        double result = t - _mX2 - _mB2 + 2.*real(E1E3);
+        result /= 2. * real(qdotqp);
+
+        return result;
+    };
+
+    // Scattering angle in the s-channel
+    // Use TMath::ACos instead of std::acos because its safer at the end points
+    double raw_kinematics::theta_s(double s, double t)
+    {
+        double zs = z_s(s, t);
+        if (std::abs(zs - 1) < 1.E-5){zs =  1.;}
+        if (std::abs(zs + 1) < 1.E-5){zs = -1.;}
+        return TMath::ACos( zs );
+    };
+
+    // ---------------------------------------------------------------------------
+    // Other Mandelstam invariants and scattering angles
+
+    double raw_kinematics::t_man(double s, double theta)
+    {
+        complex qdotqp = initial_momentum(s) * final_momentum(s);
+        complex E1E3   = beam_energy(s) * meson_energy(s);
+
+        return _mX2 + _mB2 - 2. * real(E1E3) + 2. * real(qdotqp) * cos(theta);
+    };
+
+    // Scattering angles in t and u channel frames
+    double raw_kinematics::z_t(double s, double theta)
+    {
+        double t = t_man(s, theta);
+        double u = u_man(s, theta);
+
+        double result;
+        result  = t * (s - u) + (_mB2 - _mX2) * (_mT2 - _mR2);
+        result /=  sqrt(kallen(t, _mX2, _mB2) * kallen(t, _mT2, _mR2));
+
+        return result;
+    };
+
+    double raw_kinematics::u_man(double s, double theta)
+    { 
+        return _mX2 + _mB2 + _mT2 + _mR2 - s - t_man(s, theta);
+    };
+
+    double raw_kinematics::z_u(double s, double theta)
+    {
+        double t = t_man(s, theta);
+        double u = u_man(s, theta);
+
+        double result;
+        result  = u * (t - s) + (_mB2 - _mR2) * (_mT2 - _mX2);
+        result /=  sqrt(kallen(u, _mR2, _mB2) * kallen(u, _mT2, _mX2));
+
+        return result;
+    };
+
+    // ------------------------------------------------------------------------------
+    // Momenta in the t-channel center-of-mass frame
+    
+    complex raw_kinematics::initial_momentum_tframe(double t)
+    {
+        return csqrt(kallen(t, _mB2, _mX2)/(4.*t) );
+    };
+
+    complex raw_kinematics::final_momentum_tframe(double t)
+    {
+        return csqrt( kallen(t, _mR2, _mT2)/(4.*t) );
+    };
+
+    // ------------------------------------------------------------------------------
+    // Phases associated with helicity relations 
+
+    // Intrisnic parity obeyed by helicity amplitude 
+    // This depends on which scattering chan we look at and quantum numbers of all particles
+    int raw_kinematics::intrinsic_parity(helicity_frame channel)
+    {
+        int s_a, s_b, s_c, s_d;
+        int eta_a, eta_b, eta_c, eta_d;
+
+        // a is always the photon
+        s_a = 2; eta_a = -1; // spin multiplied by two because of spin 1/2 baryons
+
+        switch (channel)
+        {
+            case helicity_frame::S_CHANNEL :
+            {
+                s_b =  1;            eta_b = +1;        // proton
+                s_c =  2*_mjp[0];    eta_c = _mjp[1];   // produced meson
+                s_d =  _bjp[0];      eta_d = _bjp[1];   // recoil baryon
+                break;
+            }
+            case helicity_frame::T_CHANNEL :
+            {
+                s_b =  2*_mjp[0];   eta_b = _mjp[1];    // produced meson
+                s_c =  1;           eta_c = -1;         // anti-proton
+                s_d =  _bjp[0];     eta_d = _bjp[1];    // recoil baryon
+                break;
+            }
+            case helicity_frame::U_CHANNEL :
+            {
+                s_b =  _bjp[0];      eta_b = -_bjp[1];   // recoil anti-baryon
+                s_c =  1;            eta_c = -1;         // anti-proton
+                s_d =  2*_mjp[0];    eta_d = _mjp[1];    // produced meson
+                break;
+            }
+
+            default: { return 0; }
+        };
+
+        int eta = eta_a * eta_b * eta_c * eta_d * pow(-1, (s_c + s_d - s_a - s_b)/2);
+        
+        return eta;
+    };
+
+    // Phase relating lambda_gamma = +1 and lambda_gamma = -1 amplitudes 
+    // Depends on the channel with respect to which the helicities are defined
+    int raw_kinematics::parity_phase(std::array<int, 4> helicities, helicity_frame channel)
+    {
+        int lam, lamp;
+        switch (channel)
+        {
+            case helicity_frame::S_CHANNEL :
+            {
+                lam =  (2 * helicities[0] - helicities[1]);
+                lamp = (2 * helicities[2] - helicities[3]);
+                break;
+            }
+            case helicity_frame::T_CHANNEL :
+            {
+                lam =  (2 * (helicities[0] - helicities[2]));
+                lamp = (helicities[1] - helicities[3]);
+                break;
+            }
+            case helicity_frame::U_CHANNEL :
+            {
+                lam =  (2 * helicities[0] - helicities[3]);
+                lamp = (2 * helicities[2] - helicities[1]);
+                break;
+            }
+
+            default: { return 0; }
+        };
+
+        int eta = intrinsic_parity(channel) *  pow(-1, (lam - lamp)/2 );
+        return eta;
+    };
+
+    // Wigner rotation angle connecting helicity and gottfried-jackson frames 
+    double raw_kinematics::mH_to_GJ_angle(double s, double t)
+    {
+        double cosAlpha = ((s - _mR2 + _mX2)*(t + _mX2 - _mB2) - 2*_mX2*(_mT2 + _mX2 - _mR2 - _mB2)) / sqrt( kallen(s, _mR2, _mX2) * kallen(t, _mX2, _mB2) );
+        return TMath::ACos( cosAlpha );
+    };
+
+    // Wigner rotation angle connecting helicity and gottfried-jackson frames 
+    double raw_kinematics::bH_to_GJ_angle(double s, double t)
+    {
+        double cosAlpha = ((s + _mR2 - _mX2)*(t + _mR2 - _mT2) + 2*_mR2*(_mT2 + _mX2 - _mR2 - _mB2)) / sqrt( kallen(s, _mR2, _mX2) * kallen(t, _mT2, _mR2) );
+        return TMath::ACos( cosAlpha );
+    };
+};

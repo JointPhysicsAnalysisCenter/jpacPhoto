@@ -1,0 +1,11 @@
+/build/
+*.cmake
+/gnuplot/
+/scripts/tests
+/tests/
+/.vscode/
+/bin/
+/lib/
+/temp/
+*.pdf
+/scripts/*.dat
