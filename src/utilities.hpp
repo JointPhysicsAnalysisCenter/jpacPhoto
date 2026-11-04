@@ -18,6 +18,7 @@
 #include <vector>
 #include <functional>
 #include <fstream>
+#include <map>
 
 #include "constants.hpp"
 
@@ -180,7 +181,7 @@ namespace jpacPhoto
     // String operations
 
     // to_string but for doubles
-    std::string to_string(double d, uint precision = 8);
+    std::string to_string(double d, unsigned int precision = 8);
 
     // Print a string centered on the terminal 
     void centered(std::string words);
@@ -254,7 +255,7 @@ namespace jpacPhoto
         if (lhs.size() != rhs.size()) return error("Attempted to add two vectors of different sizes!", std::vector<double>());
 
         std::vector<T> result;
-        for (uint i = 0; i < lhs.size(); i++) result.push_back( lhs[i] + rhs[i] );
+        for (unsigned int i = 0; i < lhs.size(); i++) result.push_back( lhs[i] + rhs[i] );
         return result;
     };
 
@@ -264,7 +265,7 @@ namespace jpacPhoto
         if (lhs.size() != rhs.size()) return error("Attempted to add two vectors of different sizes!", std::vector<double>());
 
         std::vector<double> result;
-        for (uint i = 0; i < lhs.size(); i++) result.push_back( lhs[i] - rhs[i] );
+        for (unsigned int i = 0; i < lhs.size(); i++) result.push_back( lhs[i] - rhs[i] );
         return result;
     };
 
@@ -273,7 +274,7 @@ namespace jpacPhoto
     inline std::vector<T> operator+(double lhs, std::vector<T> rhs)
     {
         std::vector<T> result;
-        for (uint i = 0; i < rhs.size(); i++) result.push_back( lhs + rhs[i] );
+        for (unsigned int i = 0; i < rhs.size(); i++) result.push_back( lhs + rhs[i] );
         return result;
     };   
     
@@ -287,7 +288,7 @@ namespace jpacPhoto
     inline std::vector<T> operator+(std::vector<T> lhs, double rhs)
     {
         std::vector<T> result;
-        for (uint i = 0; i < lhs.size(); i++) result.push_back( rhs + lhs[i] );
+        for (unsigned int i = 0; i < lhs.size(); i++) result.push_back( rhs + lhs[i] );
         return result;
     };
 
@@ -299,6 +300,7 @@ namespace jpacPhoto
 
     std::vector<double> multiply_elementwise(std::vector<double> in1, std::vector<double> in2);
     std::vector<double> square_elementwise(std::vector<double> in);
+    std::vector<double> add_in_quadrature(std::vector<double> x, std::vector<double> y);
     std::vector<double> real(std::vector<complex> vx);
     std::vector<double> imag(std::vector<complex> vx);
    
@@ -413,7 +415,7 @@ namespace jpacPhoto
     
     // Central difference 
     template<typename T> 
-    inline T central_difference_derivative(uint n, std::function<T(double)> F, double x, double h = 1E-3)
+    inline T central_difference_derivative(unsigned int n, std::function<T(double)> F, double x, double h = 1E-3)
     {
         T f3m, f2m, fm, f, fp, f2p, f3p;
         f   = F(x);
@@ -440,7 +442,7 @@ namespace jpacPhoto
 
     // Forward difference
     template<typename T> 
-    inline T forward_difference_derivative(uint n, std::function<T(double)> F, double x, double h = 1E-3)
+    inline T forward_difference_derivative(unsigned int n, std::function<T(double)> F, double x, double h = 1E-3)
     {
         if (n == 0) return F(x);
 
@@ -466,7 +468,7 @@ namespace jpacPhoto
     
     // and finally backward finite difference
     template<typename T> 
-    inline T backward_difference_derivative(uint n, std::function<T(double)> F, double x, double h = 1E-3)
+    inline T backward_difference_derivative(unsigned int n, std::function<T(double)> F, double x, double h = 1E-3)
     {
         if (n == 0) return F(x);
 
@@ -559,7 +561,7 @@ namespace jpacPhoto
 
         // In additon, save any number of extra parameters that may be needed to 
         // identify the data set
-        std::vector<double> _extras; 
+        std::map<std::string,double> _extras; 
 
         // If we want a data entry in the legend when plotting
         bool _add_to_legend = false;

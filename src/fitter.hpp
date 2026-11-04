@@ -199,7 +199,7 @@ namespace jpacPhoto
         // Methods related to fit options
 
         // Set the maximum number of calls minuit will do
-        inline void set_max_calls(int n){ print(n); _max_calls = n; };
+        inline void set_max_calls(int n){ _max_calls = n; };
         
         // Message level for minuit (0-4)
         inline void set_print_level(int n){ _print_level = n; };
@@ -331,9 +331,12 @@ namespace jpacPhoto
             print_results(false);
         };
 
-        // // Repeat do_fit N times and find the best fit
-        // // Parameters are randomly initialized each time on the interval [-5, 5] unless custom limits are set
-        // void do_fit(int N);
+        // If a filename is added, we look for F::import_parameters to use as a starting guess
+        inline void do_fit(std::string filename)
+        {
+            std::vector<double> pars = F::import_parameters(filename);
+            do_fit(pars);
+        };
 
         // Return a vector of best-fit parameters from last fit
         inline std::vector<double> pars(){ return (_fit) ? _fit_pars : std::vector<double>(); };
@@ -341,9 +344,23 @@ namespace jpacPhoto
         // Return value of fit function from last fit
         inline double fcn()     { return (_fit) ? _fcn     : NaN<double>(); };
         inline double fcn_dof() { return (_fit) ? _fcn_dof : NaN<double>(); };
+        inline int    N_free()   { return _minuit->NFree(); };
+        inline int    N_data()   { return _N; };
 
         // Return the pointer to the amp being fit at its current state
         inline amplitude get_amplitude(){ return _amplitude; };
+
+        // Export the latest fit result
+        inline void export_fit(std::string filename, std::string extra_description = "")
+        {
+            std::string description = "fcn/dof = " + jpacPhoto::to_string(fcn()) + ", fcn/dof = " + jpacPhoto::to_string(fcn_dof());
+            description += "\n# Nfree = " + std::to_string(_minuit->NFree()) + ", Ndata = " + std::to_string(_N);
+            if (!extra_description.empty())
+            {
+                description = extra_description + "\n#\n# " + description;
+            };
+            F::export_parameters(pars(), filename, description);
+        };
 
         private:
 
@@ -373,7 +390,7 @@ namespace jpacPhoto
         inline void set_up(std::vector<double> starting_guess)
         {
             _minuit->Clear();
-            _minuit->SetTolerance(_tolerance);
+            _minuit->SetTolerance(_tolerance/2*1E3);
             _minuit->SetPrintLevel(_print_level);
             _minuit->SetMaxFunctionCalls(_max_calls);
 

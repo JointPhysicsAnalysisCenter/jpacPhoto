@@ -7,8 +7,8 @@
 // Email:        dwinney@iu.alumni.edu
 // ------------------------------------------------------------------------------
 
-#ifndef TEMPLATE_HPP
-#define TEMPLATE_HPP
+#ifndef AMPLITUDE_TEMPLATE_HPP
+#define AMPLITUDE_TEMPLATE_HPP
 
 // Basic includes
 #include "constants.hpp"
@@ -86,12 +86,19 @@ namespace jpacPhoto
             return {"p1", "p2" /*, etc...*/ };
         };
         
-        // Use amplitude_option's to turn on and off features of your amplitude
-        inline void set_option(amplitude_option x)
+        // The set_option method allows you to use flags to change different things of 
+        // the amplitude. For human-readability its useful to define static consts for
+        // each relevant option
+        static const int kOption1 = 0;
+        static const int kOption2 = 1;
+        inline void set_option(int x)
         {
-            /* e.g. change shape of a form factor */
-            if (x == ExponentialFF){ /* do something*/;}
-            else if (x == MonopoleFF){/* do something else */;}
+            switch (x)
+            {
+                case kOption1: { /* do something */      break; };
+                case kOption2: { /* do something else */ break; };
+                default: return; // do nothing
+            };
         };
 
         // -----------------------------------------------------------------------
@@ -107,7 +114,7 @@ namespace jpacPhoto
         // To access class-specific member data you need to downcast, e.g.:
 
         // amplitude amp = make_amplitude<my_amplitude>(kinem);
-        // auto downcasted_amp = std::dynamic_pointer_cast<K_matrix>(amp);
+        // auto downcasted_amp = std::dynamic_pointer_cast<my_amplitude>(amp);
         // downcasted_amp->new_function();
 
         protected:
@@ -115,5 +122,6 @@ namespace jpacPhoto
         // Local data
         double _p1 = 0, _p2 = 0;
     };
+};
 
 #endif

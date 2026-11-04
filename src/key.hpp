@@ -19,7 +19,7 @@ namespace jpacPhoto
     class raw_amplitude;
     class raw_partial_wave;
     class raw_semi_inclusive;
-    enum helicity_frame : uint;
+    enum helicity_frame : unsigned int;
 
     class key
     {
@@ -39,9 +39,9 @@ namespace jpacPhoto
         template<helicity_frame C> friend std::shared_ptr<raw_amplitude> cross_to(std::shared_ptr<raw_amplitude>);
 
         // Partial wave factories
-        template<class A>             friend std::shared_ptr<raw_partial_wave> new_partial_wave(std::shared_ptr<raw_kinematics>, uint);
-        template<class A, typename B> friend std::shared_ptr<raw_partial_wave> new_partial_wave(std::shared_ptr<raw_kinematics>, uint, B);
-        friend std::shared_ptr<raw_partial_wave> project(uint, std::shared_ptr<raw_amplitude>);
+        template<class A>             friend std::shared_ptr<raw_partial_wave> new_partial_wave(std::shared_ptr<raw_kinematics>);
+        template<class A, typename B> friend std::shared_ptr<raw_partial_wave> new_partial_wave(std::shared_ptr<raw_kinematics>, B);
+        friend std::shared_ptr<raw_partial_wave> project(unsigned int, std::shared_ptr<raw_amplitude>);
 
         // Inclusive factories     
         template<class A>          friend std::shared_ptr<raw_semi_inclusive> new_semi_inclusive(std::shared_ptr<raw_kinematics> kin);

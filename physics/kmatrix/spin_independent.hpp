@@ -26,31 +26,32 @@ namespace jpacPhoto
 {
     namespace kmatrix
     {
-        struct arguments 
-        {
-            arguments(uint j, std::array<uint,3>exp={1,1,1}) 
-            : _spin(j), 
-            _production_expansion(exp[0]),
-            _diagonal_elastic_expansion(exp[1]),
-            _off_diagonal_elastic_expansion(exp[2])
-            {};
-            
-            void add_coupled_channel(double x, double y){ _coupled_channels.push_back({x,y}); };
-            
-            // Spin of the partial wave
-            uint  _spin;
-            // How many terms to consider in the production vector
-            uint  _production_expansion  = 1; 
-            // How many terms to include in the K-matrix for the diagonal and off-diagonal entries
-            uint  _diagonal_elastic_expansion = 1, _off_diagonal_elastic_expansion = 1;
-            // If this is coupled channel or not
-            std::vector<std::array<double,2>> _coupled_channels;
-        };
-
+        
         class spin_independent : public raw_partial_wave
         {
             public: 
 
+            struct arguments 
+            {
+                arguments(uint j, std::array<uint,3>exp={1,1,1}) 
+                : _spin(j), 
+                _production_expansion(exp[0]),
+                _diagonal_elastic_expansion(exp[1]),
+                _off_diagonal_elastic_expansion(exp[2])
+                {};
+                
+                void add_coupled_channel(double x, double y){ _coupled_channels.push_back({x,y}); };
+                
+                // Spin of the partial wave
+                uint  _spin;
+                // How many terms to consider in the production vector
+                uint  _production_expansion  = 1; 
+                // How many terms to include in the K-matrix for the diagonal and off-diagonal entries
+                uint  _diagonal_elastic_expansion = 1, _off_diagonal_elastic_expansion = 1;
+                // If this is coupled channel or not
+                std::vector<std::array<double,2>> _coupled_channels;
+            };
+        
             // Single channel K-matrix
             spin_independent(key k, kinematics xkinem, arguments args)
             : raw_partial_wave(k, xkinem, args._spin, "kmatrix::spin_independent")
@@ -103,7 +104,7 @@ namespace jpacPhoto
                 // Populate diagonals
                 for (int i = 0; i < N; i++)
                 {
-                    G(i,i) = i_rho(i);
+                    G(i,i) = I*rho(i);
                     for (int j = 0; j < _n_diag; j++) K(i,i) += _elastic_pars[i*_n_diag+j]*pow(q(i)*q(i), _J+j);
                 };
                 // Populate off-diagonals
@@ -132,6 +133,20 @@ namespace jpacPhoto
                 };
             };
 
+            std::vector<std::string> parameter_labels()
+            {
+                std::vector<std::string> x;
+                for (int i = 0; i < _production_pars.size(); i++)
+                {
+                    x.push_back("f_"+std::to_string(_J)+"["+std::to_string(i)+"]");
+                };
+                for (int i = 0; i < _elastic_pars.size(); i++)
+                {
+                    x.push_back("a_"+std::to_string(_J)+"["+std::to_string(i)+"]");
+                };
+                return x;
+            };
+
             protected:
 
             int _n_prod, _n_diag, _n_offdiag;
@@ -144,17 +159,17 @@ namespace jpacPhoto
             std::vector<std::array<double,2>> _thresholds;
             
             // Chew-Mandelstam phase-space 
-            inline complex i_rho(double m1, double m2)
+            inline complex rho(double m1, double m2, complex s)
             {
                 complex rho, xi;
                 complex result;
 
-                rho    = csqrt(kallen(_s, m1*m1, m2*m2)) / _s;
-                xi     = 1. - (m1+m2)*(m1+m2)/_s;
+                rho    = csqrt(kallen(s, m1*m1, m2*m2)) / s;
+                xi     = 1. - (m1+m2)*(m1+m2)/s;
                 result = (rho*log((xi + rho) / (xi - rho)) - xi*(m2-m1)/(m2+m1)*log(m2/m1)) / PI;
-                return - result / (16.*PI);
+                return I*result / (16.*PI);
             };
-            inline complex i_rho(unsigned i){ return i_rho(_thresholds[i][0], _thresholds[i][1]); };
+            inline complex rho(unsigned i){ return rho(_thresholds[i][0], _thresholds[i][1]); };
 
             // Incoming break-up momentum (define it with a threshold index but we only need i=0)
             inline complex p(int i){ return (i==0) ? _kinematics->initial_momentum(_s) : 0; };

@@ -27,16 +27,16 @@ namespace jpacPhoto
     using partial_wave = std::shared_ptr<raw_partial_wave>;
 
     template<class A>
-    inline partial_wave new_partial_wave(kinematics xkinem, uint J)
+    inline partial_wave new_partial_wave(kinematics xkinem)
     {
-        auto amp = std::make_shared<A>(key(), xkinem, J);
+        auto amp = std::make_shared<A>(key(), xkinem);
         return std::static_pointer_cast<raw_partial_wave>(amp);
     };
 
     template<class A, class B>
-    inline partial_wave new_partial_wave(kinematics xkinem, uint J, B extra)
+    inline partial_wave new_partial_wave(kinematics xkinem, B args)
     {
-        auto amp = std::make_shared<A>(key(), xkinem, J, extra);
+        auto amp = std::make_shared<A>(key(), xkinem, args);
         return std::static_pointer_cast<raw_partial_wave>(amp);
     };
 
@@ -77,6 +77,7 @@ namespace jpacPhoto
                     // Net helicities
                     int lam  = 2 * helicities[0] - helicities[1]; // Photon - Target
                     int lamp = 2 * helicities[2] - helicities[3]; // Meson  - Recoil
+                    if ( std::abs(lam) > _J || std::abs(lamp) > _J ) return 0.;
                     
                     return (_J + 1) * wigner_d_half(_J, lam, lamp, _theta) * this->partial_wave(helicities, s);
                 }
@@ -97,7 +98,7 @@ namespace jpacPhoto
         inline int J(){ return _J; };
         
         protected:
-
+        
         // Produce a string of a parameter name which appends the J quantum number to it, i.e. "name[J]"
         inline std::string J_label(std::string name){ return name + "[" + std::to_string(_J) + "]"; };
 
