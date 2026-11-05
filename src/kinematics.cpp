@@ -23,12 +23,19 @@ namespace jpacPhoto
     // ------------------------------------------------------------------------------
     // Things related to helicities
 
-    // Output a string of a given helicity set in format e.g. {+,+,+,+}
+    // Output a string of a given helicity set in format e.g. {+1,+1,+1,+1}
     std::string print_helicities(std::array<int,4> lam)
     {
         std::array<std::string,4> lams;
-        for (int i = 0; i < 4; i++) lams[i] = std::to_string(lam[i]);
-        return "[ " + lams[0] + ", " + lams[1] + ", " + lams[2] + ", " + lams[3] + "]";
+        std::stringstream ss;
+        ss << std::showpos;
+        for (int i = 0; i < 4; i++)
+        {
+            ss.str(""); ss.clear();      
+            ss << lam[i];
+            ss >> lams[i];
+        };
+        return "[" + lams[0] + ", " + lams[1] + ", " + lams[2] + ", " + lams[3] + "]";
     };
 
     // Generate a vector containing all the helicity combinations
