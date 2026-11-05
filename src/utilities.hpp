@@ -177,6 +177,10 @@ namespace jpacPhoto
     // Same as above but looks for DESKTOP
     std::string desktop();
 
+    // Sometimes we'll want to work on an analysis outside the main JPACPHOTO directory
+    // this looks for the variable JPACPHOTO_WORKING_DIR
+    std::string working_dir();
+    
     // ---------------------------------------------------------------------------
     // String operations
 

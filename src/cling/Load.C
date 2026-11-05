@@ -18,8 +18,8 @@ void Load()
     TString main_dir  = gSystem->Getenv("JPACPHOTO");
 
     // Load the main library files
-    TString core        = main_dir + "/src"; 
     TString main_lib    = main_dir + "/lib/libJPACPHOTO." + lib_ext;
+    TString core        = main_dir + "/src"; 
 
     // Supplementary header files 
     TString physics  = main_dir + "/physics";
@@ -28,19 +28,20 @@ void Load()
     
     if (!gSystem->AccessPathName(main_lib.Data()))
     {
-        Int_t pholib = gSystem->Load( main_lib.Data());
-        gInterpreter->AddIncludePath( core.Data());
-        gInterpreter->AddIncludePath( physics.Data());
-        gInterpreter->AddIncludePath( data.Data());
+        Int_t pholib = gSystem->Load(main_lib.Data());
+        gInterpreter->AddIncludePath(core.Data());
+        gInterpreter->AddIncludePath(physics.Data());
+        gInterpreter->AddIncludePath(data.Data());
     }
     else
     {
         Warning("jpacPhoto::Load", "jpacPhoto library not found! Path given: %s", main_lib.Data());
-    }
-    
-    // If Eigen is requested / searhcable add it
-    TString eigen    = gSystem->Getenv("EIGEN");
-    gInterpreter->AddIncludePath( eigen.Data());
+    };
+
+    //----------------------------------------------------------------------
+    // If Eigen is available add it
+    TString eigen = gSystem->Getenv("EIGEN");
+    gInterpreter->AddIncludePath(eigen.Data());
 
     //----------------------------------------------------------------------
     // IF dynamic AmpTools is found in lib, assume we want to load it too
@@ -52,8 +53,13 @@ void Load()
     if (AmpTools_dir != "" && !gSystem->AccessPathName(AmpTools_lib.Data()))
     {
         gSystem->Load( AmpTools_lib.Data() );
-        gInterpreter->AddIncludePath( AmpTools_inc.Data() );
-        gInterpreter->AddIncludePath( AmpTools_dir.Data() );
+        gInterpreter->AddIncludePath(AmpTools_inc.Data() );
+        gInterpreter->AddIncludePath(AmpTools_dir.Data() );
     };
     
-}
+    //----------------------------------------------------------------------
+    // Often we want to add amplitude files in another directory
+    // Here we'll simply look for the environment variable 'JPACPHOTO_WORKING_DIR'
+    TString extra = gSystem->Getenv("JPACPHOTO_WORKING_DIR");
+    gInterpreter->AddIncludePath(extra.Data());
+};

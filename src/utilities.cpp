@@ -717,7 +717,6 @@ namespace jpacPhoto
     std::string main_dir()
     {
        // Find the correct data file using the top level repo directory
-        std::string top_dir;
         char const * env = std::getenv("JPACPHOTO");
         if ( env == NULL || std::string(env) == "" )
         {
@@ -730,7 +729,6 @@ namespace jpacPhoto
     std::string desktop()
     {
        // Find the correct data file using the top level repo directory
-        std::string top_dir;
         char const * env = std::getenv("DESKTOP");
         if ( env == NULL || std::string(env) == "" )
         {
@@ -739,6 +737,18 @@ namespace jpacPhoto
         return std::string(env);  
     };
 
+    // Sometimes we'll want to work on an analysis outside the main JPACPHOTO directory
+    // this looks for the variable JPACPHOTO_WORKING_DIR
+    std::string working_dir()
+    {
+       // Find the correct data file using the top level repo directory
+        char const * env = std::getenv("JPACPHOTO_WORKING_DIR");
+        if ( env == NULL || std::string(env) == "" )
+        {
+            return error("desktop(): Cannot find environment variable JPACPHOTO_WORKING_DIR!", "");
+        }
+        return std::string(env);  
+    };
     // ---------------------------------------------------------------------------
     // String operations
 
